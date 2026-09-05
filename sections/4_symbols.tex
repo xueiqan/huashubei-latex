@@ -1,0 +1,90 @@
+\section{符号说明}
+
+文中主要符号及含义如表\ref{tab:symbols}所示，
+各问题中特有的参数和辅助变量在相应模型中另行说明。
+
+\begin{table}[H]
+	\centering
+	\caption{主要符号说明}
+	\label{tab:symbols}
+	
+	% 压缩表格字体和行距
+	\small
+	\renewcommand{\arraystretch}{0.85}
+	
+	\begin{tabularx}{0.96\textwidth}{
+			>{\centering\arraybackslash}p{0.20\textwidth}
+			>{\raggedright\arraybackslash}X
+			>{\centering\arraybackslash}p{0.15\textwidth}}
+		\toprule
+		\textbf{符号} & \multicolumn{1}{c}{\textbf{含义}} & \textbf{单位} \\
+		\midrule
+		
+		$i,r,t,s$
+		& 任务、区域、时段及候选开工时刻索引
+		& -- \\
+		
+		$a_i,e_i,o_i,d_i$
+		& 到达、最早开工、最晚完成时刻及持续时间
+		& h \\
+		
+		$g_i$
+		& 任务$i$的GPU需求量
+		& GPU \\
+		
+		$p_i$
+		& 任务$i$的AI IT功率
+		& MW \\
+		
+		$l_{ir},\,l_i^{\max}$
+		& 执行时延及最大允许时延
+		& ms \\
+		
+		$x_{irs}$
+		& 任务$i$是否在区域$r$、时刻$s$开工
+		& $\{0,1\}$ \\
+		
+		$\rho_{ist}$
+		& 任务$i$在时段$t$内的运行占比
+		& -- \\
+		
+		$P^{AI}_{rt},\,P^{NonAI}_{rt}$
+		& AI IT负荷与非AI IT负荷
+		& MW \\
+		
+		$F_{rt}$
+		& 区域$r$的设施侧总负荷
+		& MW \\
+		
+		$G^{ava}_{rt}$
+		& 区域$r$的可用GPU容量
+		& GPU \\
+		
+		$PUE_r$
+		& 区域$r$的PUE
+		& -- \\
+		
+		$P^{RE}_{rt}$
+		& 区域$r$的可用新能源功率
+		& MW \\
+		
+		$\pi_{rt},\,\sigma_{rt}$
+		& 购电价格与售电价格
+		& 元/MWh \\
+		
+		$\kappa_{rt}$
+		& 电网碳强度
+		& tCO$_2$/MWh \\
+		
+		$B_{rt},\,X_{rt},\,R_{rt}$
+		& 电网购电、新能源外送及弃用功率
+		& MW \\
+		
+		$S_{rt}$
+		& 时段$t$开始时的储能电量
+		& MWh \\
+		
+		\bottomrule
+	\end{tabularx}
+\end{table}
+
