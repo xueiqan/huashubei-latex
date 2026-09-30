@@ -1,87 +1,61 @@
 % !TEX program = xelatex
-% =============================================================================
-%  华数杯数学建模竞赛 LaTeX 模板
-%  对应 Typst 模板 zh/huashubei/main.typ 的全部功能。
-%
-%  字体依赖（正文宋体 / 标题黑体 / 强调楷体）：
-%    - 规范字体：SimSun（宋体）、SimHei（黑体）、KaiTi（楷体）。
-%    - 本模板使用 ctex 的 fontset=windows，在 Windows 上使用规范字体
-%      SimSun / SimHei / KaiTi，确保开箱即用。
-%    - 若系统已安装 SimSun/SimHei/KaiTi（如 Windows 或手动安装），当前设置可直接使用。
-%    - 西文正文：Times New Roman；代码等宽：Consolas。
-%  编译方式：xelatex main.tex
-% =============================================================================
-\documentclass[fontset=windows, 12pt, a4paper]{ctexart}
+\documentclass[fontset=windows, scheme=plain, 12pt, a4paper]{ctexart}
 
-% ---------- 页面：A4，上下左右 2.5cm ----------
 \usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
 
-% ---------- 数学 ----------
 \usepackage{amsmath}
 \usepackage{url}
 \usepackage{ragged2e}
 
-% ---------- 表格跨行 & 基础表格工具 ----------
 \usepackage{multirow}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{graphicx}
 \usepackage{float}
-\usepackage{tabularx}   % tabularx 和 X 列
-% 压缩图表和正文之间空白
+\usepackage{tabularx}   % Flexible-width tables and X columns.
 \setlength{\intextsep}{5pt plus 1pt minus 1pt}
-% 标题 ↔ 表格/图片距离
 \setlength{\abovecaptionskip}{3pt}
 \setlength{\belowcaptionskip}{3pt}
 \graphicspath{{figures/}}
-% ---------- 字体（fontspec + ctex，xelatex 编译） ----------
 \IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{}
 \IfFontExistsTF{Consolas}{\setmonofont{Consolas}}{}
 
-% ---------- 正文：12pt，首行缩进 2em，两端对齐，行距 0.92em ----------
-% 0.92em 行距 => 行高 = 1.92 * 字号，\linespread 因子 ≈ 1.6
 \linespread{1.6}
 \setlength{\parindent}{2em}
+\setlength{\emergencystretch}{2em}
 
-% ---------- 标题编号（\ctexset 配置） ----------
-% 一级标题用中文数字“一、二、三、”，二级及以下用 1.1 / 1.1.1
 \ctexset{
-	section/number       = \chinese{section},
+	section/number       = \arabic{section},
 	subsection/number    = \arabic{section}.\arabic{subsection},
 	subsubsection/number = \arabic{section}.\arabic{subsection}.\arabic{subsubsection},
 }
 
-% ---------- 标题格式（titlesec 配置） ----------
-% 对应 Typst：一级 14pt 居中黑体加粗，二级 12pt 黑体加粗，三级 12pt 黑体加粗
 \usepackage{titlesec}
 \titleformat{\section}
-{\centering\fontsize{14pt}{16.8pt}\heiti\bfseries}
-{\chinese{section}、}{1em}{}
+{\centering\fontsize{14pt}{16.8pt}\bfseries}
+{\arabic{section}.}{1em}{}
 \titleformat{\subsection}
-{\fontsize{12pt}{14.4pt}\heiti\bfseries}
+{\fontsize{12pt}{14.4pt}\bfseries}
 {\arabic{section}.\arabic{subsection}}{1em}{}
 \titleformat{\subsubsection}
-{\fontsize{12pt}{14.4pt}\heiti\bfseries}
+{\fontsize{12pt}{14.4pt}\bfseries}
 {\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}{1em}{}
 \titlespacing{\section}       {0pt}{1.0em}{-0.50em}
 \titlespacing{\subsection}    {0pt}{1.18em}{-0.50em}
 \titlespacing{\subsubsection} {0pt}{0.9em}{0.75em}
 
-% ---------- 列表（enumitem）：对应 Typst enum 编号“1、 2、”，缩进 2em ----------
 \usepackage{enumitem}
-% ---------- 列表（enumerate） ----------
 \usepackage{enumitem}
 \setlist[enumerate]{
-	label=\arabic*、,
-	leftmargin=2.2em,     % 整个列表距离正文左边的位置
-	labelsep=0.35em,      % 编号“1、”与正文之间的距离
-	itemsep=0em,       % 不同条目之间的距离
-	topsep=0.25em,        % 列表与上、下正文之间的距离
-	parsep=0pt,           % 同一条目内部不同段落的额外距离
+	label=\arabic*.,
+    leftmargin=2.2em,     % Indentation of the whole list.
+    labelsep=0.35em,      % Space between the number and the item text.
+    itemsep=0em,          % Space between items.
+    topsep=0.25em,        % Space above and below the list.
+    parsep=0pt,           % Additional paragraph spacing within an item.
 	partopsep=0pt
 }
 
-% ---------- 代码与颜色 ----------
 \usepackage{xcolor}
 \usepackage{listings}
 \lstset{
@@ -97,24 +71,18 @@
 	keepspaces=true,
 }
 
-% ---------- 页码：底部居中（华数杯从首页开始编号） ----------
 \pagestyle{plain}
 
-% ---------- 自定义命令（对应 Typst 函数） ----------
-% \referencescn：参考文献节，标题“参考文献”（不带编号）
 \newcommand{\referencescn}{%
 	\input{references}%
 }
-% \appendixcn：附录节，标题“附录 A  核心代码”
 \newcommand{\appendixcn}{%
-	\section*{附录 A\quad 核心代码}%
+    \section*{Appendix A\quad Core Code}%
 	\input{sections/A_code}%
 }
-% \threelinetable{标题}{列定义}{表头}{表格内容}：三线表，标题在表格上方居中 10.5pt 黑体加粗
-% 调用示例：\threelinetable{表 1 示例}{ccc}{A & B & C}{1 & 2 & 3 \\ 4 & 5 & 6}
 \newcommand{\threelinetable}[4]{%
 	\begin{center}
-		{\fontsize{10.5pt}{12.6pt}\heiti\bfseries #1}\par
+		{\fontsize{10.5pt}{12.6pt}\bfseries #1}\par
 		\vspace{-0.5em}
 		\begin{tabular}{#2}
 			\toprule
@@ -126,22 +94,20 @@
 	\end{center}
 }
 
+\renewcommand{\figurename}{Figure}
+\renewcommand{\tablename}{Table}
+\renewcommand{\refname}{References}
 \begin{document}
 	
-	% ---------- 官方模板顶部参赛信息表格 ----------
-	% 直接压缩页面顶部边距，作用于整页顶部
-%	\setlength{\topmargin}{-2.0cm}
-%	\setlength{\headheight}{0pt}
-%	\setlength{\headsep}{0pt}
 	\begin{center}
 		\renewcommand{\arraystretch}{1.25}
 		\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}p{0.18\textwidth}|>{\centering\arraybackslash}X|>{\centering\arraybackslash}p{0.18\textwidth}|}
 			\hline
-			所属类别 
-			& \multirow{2}{=}{\centering\fontsize{14pt}{16.8pt}\heiti\bfseries 2026年“华数杯”大学生数学建模竞赛} 
-			& 参赛编号 \\
+            Category
+            & \multirow{2}{=}{\centering\fontsize{14pt}{16.8pt}\bfseries 2026 Huashu Cup Undergraduate Mathematical Modeling Competition}
+            & Entry Number \\
 			\cline{1-1} \cline{3-3}
-			本科组 
+            Undergraduate
 			& 
 			& CM2601033 \\
 			\hline
@@ -150,44 +116,43 @@
 	
 	\vspace{-1.0em}
 	
-	% ---------- 标题与摘要页（页码从 1 开始） ----------
 	\begin{center}
-		{\fontsize{16pt}{19.2pt}\heiti\bfseries 多区域数据中心算储电协同的分层预测与多目标优化调度
+        {\fontsize{16pt}{19.2pt}\bfseries Hierarchical Forecasting and Multiobjective Scheduling for Coordinated Computing, Storage, and Electricity in Multiregional Data Centers
 		}
 	\end{center}
 	
 	\vspace{-0.85em}
 	
 	\begin{center}
-		{\fontsize{14pt}{16.8pt}\heiti\bfseries 摘\hspace{1em}要}
+        {\fontsize{14pt}{16.8pt}\bfseries Abstract}
 	\end{center}
 	
 	\vspace{-0.5em}
 	
-	针对六区域数据中心算电协同问题，构建“\textbf{分层预测与中性基线—碳感知调度—给定负荷下储能协同—算储电联合优化}”框架。
+    For computing--electricity coordination across six regional data centers, we develop a framework of \textbf{hierarchical forecasting and a neutral baseline, carbon-aware scheduling, storage coordination under specified loads, and joint computing--storage--electricity optimization}.
 	
-	对稀疏异质GPU需求采用三级\textbf{局部均值预测}，以\textbf{边际一致性}恢复18类交叉需求。取\textbf{72\,h历史窗口}，验证期、测试期WAPE为\textbf{0.7241、0.6519}，均优于24\,h同刻基线；
-	538个任务经字典序调度实现\textbf{100\%本地执行}，累计等待\textbf{3\,h}。
+    Sparse, heterogeneous GPU demand is forecast using three levels of \textbf{local means}, with \textbf{marginal consistency} recovering 18 cross-classified demand series. With a \textbf{72\,h historical window}, validation and test WAPE are \textbf{0.7241 and 0.6519}, both below the 24\,h same-hour baseline;
+    lexicographic scheduling achieves \textbf{100\% local execution} of 538 jobs, with \textbf{3\,h} of cumulative waiting.
 	
-	构建净运行成本、碳排放、网络时延和新能源未利用率\textbf{四指标模型}并\textbf{固定定标滚动求解}。较纯算力中性基准，
-	净运行成本降低\textbf{507.34万元}、新能源利用率提高\textbf{0.2232个百分点}，
-	但碳排放和平均网络时延分别增加\textbf{1.2752\,tCO$_2$、7.9468\,ms}。
+    A \textbf{four-metric model} of net operating cost, carbon emissions, network latency, and renewable nonutilization is solved by a \textbf{rolling method with fixed normalization}. Relative to the neutral computing-only baseline,
+    net operating cost decreases by \textbf{507.34 units of CNY\,10,000} and renewable utilization increases by \textbf{0.2232 percentage points},
+    while carbon emissions and average network latency increase by \textbf{1.2752\,tCO$_2$ and 7.9468\,ms}, respectively.
 	
-	在题目给定的AI与非AI IT负荷下，依据\textbf{能量守恒、SOC递推和购售电边界}优化储能与购售电。
-	与无储能反事实方案相比，净运行成本降低\textbf{3936.19万元}，
-	碳排放由\textbf{8.8506\,tCO$_2$降至0}，
-	六个区域峰值净购电之和由\textbf{31.5979\,MW降至0}。
+    Under the specified AI and non-AI IT loads, storage and electricity purchases and sales are optimized subject to \textbf{energy conservation, SOC dynamics, and grid transaction limits}.
+    Compared with a no-storage counterfactual, net operating cost decreases by \textbf{3936.19 units of CNY\,10,000},
+    carbon emissions decrease from \textbf{8.8506\,tCO$_2$ to 0},
+    and the sum of regional peak net grid purchases decreases from \textbf{31.5979\,MW to 0}.
 	
-	联合优化任务迁移、开工时刻、储能和购售电，建立包含成本、碳排放、网络时延、等待损失、新能源未利用率和峰值净购电的\textbf{六指标联合模型}，并基于\textbf{固定定标滚动求解}。为消除旧顺序能源解的退化影响，将顺序任务方案和联合任务方案均按相同能源口径复算。联合任务方案的净运行结算降低\textbf{65.67万元}，
-	平均网络时延由\textbf{12.95\,ms降至9.96\,ms}，等待损失下降\textbf{0.004378}，新能源未利用率下降\textbf{0.0258个百分点}；
-	相应地，碳排放和峰值净购电分别增加\textbf{41.08\,tCO$_2$、30.61\,MW}，体现服务质量、新能源消纳与能源侧指标之间的权衡。
+    Joint optimization of job migration, start times, storage, and grid transactions yields a \textbf{six-metric model} of cost, emissions, latency, waiting loss, renewable nonutilization, and peak net grid purchases, solved using \textbf{fixed-normalization rolling optimization}. To remove degeneracy in the previous sequential energy solution, both sequential and joint job schedules are reevaluated under identical energy accounting. The joint job schedule reduces net operating settlement by \textbf{65.67 units of CNY\,10,000},
+    lowers average network latency from \textbf{12.95\,ms to 9.96\,ms}, waiting loss by \textbf{0.004378}, and renewable nonutilization by \textbf{0.0258 percentage points};
+    carbon emissions and peak net grid purchases increase by \textbf{41.08\,tCO$_2$ and 30.61\,MW}, revealing trade-offs between service quality, renewable utilization, and energy-side metrics.
 	
-	情景分析显示，强化碳约束减排\textbf{30.53\%--100\%}，固定区域均价使净运行成本增加\textbf{91.71万元}、峰值净购电增加\textbf{48.27\%}，非零出力时段完全平滑使碳排放降低\textbf{88.12\%}。
+    Scenario analysis shows that tighter carbon constraints reduce emissions by \textbf{30.53\%--100\%}; fixed regional average electricity prices increase net operating cost by \textbf{91.71 units of CNY\,10,000} and peak net grid purchases by \textbf{48.27\%}; complete smoothing within nonzero renewable-output periods reduces emissions by \textbf{88.12\%}.
 	
-	\textbf{样本外检验与全时域独立复算}表明方案满足任务、资源、能量、SOC及购售电等硬约束。\textbf{滚动数学启发式得到严格满足硬约束且计算效率较高的可行方案，不宣称获得全局最优解}；
-	联合决策量化呈现了成本、碳排放、服务质量、新能源消纳与削峰之间的权衡。
+    \textbf{Out-of-sample tests and independent full-horizon recomputation} confirm compliance with job, resource, energy, SOC, and grid transaction constraints. The \textbf{rolling matheuristic produces computationally efficient feasible schedules satisfying all hard constraints; global optimality is not claimed}.
+    Joint decisions quantify trade-offs among cost, emissions, service quality, renewable utilization, and peak reduction.
 	
-	\noindent\textbf{关键词：}算电协同；分层需求预测；碳感知调度；储能协同优化；多目标优化
+    \noindent\textbf{Keywords:} computing--electricity coordination; hierarchical demand forecasting; carbon-aware scheduling; coordinated storage optimization; multiobjective optimization
 	
 	
 	
@@ -202,23 +167,15 @@
 	\input{sections/7_problem3}
 	\input{sections/8_evaluation}
 	
-	% ---------- AI工具使用声明（正文后、参考文献前） ----------
-	\section*{AI工具使用声明}
-	本参赛队在竞赛过程中使用了DeepSeek，
-	主要用于语言润色、代码调试、图表制作与LaTeX排版辅助，
-	详细使用情况见附录。
-	% ====================== 两个版本二选一，删除不用的版本 ======================
-	% 版本1：未使用任何AI工具
-%	本参赛队在竞赛过程中未使用任何AI工具。
+    \section*{AI Tool Use Declaration}
+    The team used DeepSeek during the competition,
+    primarily for language editing, code debugging, figure preparation, and LaTeX typesetting assistance.
+    Details are provided in the appendix.
 	
-	% 版本2：使用了AI工具，按需修改括号内用途
-	% 本参赛队在竞赛过程中使用了AI工具，主要用于【语言润色、代码调试、数据可视化辅助】，详细使用情况见附录。
-	% ==========================================================================
 	
 	\referencescn
 	
 	\newpage
-	% ---------- 附录：软件、复现说明、AI详情与完整源程序 ----------
 	\input{sections/A_code}
 
 \end{document}

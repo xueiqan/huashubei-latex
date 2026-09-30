@@ -320,3 +320,6 @@ __pycache__/
 .idea/
 paper/build/
 code_q2_validation_runs/
+
+# Shared PyCharm run configurations
+!code/.run/*.run.xml

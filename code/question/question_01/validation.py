@@ -1,14 +1,16 @@
-"""问题1的三项高强度模型检验。
+"""Three rigorous Question 1 validation chains.
 
-本文件只保留《q1检验.txt》规定的三条证据链：
+Retain the three evidence chains specified by the Q1 validation plan:
 
-1. 多窗口滚动时间外预测与聚合尺度泛化；
-2. 分层结构恢复的代数一致性、历史结构稳定性和底层误差比较；
-3. 调度一级目标的全局最优性证书与临界负载压力边界。
+1. Rolling out-of-time forecasts and aggregation-scale generalization.
+2. Algebraic reconciliation consistency, historical structure stability, and
+   bottom-level error comparisons.
+3. A global optimality certificate for the first scheduling objective and
+   critical-load stress bounds.
 
-检验代码独立重算预测指标、结构占比、资源剖面和压力可行性；不改变
-``model.py``中的参数，不把检验输出反向写入模型结果。所有输出写入
-``outputs/tables/validation_*.csv``，不生成普通装饰性图表。
+Independently recompute forecasting metrics, structure shares, resource profiles,
+and stress feasibility without changing ``model.py`` parameters or overwriting
+model results. Write ``outputs/tables/validation_*.csv`` only; no decorative plots.
 """
 
 from __future__ import annotations
@@ -104,11 +106,11 @@ CAPACITY_COLUMNS = [
 
 def _read_csv(path: Path, required_columns: Iterable[str]) -> pd.DataFrame:
     if not path.is_file():
-        raise FileNotFoundError(f"找不到检验输入表：{path}")
+        raise FileNotFoundError(f"Validation input table not found: {path}")
     frame = pd.read_csv(path, encoding="utf-8-sig")
     missing = [column for column in required_columns if column not in frame.columns]
     if missing:
-        raise ValueError(f"{path.name}缺少检验必需字段：{missing}")
+        raise ValueError(f"{path.name} is missing required validation columns: {missing}")
     return frame
 
 
@@ -204,15 +206,15 @@ def _read_inputs() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFra
     capacity["Region"] = capacity["Region"].astype(str)
 
     if panel.duplicated(["Hour", *SERIES_COLUMNS]).any():
-        raise ValueError("hourly_demand_panel不是唯一的Hour×SourceRegion×TaskType粒度")
+        raise ValueError("hourly_demand_panel must have unique Hour x SourceRegion x TaskType keys")
     if tasks["TaskID"].duplicated().any():
-        raise ValueError("tasks_clean的TaskID不唯一")
+        raise ValueError("tasks_clean contains duplicate TaskID values")
     if candidates.duplicated(["TaskID", "TargetRegion"]).any():
-        raise ValueError("task_candidate_regions存在重复的TaskID×TargetRegion记录")
+        raise ValueError("task_candidate_regions contains duplicate TaskID x TargetRegion records")
     if capacity.duplicated(["Hour", "Region"]).any():
-        raise ValueError("region_hour_capacity存在重复的Hour×Region记录")
+        raise ValueError("region_hour_capacity contains duplicate Hour x Region records")
     if not capacity["Hour"].between(TEST_START_HOUR, TAIL_END_HOUR).all():
-        raise ValueError("容量表必须覆盖2376--2405，不能提供2406执行容量")
+        raise ValueError("Capacity must cover hours 2376--2405 and exclude task execution capacity at hour 2406")
     return panel, tasks, candidates, capacity
 
 
@@ -220,7 +222,7 @@ def _load_model_module():
     path = QUESTION_DIR / "model.py"
     spec = importlib.util.spec_from_file_location("q1_model_for_validation", path)
     if spec is None or spec.loader is None:
-        raise ImportError(f"无法加载问题1模型模块：{path}")
+        raise ImportError(f"Cannot load the Question 1 model module: {path}")
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
@@ -245,7 +247,7 @@ def _level_entities(panel: pd.DataFrame, level: str) -> list[str]:
         return sorted(panel["TaskType"].astype(str).unique())
     if level == "System":
         return ["ALL"]
-    raise ValueError(f"未知层级：{level}")
+    raise ValueError(f"Unknown level: {level}")
 
 
 def _level_demand(frame: pd.DataFrame, level: str) -> pd.DataFrame:
@@ -269,7 +271,7 @@ def _level_demand(frame: pd.DataFrame, level: str) -> pd.DataFrame:
         )
         result["Entity"] = "ALL"
     else:
-        raise ValueError(f"未知层级：{level}")
+        raise ValueError(f"Unknown level: {level}")
     result["Entity"] = result["Entity"].astype(str)
     return result[["Hour", "Entity", "Demand"]]
 
@@ -313,7 +315,7 @@ def _ipf(row_targets: np.ndarray, column_targets: np.ndarray, prior: np.ndarray)
         )
         if residual <= tolerance:
             return matrix
-    raise RuntimeError("独立IPF核验未在限定次数内收敛")
+    raise RuntimeError("Independent IPF validation did not converge within the iteration limit")
 
 
 def _history_prior(history: pd.DataFrame, regions: list[str], task_types: list[str]) -> np.ndarray:
@@ -348,7 +350,7 @@ def _hierarchical_prediction(
     window = history.loc[history["Hour"].between(window_start, fit_end_hour)].copy()
     target = panel.loc[panel["Hour"].between(target_start_hour, target_end_hour)].copy()
     if history.empty or window.empty or target.empty:
-        raise ValueError("滚动预测缺少历史窗口或目标窗口")
+        raise ValueError("Rolling forecasts are missing history or target windows")
 
     regions = _level_entities(history, "Region")
     task_types = _level_entities(history, "TaskType")
@@ -472,7 +474,7 @@ def _same_hour_prediction(
         validate="one_to_one",
     )
     if result["Prediction"].isna().any():
-        raise ValueError("24小时同刻基线缺少t-24历史值")
+        raise ValueError("The 24-hour same-hour baseline is missing t-24 history")
     return result.rename(columns={"GPU_Demand_Arrival": "Actual_GPU_Demand"})
 
 
@@ -486,7 +488,7 @@ def _aggregate_for_metric(bottom: pd.DataFrame, prediction_column: str, level: s
     elif level == "System":
         group_columns = ["Hour"]
     else:
-        raise ValueError(f"未知评价层级：{level}")
+        raise ValueError(f"Unknown evaluation level: {level}")
     result = (
         bottom.groupby(group_columns, as_index=False)[
             ["Actual_GPU_Demand", prediction_column]
@@ -635,7 +637,7 @@ def _run_rolling_forecast_test(
     for window_id, start_hour, end_hour in _rolling_windows():
         if window_id == 1 or window_id % 10 == 0 or window_id == len(_rolling_windows()):
             logging.info(
-                "检验一滚动窗口：%d/%d，目标区间=%d--%d",
+                "Validation 1 rolling window: %d/%d, target hours=%d--%d",
                 window_id,
                 len(_rolling_windows()),
                 start_hour,
@@ -802,30 +804,30 @@ def _run_rolling_forecast_test(
     )
     _record(
         records,
-        "检验一：滚动时间外预测与聚合尺度泛化",
-        "验证期窗口选择与历史滚动稳定性",
+        "Validation 1: rolling out-of-time forecasts and aggregation-scale generalization",
+        "Validation-window selection and historical rolling stability",
         "PASS" if selected_rank <= len(HISTORY_WINDOWS) else "REVIEW",
         f"H*={selected_window}; rolling_windows={len(_rolling_windows())}; rolling_rank={selected_rank}/{len(HISTORY_WINDOWS)}",
-        "H*由官方验证期选择，并在严格前向、互不重叠历史窗口中复核",
-        "若滚动排名不稳定，论文中不能把官方验证日选择写成普遍最优",
+        "Select H* on the official validation period and recheck it in strictly forward, nonoverlapping historical windows",
+        "If rolling rankings are unstable, the paper cannot claim the official validation-day choice is universally optimal",
     )
     _record(
         records,
-        "检验一：滚动时间外预测与聚合尺度泛化",
-        "主模型相对24小时同刻基线的成对WAPE",
+        "Validation 1: rolling out-of-time forecasts and aggregation-scale generalization",
+        "Paired WAPE of the main model versus the 24-hour same-hour baseline",
         "PASS" if main_baseline_ok else "FAIL",
         f"n={sample_count}; median_delta={median_delta:.6g}; negative={negative_count}; p={p_value:.6g}",
-        "Wilcoxon单侧检验p<0.05且median(Δ)<0，Δ=WAPE主模型-WAPE基准",
-        "若不通过，不能宣称主模型具有稳定样本外优势，应改用滚动稳定模型或基准",
+        "One-sided Wilcoxon p<0.05 and median(delta)<0, where delta=main-model WAPE minus baseline WAPE",
+        "If this fails, do not claim stable out-of-sample superiority; use a stable rolling model or the baseline",
     )
     _record(
         records,
-        "检验一：滚动时间外预测与聚合尺度泛化",
-        "底层到区域/类型/系统的聚合尺度排序",
+        "Validation 1: rolling out-of-time forecasts and aggregation-scale generalization",
+        "Aggregation-scale ordering from bottom level to region/type/system",
         "PASS" if aggregation_ok else "FAIL",
         f"order_ratio={aggregation_order_ratio:.6g}; median_order={median_order_ok}",
-        "选定H*下多数滚动窗口及WAPE中位数均满足底层不优于聚合层、区域/类型不优于系统层",
-        "若不通过，只能报告实际观察到的尺度差异，不能概括为聚合普遍提高可预测性",
+        "At selected H*, most rolling windows and median WAPE must show bottom-level error no lower than aggregate error, and region/type error no lower than system error",
+        "If this fails, report only observed scale differences; do not claim aggregation universally improves predictability",
     )
     return {
         "ok": main_baseline_ok and aggregation_ok,
@@ -994,12 +996,12 @@ def _run_structure_test(
         _write_table(consistency, "validation_hierarchy_consistency.csv")
     _record(
         records,
-        "检验二：分层预测结构恢复有效性",
-        "边际闭合与18类结果衔接",
+        "Validation 2: effectiveness of hierarchical forecast reconciliation",
+        "Marginal closure and consistency of 18-category results",
         "PASS" if consistency_ok else "FAIL",
         f"actual_mismatch={actual_mismatch}; max_region_diff={max_region_diff:.6g}; max_type_diff={max_type_diff:.6g}; bottom_region_diff={bottom_region_diff:.6g}",
-        "区域边际和任务类型边际必须在数值精度内等于系统边际，18类区域汇总必须等于区域边际",
-        "若不通过，分层恢复程序判定失败，不得继续解释18类预测结果",
+        "Regional and task-type margins must match the system margin within numerical precision, and the 18-category regional totals must match regional margins",
+        "If this fails, reconciliation has failed; do not interpret the 18-category forecasts further",
     )
 
     block_starts = list(range(TRAIN_START_HOUR, TRAIN_END_HOUR + 1, 24))
@@ -1024,12 +1026,12 @@ def _run_structure_test(
     _write_table(adjacent, "validation_structure_js.csv")
     _record(
         records,
-        "检验二：分层预测结构恢复有效性",
-        "区域—类型历史结构稳定性",
+        "Validation 2: effectiveness of hierarchical forecast reconciliation",
+        "Historical region/type structure stability",
         "PASS" if js_ok else "FAIL",
         f"training_adjacent_windows={len(adjacent)}; Q95_JS={q95:.6g}; JS_validation={validation_js:.6g}",
-        "JS_validation≤训练相邻窗口JS距离的经验95%分位数",
-        "若不通过，应缩短结构先验窗口或改用动态区域—类型占比，不得继续固定历史结构解释测试期",
+        "JS_validation <= the empirical 95th percentile of JS distances between adjacent training windows",
+        "If this fails, shorten the structural prior window or use dynamic region/type shares; do not explain test forecasts with a fixed historical structure",
     )
 
     paired = rolling_state["paired"]
@@ -1062,12 +1064,12 @@ def _run_structure_test(
     )
     _record(
         records,
-        "检验二：分层预测结构恢复有效性",
-        "分层恢复与直接预测18类序列的成对误差",
+        "Validation 2: effectiveness of hierarchical forecast reconciliation",
+        "Paired errors of reconciled versus direct forecasts for 18 series",
         direct_status,
         f"n={sample_count}; median_delta={median_delta:.6g}; p_less={p_less:.6g}; p_greater={p_greater:.6g}",
-        "median(Δ)<0且Wilcoxon单侧p<0.05为显著改善；显著变差才判定失败，否则只能写保持边际一致且无显著损失",
-        "若显著变差，论文结论停留在区域+类型+系统层，不强行宣称18类交叉单元预测可靠",
+        "Median(delta)<0 and one-sided Wilcoxon p<0.05 indicate improvement; only significant deterioration fails. Otherwise claim marginal consistency without significant loss",
+        "If errors deteriorate significantly, limit conclusions to region/type/system levels; do not force a reliability claim for 18 cross-category forecasts",
     )
     hard_ok = consistency_ok and js_ok and direct_status != "FAIL"
     return {"ok": hard_ok}
@@ -1094,7 +1096,7 @@ def _recompute_profile(assignments: pd.DataFrame, capacity: pd.DataFrame) -> pd.
                 continue
             key = (hour, str(row.TargetRegion))
             if key not in row_index:
-                raise ValueError(f"调度结果引用容量表之外的Hour×Region：{key}")
+                raise ValueError(f"The schedule references Hour x Region keys outside the capacity table: {key}")
             index = row_index[key]
             profile.loc[index, "Recomputed_GPU"] += float(row.GPU_Demand) * overlap
             profile.loc[index, "Recomputed_AI_IT_Load_MW"] += (
@@ -1130,12 +1132,12 @@ def _run_dispatch_certificate(
     if not all(path.is_file() for path in [assignment_path, profile_path, summary_path]):
         _record(
             records,
-            "检验三：调度最优性与临界负载",
-            "当前调度结果文件",
+            "Validation 3: scheduling optimality and critical load",
+            "Current schedule result files",
             "FAIL",
-            "dispatch_assignments.csv、dispatch_resource_profile.csv或dispatch_summary.csv缺失",
-            "调度证书必须具有任务分配、资源重算和求解摘要",
-            "先重新运行model.py生成基础调度结果",
+            "dispatch_assignments.csv, dispatch_resource_profile.csv, or dispatch_summary.csv is missing",
+            "The scheduling certificate requires assignments, recomputed resource profiles, and solver summaries",
+            "Rerun model.py to generate the compute schedule first",
         )
         return {"ok": False}
 
@@ -1317,36 +1319,36 @@ def _run_dispatch_certificate(
     certificate = pd.DataFrame(
         [
             {
-                "Check": "任务唯一执行",
+                "Check": "Exactly-once task execution",
                 "Status": "PASS" if exact_once_ok else "FAIL",
                 "Observed": f"duplicates={duplicate_ids}; missing={missing_ids}; unexpected={unexpected_ids}",
-                "Rule": "每个2376--2399小时到达任务恰好执行一次",
+                "Rule": "Every task arriving during hours 2376--2399 must execute exactly once",
             },
             {
-                "Check": "任务时延/时间边界",
+                "Check": "Task latency and time boundaries",
                 "Status": "PASS"
                 if network_violation + earliest_violation + finish_violation + terminal_violation + duration_violation + realtime_start_violation + occupied_terminal == 0
                 else "FAIL",
                 "Observed": f"network={network_violation}; earliest={earliest_violation}; finish={finish_violation}; terminal={terminal_violation}; duration={duration_violation}; realtime={realtime_start_violation}; occupied_2406={occupied_terminal}",
-                "Rule": "满足到达、最早开工、LatestFinish、网络时延和2406终端边界；2406小时占用必须为0",
+                "Rule": "Respect arrival, earliest start, LatestFinish, network latency, and the hour-2406 terminal boundary; hour-2406 occupancy must be zero",
             },
             {
-                "Check": "GPU/IT/设施容量",
+                "Check": "GPU / IT / facility capacity",
                 "Status": "PASS" if resource_ok else "FAIL",
                 "Observed": f"max_gpu_violation={recomputed['GPU_Violation'].max()}; max_it_violation={recomputed['IT_Violation_MW'].max()}; max_facility_violation={recomputed['Facility_Violation_MW'].max()}",
-                "Rule": "三层资源约束违反量均为0，且独立重算剖面与模型输出一致",
+                "Rule": "All three resource violation amounts must be zero, and independently recomputed profiles must match model output",
             },
             {
-                "Check": "F1严格全局最优证书",
+                "Check": "Strict global optimality certificate for F1",
                 "Status": "PASS" if certificate_ok else "FAIL",
                 "Observed": f"lower_bound=0; constructed_feasible={feasible}; F1={f1_recomputed}",
-                "Rule": "迁移工作量非负给出F1≥0；存在可行F1=0构造则F1*=0",
+                "Rule": "Nonnegative migration workload implies F1>=0; a feasible F1=0 construction proves F1*=0",
             },
             {
-                "Check": "F2二级目标复算",
+                "Check": "Recomputation of the second objective F2",
                 "Status": "PASS" if objective_ok else "FAIL",
                 "Observed": f"F2_recomputed={f2_recomputed}; F2_reported={f2_reported}",
-                "Rule": "在F1固定为最优后，弹性任务等待量与报告结果一致",
+                "Rule": "After fixing optimal F1, flexible-task waiting workload must match the reported result",
             },
         ]
     )
@@ -1354,12 +1356,12 @@ def _run_dispatch_certificate(
     for row in certificate.itertuples(index=False):
         _record(
             records,
-            "检验三：调度最优性与临界负载",
+            "Validation 3: scheduling optimality and critical load",
             str(row.Check),
             str(row.Status),
             str(row.Observed),
             str(row.Rule),
-            "修复对应任务边界、资源剖面或两级目标证书后再解释本地执行结论",
+            "Repair task boundaries, resource profiles, or the two-stage objective certificate before interpreting local execution",
         )
     return {
         "ok": feasible,
@@ -1441,8 +1443,8 @@ def _run_feasibility(
     matrix, lower, upper, _, wait_objective = model._build_dispatch_constraints(
         options, dispatch_tasks, capacity
     )
-    # 压力检验只问“是否存在可行解”；用等待目标加极小确定性排序打破
-    # 零目标可行性MILP的大量等价解，不改变任何约束可行域。
+    # Stress validation asks only whether a feasible solution exists. Waiting cost plus a tiny deterministic tie-break
+    # removes equivalent solutions in the zero-objective feasibility MILP without changing its feasible set.
     objective = np.asarray(wait_objective, dtype=float) + np.arange(len(options)) * 1e-9
     result = milp(
         c=objective,
@@ -1611,7 +1613,7 @@ def _run_pressure_test(
             "Alpha": 1.0,
             "F1": float(dispatch_state["f1"]),
             "F2": float(dispatch_state["f2"]),
-            "Source": "当前主解dispatch_summary",
+            "Source": "Current main-solution dispatch_summary",
         }
     ]
     local_lower = local_1h.get("LowerFeasible")
@@ -1631,7 +1633,7 @@ def _run_pressure_test(
                     "Alpha": probe_alpha,
                     "F1": float(result[1]),
                     "F2": float(result[2]),
-                    "Source": "local临界上界附近两级MILP",
+                    "Source": "Two-stage MILP near the local critical upper bound",
                 }
             )
     objective_frame = pd.DataFrame(objective_rows)
@@ -1670,21 +1672,21 @@ def _run_pressure_test(
     all_boundaries_ok = all(row.get("Status") == "PASS" for row in boundary_rows)
     _record(
         records,
-        "检验三：调度最优性与临界负载",
-        "自适应临界压力边界",
+        "Validation 3: scheduling optimality and critical load",
+        "Adaptive critical-load bounds",
         "PASS" if all_boundaries_ok else "FAIL",
         f"alpha_local_1h=[{local_1h.get('LowerFeasible')},{local_1h.get('UpperInfeasible')}]; alpha_feas_1h=[{system_1h.get('LowerFeasible')},{system_1h.get('UpperInfeasible')}]; alpha_local_0_5h=[{local_half.get('LowerFeasible')},{local_half.get('UpperInfeasible')}]",
-        "不预设±百分比；从α=1自适应搜索至首次不可行，并将可行下界与不可行上界压缩到0.01以内",
-        "若边界无法搜索或α=1即不可行，不能宣称当前本地执行结论具有压力余量",
+        "Search adaptively from alpha=1 to the first infeasibility, without preset percentages, then narrow feasible/infeasible bounds to within 0.01",
+        "If bounds cannot be found or alpha=1 is infeasible, do not claim stress headroom for current local execution",
     )
     _record(
         records,
-        "检验三：调度最优性与临界负载",
-        "时间粒度与本地临界压力交互",
+        "Validation 3: scheduling optimality and critical load",
+        "Interaction between time resolution and local critical load",
         "PASS" if interaction_ok else "QUALIFIED",
         f"delta_alpha={delta_alpha:.6g}; current_margin={margin:.6g}",
-        "报告|alpha_local(1h)-alpha_local(0.5h)|并与当前到边界余量比较，不设置外部固定容差",
-        "若边界移动与当前余量同量级，应在论文中承认时间离散对临界容量结论的影响",
+        "Report |alpha_local(1h)-alpha_local(0.5h)| relative to current boundary headroom, without an external fixed tolerance",
+        "If the boundary shift is comparable to current headroom, acknowledge the effect of time discretization on critical capacity",
     )
     return {"ok": all_boundaries_ok}
 
@@ -1692,7 +1694,7 @@ def _run_pressure_test(
 def _fixed_schedule_alpha_lower_bound(
     assignments: pd.DataFrame, capacity: pd.DataFrame
 ) -> float:
-    """同一份已验证可行排程在负载同步放大下仍可行的严格下界。"""
+    """Strict feasible lower bound from scaling one independently verified schedule with load."""
 
     profile = _recompute_profile(assignments, capacity)
     ratios: list[float] = []
@@ -1718,7 +1720,7 @@ def _fixed_schedule_alpha_lower_bound(
 def _aggregate_alpha_upper_bound(
     tasks: pd.DataFrame, capacity: pd.DataFrame, local_only: bool
 ) -> float:
-    """由总工作量和总容量给出不可行的严格上界。"""
+    """Strict infeasible upper bound from total workload and capacity conservation."""
 
     dispatch_tasks = tasks.loc[
         tasks["ArrivalHour"].between(TEST_START_HOUR, TEST_END_HOUR)
@@ -1756,12 +1758,14 @@ def _run_pressure_bound_test(
     dispatch_state: dict[str, object],
     records: list[dict[str, object]],
 ) -> dict[str, object]:
-    """在不冒充精确临界点的前提下输出可验证的负载上下界。
+    """Report verifiable load bounds without claiming an exact critical point.
 
-    当前数据的完整临界MILP存在大量等价开工组合。这里先给出两类严格证据：
-    已验证排程随负载同步放大的可行下界，以及总容量守恒给出的不可行上界。
-    二者形成可追溯区间；若要把区间压缩成精确sup，需要单独运行长时限的
-    临界MILP搜索，不能把本区间中任意一点写成精确临界值。
+    The full critical MILP has many equivalent start-time combinations. Report
+    two strict evidence types first: a feasible lower bound from a verified
+    schedule scaled with load, and an infeasible upper bound from capacity
+    conservation. These form a traceable interval. An exact supremum requires
+    a separate long-limit critical MILP search; no point within this interval
+    may be reported as the exact critical value.
     """
 
     assignments = dispatch_state["assignments"]
@@ -1809,7 +1813,7 @@ def _run_pressure_bound_test(
                     "Alpha": 1.0,
                     "F1": float(dispatch_state["f1"]),
                     "F2": float(dispatch_state["f2"]),
-                    "Source": "当前已验证两级MILP主解",
+                    "Source": "Current verified two-stage MILP solution",
                 }
             ]
         ),
@@ -1857,7 +1861,7 @@ def _run_pressure_bound_test(
                     "AlphaLocal_0_5h_LowerBound": fixed_lower,
                     "DeltaAlphaLocalLowerBound": delta_alpha,
                     "CurrentToLowerBoundMargin": current_margin,
-                    "Interpretation": "两种粒度均包含同一份整数时刻可行构造；尚未求得可重排条件下的精确临界sup",
+                    "Interpretation": "Both resolutions contain the same feasible integer-time construction; the exact critical supremum under rescheduling remains unsolved",
                 }
             ]
         ),
@@ -1865,21 +1869,21 @@ def _run_pressure_bound_test(
     )
     _record(
         records,
-        "检验三：调度最优性与临界负载",
-        "临界压力严格上下界",
+        "Validation 3: scheduling optimality and critical load",
+        "Strict critical-load lower and upper bounds",
         "QUALIFIED" if finite_ok else "FAIL",
         f"constructed_lower={fixed_lower:.6g}; local_capacity_upper={local_upper:.6g}; system_capacity_upper={system_upper:.6g}",
-        "α=1存在已验证可行构造；同步放大后的固定构造给出下界；区域/系统总容量守恒给出不可行上界",
-        "当前只报告边界区间；若论文需要精确alpha_local或alpha_feas，必须继续运行长时限临界MILP并记录求解状态",
+        "A verified construction is feasible at alpha=1; scaling that fixed construction gives a lower bound, and regional/system capacity conservation gives an infeasible upper bound",
+        "Report only a boundary interval. Exact alpha_local or alpha_feas requires continued long-limit critical MILP solving with recorded solver status",
     )
     _record(
         records,
-        "检验三：调度最优性与临界负载",
-        "时间粒度与压力边界交互",
+        "Validation 3: scheduling optimality and critical load",
+        "Interaction between time resolution and stress bounds",
         "QUALIFIED" if finite_ok else "FAIL",
         f"lower_bound_shift={delta_alpha:.6g}; current_margin_to_lower_bound={current_margin:.6g}",
-        "1h和0.5h共享同一份整数时刻可行构造，因此下界不因粒度改变；精确临界sup仍需单独求解",
-        "不能把下界相同写成两种粒度临界点完全相同",
+        "The 1h and 0.5h grids share the same feasible integer-time construction, so their lower bounds agree; exact critical suprema still require separate solving",
+        "Equal lower bounds do not prove equal critical points for both resolutions",
     )
     return {"ok": finite_ok}
 
@@ -1894,7 +1898,7 @@ def main() -> int:
     try:
         panel, tasks, candidates, capacity = _read_inputs()
         logging.info(
-            "Q1新检验开始：面板%d行、调度任务%d个、候选记录%d行、容量%d行。",
+            "Q1 validation started: %d panel rows, %d scheduling tasks, %d candidate rows, %d capacity rows.",
             len(panel),
             len(tasks.loc[tasks["ArrivalHour"].between(TEST_START_HOUR, TEST_END_HOUR)]),
             len(candidates),
@@ -1907,15 +1911,15 @@ def main() -> int:
             tasks, capacity, dispatch_state, records
         )
     except Exception as exc:
-        logging.exception("Q1新检验执行失败")
+        logging.exception("Q1 validation failed")
         _record(
             records,
-            "检验流程",
-            "异常终止",
+            "Validation workflow",
+            "Abnormal termination",
             "FAIL",
             f"{type(exc).__name__}: {exc}",
-            "三项检验必须完成并输出证据表",
-            "先修复异常输入、代码接口或求解器状态，再解释检验结论",
+            "All three validations must complete and produce evidence tables",
+            "Repair invalid inputs, code interfaces, or solver status before interpreting validation conclusions",
         )
         _write_table(pd.DataFrame(records), "validation_summary.csv")
         return 1
@@ -1924,7 +1928,7 @@ def main() -> int:
     _write_table(summary, "validation_summary.csv")
     success = bool(rolling_state["ok"] and structure_state["ok"] and dispatch_state["ok"] and pressure_state["ok"])
     logging.info(
-        "Q1新检验完成：test1=%s, test2=%s, dispatch_certificate=%s, pressure=%s",
+        "Q1 validation completed: test1=%s, test2=%s, dispatch_certificate=%s, pressure=%s",
         rolling_state["ok"],
         structure_state["ok"],
         dispatch_state["ok"],

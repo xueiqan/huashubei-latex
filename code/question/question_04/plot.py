@@ -1,12 +1,12 @@
-"""问题4论文绘图入口。
+"""Q4 publication plotting entry point.
 
-只读取已经生成的CSV和共享储能参数，不重新求解模型、不调用MILP。输出三组图、
-五个子图：联合优化效果、情景响应、MH/REF窗口检验和全时域SOC轨迹。
+Read existing CSV files and shared storage parameters without solving models or calling MILP.
+Produce three figure groups with five panels: joint optimization, scenario responses,
 
-第一组只比较按同一V4能源口径复算的顺序任务方案和既有联合任务方案；已完成且
-独立核验通过的V4情景直接读取正式结果目录；第三组优先读取
-validation.py已经写出的检验结果，不在绘图入口启动任何MILP。检验输出尚未完成时
-保留图位并标注“待补证据”，不把滚动日志冒充正式参考对照。
+MH/REF window checks, and full-horizon SOC. The first group compares sequential and
+existing joint task schedules recomputed under the same V4 energy definitions. Read completed,
+independently audited V4 scenarios from formal result directories. The third group uses
+existing validation.py outputs; missing evidence is labeled explicitly without substituting rolling logs.
 """
 
 from __future__ import annotations
@@ -89,11 +89,11 @@ def _read_csv(path: Path, required: tuple[str, ...] = ()) -> pd.DataFrame | None
     try:
         frame = pd.read_csv(path, encoding="utf-8-sig")
     except (OSError, UnicodeError, ValueError, pd.errors.ParserError) as exc:
-        logging.warning("读取图表输入失败：%s；%s", path, exc)
+        logging.warning("Cannot read figure input: %s; %s", path, exc)
         return None
     missing = [column for column in required if column not in frame.columns]
     if missing:
-        logging.warning("%s缺少字段：%s", path.name, missing)
+        logging.warning("%s is missing columns: %s", path.name, missing)
         return None
     return frame
 
@@ -102,7 +102,7 @@ def _table(name: str, required: tuple[str, ...] = ()) -> pd.DataFrame | None:
     path = TABLES_DIR / name
     frame = _read_csv(path, required)
     if frame is None and not path.is_file():
-        logging.info("图表输入待补：%s", name)
+        logging.info("Figure input pending: %s", name)
     return frame
 
 
@@ -114,7 +114,7 @@ def _joint_result_path(name: str) -> Path:
         return current
     legacy = LEGACY_JOINT_TABLES_DIR / name
     if legacy.is_file():
-        logging.warning("V4联合基准尚未重跑，第一组暂读取既有联合结果：%s。", legacy)
+        logging.warning("V4 joint baseline has not been rerun; using existing joint results for group 1: %s.", legacy)
         return legacy
     return current
 
@@ -188,14 +188,14 @@ def _save(figure: plt.Figure, stem: str) -> bool:
         except PermissionError:
             fallback = FIGURES_DIR / f"{stem}_new.pdf"
             figure.savefig(fallback, format="pdf", bbox_inches="tight", pad_inches=0.06)
-            logging.warning("%s被占用，改写为%s。", pdf.name, fallback.name)
+            logging.warning("%s is locked; writing %s instead.", pdf.name, fallback.name)
         figure.savefig(png, format="png", dpi=450, bbox_inches="tight", pad_inches=0.06)
     except OSError as exc:
-        logging.error("保存图表失败：%s；%s", stem, exc)
+        logging.error("Cannot save figure: %s; %s", stem, exc)
         return False
     finally:
         plt.close(figure)
-    logging.info("图表已写出：%s、%s。", pdf, png)
+    logging.info("Figures written: %s, %s.", pdf, png)
     return True
 
 
@@ -264,15 +264,15 @@ def _q4_metrics() -> dict[str, float] | None:
 def _joint_energy_reference_metrics() -> dict[str, float] | None:
     marker_path = TABLES_DIR / JOINT_ENERGY_REFERENCE_MARKER
     if not marker_path.is_file():
-        logging.warning("缺少联合任务方案V4能源复算完成标记：%s。", marker_path)
+        logging.warning("Missing V4 joint schedule energy recomputation marker: %s.", marker_path)
         return None
     try:
         marker = json.loads(marker_path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        logging.warning("联合任务方案V4能源复算标记读取失败：%s。", exc)
+        logging.warning("Cannot read V4 joint schedule energy recomputation marker: %s.", exc)
         return None
     if marker.get("complete") is not True:
-        logging.warning("联合任务方案V4能源复算尚未完成。")
+        logging.warning("V4 joint schedule energy recomputation is incomplete.")
         return None
     frame = _table("q4_joint_energy_reference_metrics.csv", ("Metric", "Value"))
     return None if frame is None else _metrics_from(
@@ -365,12 +365,12 @@ SEQUENTIAL_DISPATCH_FILES = (
 def _sequential_metrics() -> tuple[dict[str, float], str] | None:
     path = _optional_path(SEQUENTIAL_METRIC_FILES)
     if path is None:
-        logging.warning("未找到Q2→Q3顺序基准指标表：%s。", ", ".join(SEQUENTIAL_METRIC_FILES))
+        logging.warning("Q2 -> Q3 sequential baseline metrics not found: %s.", ", ".join(SEQUENTIAL_METRIC_FILES))
         return None
     frame = _read_csv(path)
     values = None if frame is None else _metrics_from(frame, ("Sequential", "Sequence", "Baseline"))
     if values is None:
-        logging.warning("顺序基准表%s缺少完整六目标指标。", path.name)
+        logging.warning("Sequential baseline table %s lacks complete six-objective metrics.", path.name)
         return None
     return values, path.name
 
@@ -452,7 +452,7 @@ def _aggregate(frame: pd.DataFrame) -> dict[str, float] | None:
 def _sequential_dispatch() -> tuple[pd.DataFrame, str] | None:
     path = _optional_path(SEQUENTIAL_DISPATCH_FILES)
     if path is None:
-        logging.warning("未找到Q2→Q3顺序能源轨迹表：%s。", ", ".join(SEQUENTIAL_DISPATCH_FILES))
+        logging.warning("Q2 -> Q3 sequential energy trajectory not found: %s.", ", ".join(SEQUENTIAL_DISPATCH_FILES))
         return None
     frame = _dispatch(path)
     return None if frame is None else (frame, path.name)
@@ -487,7 +487,7 @@ def plot_group1_joint_optimization_results() -> bool:
     figure.subplots_adjust(left=0.08, right=0.98, bottom=0.22, top=0.80, wspace=0.36)
     ax_metric, ax_energy = axes
     if q4 is None or scaling is None or seq is None:
-        _placeholder(ax_metric, "六目标顺序对照待补", "需要正式顺序基准六目标表\n当前输入不完整，未用Q3固定附件基准替代")
+        _placeholder(ax_metric, "Six-objective comparison pending", "Formal sequential six-objective metrics required\nInputs are incomplete; fixed-input Q3 baseline was not substituted")
     else:
         # The retained joint task schedule was produced by the audited search
         # whose actual minimax set was L/J/Q.  C/E/P are re-evaluated below as
@@ -498,8 +498,8 @@ def plot_group1_joint_optimization_results() -> bool:
         joint = _deviation(q4, scaling, active_metrics)
         x = np.arange(len(active_metrics))
         width = 0.34
-        ax_metric.bar(x - width / 2, sequence, width, color=PALETTE["gold"], label="顺序任务方案", edgecolor=PALETTE["text"], linewidth=0.35)
-        ax_metric.bar(x + width / 2, joint, width, color=PALETTE["blue"], label="联合任务方案", edgecolor=PALETTE["text"], linewidth=0.35)
+        ax_metric.bar(x - width / 2, sequence, width, color=PALETTE["gold"], label="Sequential task schedule", edgecolor=PALETTE["text"], linewidth=0.35)
+        ax_metric.bar(x + width / 2, joint, width, color=PALETTE["blue"], label="Joint task schedule", edgecolor=PALETTE["text"], linewidth=0.35)
         ymax = max(float(np.max(np.r_[sequence, joint])), 0.08)
         for values, offset in ((sequence, -width / 2), (joint, width / 2)):
             for index, value in enumerate(values):
@@ -508,24 +508,24 @@ def plot_group1_joint_optimization_results() -> bool:
         ax_metric.axhline(z_seq, color=PALETTE["gold"], linestyle="--", linewidth=0.9, label=r"$z^{SEQ}$")
         ax_metric.axhline(z_joint, color=PALETTE["blue"], linestyle=":", linewidth=1.0, label=r"$z^{JOINT}$")
         change = (z_seq - z_joint) / z_seq if z_seq > 1e-12 else 0
-        ax_metric.text(0.98, 0.96, f"z_SEQ={z_seq:.3g}\nz_JOINT={z_joint:.3g}\n最大偏离下降={change:+.1%}", transform=ax_metric.transAxes, ha="right", va="top", fontsize=6.5, bbox={"boxstyle": "round,pad=0.25", "facecolor": PALETTE["white"], "edgecolor": PALETTE["grid"], "linewidth": 0.6})
+        ax_metric.text(0.98, 0.96, f"z_SEQ={z_seq:.3g}\nz_JOINT={z_joint:.3g}\nMaximum deviation reduction={change:+.1%}", transform=ax_metric.transAxes, ha="right", va="top", fontsize=6.5, bbox={"boxstyle": "round,pad=0.25", "facecolor": PALETTE["white"], "edgecolor": PALETTE["grid"], "linewidth": 0.6})
         ax_metric.set_xticks(x, [METRIC_LABELS[name] for name in active_metrics])
-        ax_metric.set_xlabel("参与最小最大化的有效指标")
-        ax_metric.set_ylabel(r"标准化偏离 $d_m$")
+        ax_metric.set_xlabel("Active metrics in minimax optimization")
+        ax_metric.set_ylabel(r"Normalized deviation $d_m$")
         _style_axis(ax_metric)
         handles, labels = ax_metric.get_legend_handles_labels()
         _legend(ax_metric, handles=handles, labels=labels, loc="lower center", bbox_to_anchor=(0.5, 1.08), ncol=2, columnspacing=0.65, handletextpad=0.35, borderaxespad=0.0)
-    _caption(ax_metric, "(a) V4统一口径下有效指标偏离度比较")
+    _caption(ax_metric, "(a) Active metric deviations under unified V4 definitions")
     if q4_dispatch is None or seq_dispatch is None:
-        _placeholder(ax_energy, "能源侧顺序对照待补", "需要完整的顺序方案能源轨迹\n当前Q4能源轨迹不能与固定附件基准直接拼接")
+        _placeholder(ax_energy, "Energy comparison pending", "Complete sequential energy trajectory required\nThe Q4 trajectory cannot be combined directly with the fixed-input baseline")
     else:
         current = _aggregate(q4_dispatch)
         sequence = _aggregate(seq_dispatch[0])
         if current is None or sequence is None:
-            _placeholder(ax_energy, "能源侧字段待补", "顺序与Q4轨迹需同时包含直接消纳、储能、外送、弃电字段")
+            _placeholder(ax_energy, "Energy fields pending", "Both sequential and Q4 trajectories must contain direct use, storage, export, and curtailment")
         else:
             keys = ("direct", "storage", "export", "curtailment")
-            labels = ("直接消纳", "进入储能", "新能源外送", "弃新能源")
+            labels = ("Direct use", "Storage charging", "Renewable export", "Renewable curtailment")
             delta = np.asarray([current[key] - sequence[key] for key in keys])
             x = np.arange(len(keys))
             colors = [PALETTE["blue"] if value >= 0 else PALETTE["orange"] for value in delta]
@@ -538,12 +538,12 @@ def plot_group1_joint_optimization_results() -> bool:
             upper = max(float(np.max(delta)), 0.0)
             label_padding = max(0.18 * bound, 1.0)
             ax_energy.set_ylim(lower - label_padding, upper + label_padding)
-            callout = f"ΔC={_compact(current['Cost'] - sequence['Cost'])} CNY\nΔU={(current['Utilization'] - sequence['Utilization']) * 100:+.2f} pp\nΔP={_compact(current['Peak'] - sequence['Peak'])} MW\nΔ吞吐={_compact(current['throughput'] - sequence['throughput'])} MWh"
+            callout = f"ΔC={_compact(current['Cost'] - sequence['Cost'])} CNY\nΔU={(current['Utilization'] - sequence['Utilization']) * 100:+.2f} pp\nΔP={_compact(current['Peak'] - sequence['Peak'])} MW\nΔThroughput={_compact(current['throughput'] - sequence['throughput'])} MWh"
             ax_energy.text(0.98, 0.96, callout, transform=ax_energy.transAxes, ha="right", va="top", fontsize=6.2, bbox={"boxstyle": "round,pad=0.25", "facecolor": PALETTE["white"], "edgecolor": PALETTE["grid"], "linewidth": 0.6})
             ax_energy.set_xticks(x, labels, rotation=18, ha="right")
-            ax_energy.set_ylabel("累计变化（联合任务方案−顺序任务方案） / MWh")
+            ax_energy.set_ylabel("Cumulative change (joint - sequential) / MWh")
             _style_axis(ax_energy)
-    _caption(ax_energy, "(b) V4统一能源口径下新能源与储能结构变化")
+    _caption(ax_energy, "(b) Renewable and storage allocation changes under unified V4 energy definitions")
     return _save(figure, "q4_group1_joint_optimization_results")
 
 
@@ -566,15 +566,15 @@ SCENARIO_FILES = ("q4_scenario_metrics.csv", "q4_scenarios.csv", "q4_scenario_re
 def _scenario_display_name(directory_name: str, scenario: dict[str, object]) -> str:
     kind = str(scenario.get("ScenarioKind", "")).strip().lower()
     if kind == "low_carbon_reference":
-        return "低碳参考"
+        return "Low-carbon reference"
     if kind == "carbon_constraint":
         value = scenario.get("CarbonLambda")
-        return f"碳约束 λ={float(value):g}" if value is not None else "碳约束"
+        return f"Carbon constraint λ={float(value):g}" if value is not None else "Carbon constraint"
     if kind == "flat_price":
-        return "平价电价"
+        return "Parity electricity prices"
     if kind == "low_variability_renewable":
         value = scenario.get("RenewableSmoothingGamma")
-        return f"新能源平滑 γ={float(value):g}" if value is not None else "新能源平滑"
+        return f"Renewable smoothing γ={float(value):g}" if value is not None else "Renewable smoothing"
     return directory_name
 
 
@@ -598,7 +598,7 @@ def _scenario_metrics_from_summary(frame: pd.DataFrame) -> dict[str, float] | No
 def _load_v4_scenarios() -> tuple[pd.DataFrame, str, str] | None:
     """Load the baseline and completed V4 scenario directories directly."""
 
-    roots: list[tuple[str, Path, dict[str, object]]] = [("Q4·00基准", TABLES_DIR, {})]
+    roots: list[tuple[str, Path, dict[str, object]]] = [("Q4 00 baseline", TABLES_DIR, {})]
     if SCENARIO_DIR.is_dir():
         for directory in sorted(SCENARIO_DIR.iterdir(), key=lambda path: path.name):
             if not directory.is_dir():
@@ -612,17 +612,17 @@ def _load_v4_scenarios() -> tuple[pd.DataFrame, str, str] | None:
             try:
                 marker = json.loads(marker_path.read_text(encoding="utf-8"))
             except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as exc:
-                logging.warning("V4情景标记读取失败：%s；%s", marker_path, exc)
+                logging.warning("Cannot read V4 scenario marker: %s; %s", marker_path, exc)
                 continue
             if marker.get("complete") is not True or marker.get("audit_passed") is not True:
-                logging.warning("跳过未完成或未审计通过的V4情景：%s。", directory.name)
+                logging.warning("Skipping incomplete or unaudited V4 scenario: %s.", directory.name)
                 continue
             scenario = dict(marker.get("scenario", {}))
             if metadata_path.is_file():
                 try:
                     scenario.update(json.loads(metadata_path.read_text(encoding="utf-8")))
                 except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as exc:
-                    logging.warning("V4情景元数据读取失败，继续使用完成标记：%s；%s", metadata_path, exc)
+                    logging.warning("Cannot read V4 scenario metadata; using completion marker: %s; %s", metadata_path, exc)
             roots.append((_scenario_display_name(directory.name, scenario), tables, scenario))
 
     records: list[dict[str, object]] = []
@@ -631,7 +631,7 @@ def _load_v4_scenarios() -> tuple[pd.DataFrame, str, str] | None:
         frame = _read_csv(summary_path, ("Metric", "Value"))
         values = None if frame is None else _scenario_metrics_from_summary(frame)
         if values is None:
-            logging.warning("V4情景汇总缺少六项绘图指标：%s。", summary_path)
+            logging.warning("V4 scenario summary lacks six plotting metrics: %s.", summary_path)
             continue
         records.append({"Scenario": label, **values})
 
@@ -639,12 +639,12 @@ def _load_v4_scenarios() -> tuple[pd.DataFrame, str, str] | None:
         return None
     wide = pd.DataFrame(records).set_index("Scenario")
     wide = wide.loc[:, list(SCENARIO_METRICS)].dropna(how="any")
-    baseline = "Q4·00基准"
+    baseline = "Q4 00 baseline"
     if baseline not in wide.index or wide.empty:
-        logging.warning("V4情景绘图输入缺少Q4·00基准或完整指标。")
+        logging.warning("V4 scenario plotting input lacks the Q4 00 baseline or complete metrics.")
         return None
-    logging.info("已读取V4情景绘图输入：%d组，基准=%s。", len(wide), baseline)
-    return wide, baseline, "V4正式情景结果目录"
+    logging.info("V4 scenario plotting inputs loaded: %d groups, baseline=%s.", len(wide), baseline)
+    return wide, baseline, "Formal V4 scenario result directories"
 
 
 def _load_scenarios() -> tuple[pd.DataFrame, str, str] | None:
@@ -653,7 +653,7 @@ def _load_scenarios() -> tuple[pd.DataFrame, str, str] | None:
         return v4
     path = _optional_path(SCENARIO_FILES)
     if path is None:
-        logging.warning("未找到Q4情景结果表：%s。", ", ".join(SCENARIO_FILES))
+        logging.warning("Q4 scenario result table not found: %s.", ", ".join(SCENARIO_FILES))
         return None
     frame = _read_csv(path)
     if frame is None:
@@ -700,9 +700,9 @@ def _load_scenarios() -> tuple[pd.DataFrame, str, str] | None:
     if any(metric not in wide.columns for metric in SCENARIO_METRICS):
         return None
     wide = wide.loc[:, list(SCENARIO_METRICS)].dropna(how="any")
-    baseline = next((str(label) for label in wide.index if any(word in str(label).lower() for word in ("base", "baseline", "default", "基准", "默认"))), None)
+    baseline = next((str(label) for label in wide.index if any(word in str(label).lower() for word in ("base", "baseline", "default", "\u57fa\u51c6", "\u9ed8\u8ba4"))), None)
     if baseline is None or wide.empty:
-        logging.warning("情景表%s缺少明确基准情景或完整指标。", path.name)
+        logging.warning("Scenario table %s lacks an explicit baseline or complete metrics.", path.name)
         return None
     return wide, baseline, path.name
 
@@ -722,8 +722,8 @@ def plot_group2_scenario_response() -> bool:
     figure, axis = plt.subplots(figsize=(7.15, 3.65))
     figure.subplots_adjust(left=0.15, right=0.87, bottom=0.28, top=0.86)
     if loaded is None:
-        _placeholder(axis, "Q4情景响应待补", "需要正式V4基准和至少一个已完成且审计通过的V4情景\n当前未找到可用的V4情景汇总，未虚构λ或情景数")
-        _caption(axis, "不同机制情景下的策略响应矩阵")
+        _placeholder(axis, "Q4 scenario responses pending", "Formal V4 baseline and at least one complete audited V4 scenario required\nNo usable V4 summary found; λ values and scenario counts are not fabricated")
+        _caption(axis, "Strategy response matrix across scenario mechanisms")
         return _save(figure, "q4_group2_scenario_response")
     wide, baseline, source = loaded
     base = wide.loc[baseline]
@@ -739,7 +739,7 @@ def plot_group2_scenario_response() -> bool:
     image = axis.imshow(changes, aspect="auto", cmap=SCENARIO_CMAP, norm=TwoSlopeNorm(vmin=-limit, vcenter=0, vmax=limit))
     axis.set_xticks(np.arange(len(SCENARIO_METRICS)), [SCENARIO_LABELS[metric] for metric in SCENARIO_METRICS])
     axis.set_yticks(np.arange(len(wide)), wide.index.astype(str))
-    axis.set_xlabel("最终指标；QoS=1−J，U=1−Q")
+    axis.set_xlabel("Final metrics; QoS=1-J, U=1-Q")
     for row_index in range(len(wide)):
         for column_index in range(len(SCENARIO_METRICS)):
             value = changes[row_index, column_index]
@@ -751,9 +751,9 @@ def plot_group2_scenario_response() -> bool:
     axis.tick_params(which="minor", bottom=False, left=False)
     _style_axis(axis, "none")
     colorbar = figure.colorbar(image, ax=axis, fraction=0.035, pad=0.035)
-    colorbar.set_label("相对变化；比例/百分点/零基准绝对差", fontsize=7, color=PALETTE["text"])
+    colorbar.set_label("Relative change: fraction / pp / absolute change for zero baseline", fontsize=7, color=PALETTE["text"])
     colorbar.ax.tick_params(colors=PALETTE["text"], labelsize=6.5)
-    _caption(axis, "不同机制情景相对基准的指标响应；正值表示上升", y=-0.27)
+    _caption(axis, "Scenario metric responses relative to baseline; positive values indicate increases", y=-0.27)
     return _save(figure, "q4_group2_scenario_response")
 
 
@@ -790,31 +790,31 @@ def _numeric_series(frame: pd.DataFrame, aliases: tuple[str, ...]) -> pd.Series:
 
 
 def _bool_value(value: object) -> bool:
-    return str(value).strip().lower() in {"1", "true", "yes", "pass", "passed", "通过"}
+    return str(value).strip().lower() in {"1", "true", "yes", "pass", "passed", "\u901a\u8fc7"}
 
 
 def _validation_window_label(row: pd.Series, window: float) -> str:
     role = str(row.get("ReferenceRole", row.get("ScenarioName", ""))).upper()
     if "MEDIAN" in role:
-        return "中位耗时窗口"
+        return "Median-runtime window"
     if "LONGEST" in role:
-        return "最长耗时窗口"
+        return "Longest-runtime window"
     if "GPU" in role or "COMPUTE" in role:
-        return "GPU/计算压力"
+        return "GPU/compute pressure"
     if "DEADLINE" in role:
-        return "截止期密集"
+        return "Dense deadlines"
     if "SOC" in role or "RENEWABLE" in role:
-        return "SOC/新能源压力"
+        return "SOC/renewable pressure"
     if "ORDINARY" in role:
-        return "普通窗口"
-    return f"窗口{int(window)}"
+        return "Ordinary window"
+    return f"Window {int(window)}"
 
 
 def _validation_window_evidence() -> tuple[pd.DataFrame, str, str] | None:
     """Load completed validation output; never start a solver from the plot entry."""
 
     if not _validation_report_ready():
-        logging.info("validation.py尚未形成稳定完成报告，第三组暂不读取历史检验表。")
+        logging.info("validation.py has no stable completion report; group 3 will not read historical validation tables.")
         return None
     for name in VALIDATION_WINDOW_FILES:
         path = VALIDATION_DIR / name
@@ -845,9 +845,9 @@ def _validation_window_evidence() -> tuple[pd.DataFrame, str, str] | None:
         result["ElapsedSeconds"] = _numeric_series(source_frame, ("ElapsedSeconds", "Elapsed", "TimeSeconds")).to_numpy()
         result["MaxEnergyBalanceError"] = _numeric_series(source_frame, ("MaxEnergyBalanceError", "MaxResidual", "EnergyResidual")).to_numpy()
         mode = "reference" if name == "q4_reference_window_comparison.csv" else "audit"
-        logging.info("已读取validation检验绘图输入：%d个窗口，来源=%s。", len(result), name)
+        logging.info("Validation plotting inputs loaded: %d windows, source=%s.", len(result), name)
         return result.reset_index(drop=True), name, mode
-    logging.warning("未找到已完成的validation窗口检验表：%s。", ", ".join(VALIDATION_WINDOW_FILES))
+    logging.warning("Completed validation window table not found: %s.", ", ".join(VALIDATION_WINDOW_FILES))
     return None
 
 
@@ -859,14 +859,14 @@ def _plot_validation_window_evidence(axis: plt.Axes, loaded: tuple[pd.DataFrame,
         gaps = local["MIPGap"].to_numpy(dtype=float) * 100.0
         targets = local["MIPGapTarget"].fillna(0.05).to_numpy(dtype=float) * 100.0
         colors = [PALETTE["blue"] if gap <= target + 1e-9 else PALETTE["orange"] for gap, target in zip(gaps, targets)]
-        axis.bar(x, gaps, color=colors, edgecolor=PALETTE["text"], linewidth=0.4, label="实际MIP gap")
+        axis.bar(x, gaps, color=colors, edgecolor=PALETTE["text"], linewidth=0.4, label="Actual MIP gap")
         target = float(np.nanmedian(targets))
-        axis.axhline(target, color=PALETTE["reference"], linestyle="--", linewidth=0.9, label=f"目标MIP gap={target:g}%")
+        axis.axhline(target, color=PALETTE["reference"], linestyle="--", linewidth=0.9, label=f"Target MIP gap={target:g}%")
         ymax = max(float(np.max(gaps)), target, 1.0)
         for index, (_, row) in enumerate(local.iterrows()):
             status = str(row["SolverStatus"]).replace("_", " ")
             status = status.replace("TIME LIMIT FEASIBLE", "TIME LIMIT")
-            audit = "核验通过" if bool(row["AuditPassed"]) else "核验失败"
+            audit = "Audit passed" if bool(row["AuditPassed"]) else "Audit failed"
             axis.text(index, gaps[index] + ymax * 0.04, f"{gaps[index]:.2f}%\n{status}\n{audit}", ha="center", va="bottom", fontsize=5.8)
         axis.set_xticks(x, local["Label"].astype(str))
         axis.set_ylabel("MIP gap / %")
@@ -875,7 +875,7 @@ def _plot_validation_window_evidence(axis: plt.Axes, loaded: tuple[pd.DataFrame,
         _legend(axis, loc="upper right", bbox_to_anchor=(0.98, 0.79))
         return
     checks = ("AuditPassed",)
-    check_labels = ("独立窗口核验",)
+    check_labels = ("Independent window audit",)
     matrix = frame.loc[:, list(checks)].astype(float).to_numpy()
     image = axis.imshow(matrix, aspect="auto", cmap=LinearSegmentedColormap.from_list("q4_audit", [PALETTE["white"], PALETTE["blue"]]), vmin=0.0, vmax=1.0)
     axis.set_xticks(np.arange(len(checks)), check_labels)
@@ -884,10 +884,10 @@ def _plot_validation_window_evidence(axis: plt.Axes, loaded: tuple[pd.DataFrame,
         for column_index in range(len(checks)):
             passed = bool(matrix[row_index, column_index])
             axis.text(column_index, row_index, "PASS" if passed else "FAIL", ha="center", va="center", fontsize=6.0, color=PALETTE["text"] if passed else PALETTE["reference"])
-    axis.set_xlabel("独立核验状态")
+    axis.set_xlabel("Independent audit status")
     axis.tick_params(axis="x", bottom=False)
     _style_axis(axis, "none")
-    axis.text(0.98, 0.02, "数据来源：代表窗口检验结果", transform=axis.transAxes, ha="right", va="bottom", fontsize=5.8, color=PALETTE["text"])
+    axis.text(0.98, 0.02, "Source: representative-window validation results", transform=axis.transAxes, ha="right", va="bottom", fontsize=5.8, color=PALETTE["text"])
 
 
 def plot_group3_model_validation() -> bool:
@@ -897,12 +897,12 @@ def plot_group3_model_validation() -> bool:
     figure.subplots_adjust(left=0.08, right=0.98, bottom=0.20, top=0.79, wspace=0.34)
     ax_pair, ax_soc = axes
     if validation is None:
-        _placeholder(ax_pair, "代表窗口检验结果待补", "需要完成代表窗口检验后形成的检验表")
+        _placeholder(ax_pair, "Representative validation pending", "Complete representative-window validation to obtain its result table")
     else:
         _plot_validation_window_evidence(ax_pair, validation)
-    _caption(ax_pair, "(a) 代表窗口MIP gap与独立核验结果")
+    _caption(ax_pair, "(a) Representative-window MIP gaps and independent audits")
     if soc is None:
-        _placeholder(ax_soc, "SOC轨迹待补", "需要完整时域调度结果与共享储能参数")
+        _placeholder(ax_soc, "SOC trajectory pending", "Complete full-horizon dispatch and shared storage parameters required")
     else:
         trajectory, terminal_ok = soc
         for region in REGIONS:
@@ -910,20 +910,20 @@ def plot_group3_model_validation() -> bool:
             if local.empty:
                 continue
             color = REGION_COLORS[region]
-            ax_soc.plot(local["Hour"], local["SOCNorm"], linewidth=0.75, color=color, label=region.replace("Region", "区域"))
+            ax_soc.plot(local["Hour"], local["SOCNorm"], linewidth=0.75, color=color, label=region.replace("Region", "Region"))
             ax_soc.scatter([0], [local["InitialNorm"].iloc[0]], s=18, facecolor=PALETTE["white"], edgecolor=color, linewidth=0.8, zorder=4)
             ax_soc.scatter([MAIN_END], [local.loc[local["Hour"].eq(MAIN_END), "SOCNorm"].iloc[0]], s=18, facecolor=color, edgecolor=PALETTE["text"], linewidth=0.45, zorder=4)
-        ax_soc.axhline(0, color=PALETTE["reference"], linestyle="--", linewidth=0.8, label="SOC下界")
-        ax_soc.axhline(1, color=PALETTE["reference"], linestyle=":", linewidth=0.9, label="SOC上界")
-        ax_soc.text(0.98, 0.12, r"$S_{r,2406}\geq InitialSOC_r$" + ("：全部满足" if terminal_ok else "：存在不满足"), transform=ax_soc.transAxes, ha="right", va="bottom", fontsize=6.5, bbox={"boxstyle": "round,pad=0.25", "facecolor": PALETTE["white"], "edgecolor": PALETTE["grid"], "linewidth": 0.6})
+        ax_soc.axhline(0, color=PALETTE["reference"], linestyle="--", linewidth=0.8, label="SOC lower bound")
+        ax_soc.axhline(1, color=PALETTE["reference"], linestyle=":", linewidth=0.9, label="SOC upper bound")
+        ax_soc.text(0.98, 0.12, r"$S_{r,2406}\geq InitialSOC_r$" + (": all satisfied" if terminal_ok else ": violations exist"), transform=ax_soc.transAxes, ha="right", va="bottom", fontsize=6.5, bbox={"boxstyle": "round,pad=0.25", "facecolor": PALETTE["white"], "edgecolor": PALETTE["grid"], "linewidth": 0.6})
         ax_soc.set_xlim(0, MAIN_END)
         ax_soc.set_ylim(-0.035, 1.035)
-        ax_soc.set_xlabel("时段 t / h")
-        ax_soc.set_ylabel(r"归一化储能状态 $SOC^{norm}_{rt}$")
+        ax_soc.set_xlabel("Time t / h")
+        ax_soc.set_ylabel(r"Normalized storage state $SOC^{norm}_{rt}$")
         _style_axis(ax_soc, "both")
         handles, labels = ax_soc.get_legend_handles_labels()
         _legend(ax_soc, handles=handles, labels=labels, loc="lower center", bbox_to_anchor=(0.5, 1.03), ncol=4, columnspacing=0.7, handletextpad=0.35, borderaxespad=0.0)
-    _caption(ax_soc, "(b) 六区域SOC可行性与终端恢复")
+    _caption(ax_soc, "(b) SOC feasibility and terminal recovery in six regions")
     return _save(figure, "q4_group3_model_validation")
 
 
@@ -962,11 +962,11 @@ def _soc_trajectory() -> tuple[pd.DataFrame, bool] | None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="问题4论文绘图入口")
+    parser = argparse.ArgumentParser(description="Q4 publication plotting entry point")
     parser.add_argument(
         "--groups", nargs="+", choices=("group1", "group2", "group3"),
         default=("group1", "group2", "group3"),
-        help="只绘制指定图组；默认绘制三组",
+        help="Plot the selected figure groups only; default: all three groups",
     )
     args = parser.parse_args()
     _configure_style()
@@ -980,7 +980,7 @@ def main() -> int:
         "group3": plot_group3_model_validation,
     }
     result = {name: plotters[name]() for name in args.groups}
-    logging.info("Q4绘图完成状态：%s。", result)
+    logging.info("Q4 plotting completion status: %s.", result)
     return 0 if all(result.values()) else 1
 
 

@@ -1,13 +1,14 @@
-"""问题3三组论文图。
+"""Three groups of Question 3 paper figures.
 
-本文件只读取问题3已经生成的输入/结果CSV，不重新求解MILP，也不修改模型结果。
-输出三份静态PDF：
+Read existing Q3 input/result CSV files without solving MILP or modifying model
+results. Produce three static PDFs:
 
-1. 储能时移运行机制；
-2. 储能协同优化效果与区域差异；
-3. 物理闭环、附件基准诊断和多目标择优检验。
+1. Storage time-shifting mechanisms.
+2. Storage coordination effects and regional differences.
+3. Physical closure, attachment-baseline diagnostics, and multiobjective selection.
 
-图内不放总图题和长段解释；每个子图的题目统一放在子图下方。
+Avoid overall figure titles and long in-figure explanations. Place each subplot
+caption below its axes.
 """
 
 from __future__ import annotations
@@ -36,12 +37,12 @@ FIGURES_DIR = QUESTION_DIR / "outputs" / "figures"
 REGION_ORDER = ["RegionA", "RegionB", "RegionC", "RegionD", "RegionE", "RegionF"]
 SCHEME_ORDER = ["NoStorage", "BaselineReference", "Balanced"]
 SCHEME_LABELS = {
-    "NoStorage": "无储能",
-    "BaselineReference": "附件基准",
-    "Balanced": "优化方案",
+    "NoStorage": "No storage",
+    "BaselineReference": "Attachment baseline",
+    "Balanced": "Optimized solution",
 }
-# 配色沿用问题1 plot.py中依据《绘图颜色搭配.docx》整理的色值；本次按Q3图示语义映射：
-# 绿色=新能源，蓝色=储能/购电，橙红色=放电/峰值/告警，紫色=附件基准。
+# Use the Q1 plotting palette derived from the supplied document, mapped to Q3 semantics:
+# green=renewables, blue=storage/purchases, orange-red=discharge/peaks/alerts, purple=attachment baseline.
 SCHEME_COLORS = {
     "NoStorage": "#BADEFA",
     "BaselineReference": "#9632B8",
@@ -83,12 +84,12 @@ def _configure_style() -> None:
 
 def _read_csv(path: Path, required: tuple[str, ...] = ()) -> pd.DataFrame | None:
     if not path.is_file():
-        logging.error("图表输入缺失：%s", path)
+        logging.error("Plot input missing: %s", path)
         return None
     frame = pd.read_csv(path, encoding="utf-8-sig")
     missing = [column for column in required if column not in frame.columns]
     if missing:
-        logging.error("%s缺少字段：%s", path.name, missing)
+        logging.error("%s is missing columns: %s", path.name, missing)
         return None
     return frame
 
@@ -149,7 +150,7 @@ def _panel_caption(
     y: float = -0.25,
     fontsize: float = 9.0,
 ) -> None:
-    """将子图题放在坐标轴下方，避免与坐标轴标题混在上方。"""
+    """Place subplot captions below axes, separate from upper axis titles."""
 
     axis.text(
         0.5,
@@ -166,7 +167,7 @@ def _panel_caption(
 
 
 def _save(figure: plt.Figure, stem: str) -> None:
-    """保存PDF；若原PDF正被Windows预览器占用，则自动写入 *_new.pdf。"""
+    """Save a PDF; if Windows preview locks the target, write *_new.pdf instead."""
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     target = FIGURES_DIR / f"{stem}.pdf"
 
@@ -177,7 +178,7 @@ def _save(figure: plt.Figure, stem: str) -> None:
             bbox_inches="tight",
             pad_inches=0.03,
         )
-        logging.info("已生成：%s", target.name)
+        logging.info("Generated: %s", target.name)
 
     except PermissionError:
         fallback = FIGURES_DIR / f"{stem}_new.pdf"
@@ -188,7 +189,7 @@ def _save(figure: plt.Figure, stem: str) -> None:
             pad_inches=0.03,
         )
         logging.warning(
-            "%s 正被其他程序占用，已改为输出：%s",
+            "%s is locked by another application; output redirected to %s",
             target.name,
             fallback.name,
         )
@@ -226,7 +227,7 @@ def _load_balanced() -> pd.DataFrame | None:
 
 
 def plot_group1_storage_mechanism() -> bool:
-    """图1：六区域储能功率概览与活跃区域SOC时移特征。"""
+    """Figure 1: storage-power overview for six regions and SOC time shifts in active regions."""
 
     balanced = _load_balanced()
     storage = _read_csv(
@@ -245,7 +246,7 @@ def plot_group1_storage_mechanism() -> bool:
         return False
     params = storage.set_index("Region").reindex(regions)
     if params[["StorageCapacity_MWh", "MinSOC_MWh", "InitialSOC_MWh"]].isna().any().any():
-        logging.error("storage_params.csv无法覆盖全部Q3区域")
+        logging.error("storage_params.csv does not cover all Q3 regions")
         return False
 
     balanced = balanced.copy()
@@ -261,7 +262,7 @@ def plot_group1_storage_mechanism() -> bool:
         hspace=0.63,
     )
 
-    # 上半区只保留热力图主体和窄色条，不再放统计表。
+    # Keep only the heatmap and narrow colorbar in the upper area, without a statistics table.
     heat_grid = grid[0].subgridspec(
         1,
         2,
@@ -297,29 +298,29 @@ def plot_group1_storage_mechanism() -> bool:
     power_axis.set_yticks(np.arange(len(regions)))
     power_axis.set_yticklabels(regions)
     power_axis.set_xticks([0, 600, 1200, 1800, 2405])
-    power_axis.set_xlabel("时段 (t) / h", fontsize=10.2)
-    power_axis.set_ylabel("区域", fontsize=10.2)
+    power_axis.set_xlabel("Time (t) / h", fontsize=10.2)
+    power_axis.set_ylabel("Region", fontsize=10.2)
     _panel_caption(
         power_axis,
-        "(a) 六区域储能功率时序概览",
+        "(a) Storage-power time series in six regions",
         y=-0.22,
         fontsize=9.2,
     )
     _style_axis(power_axis, grid_axis="none")
 
     colorbar = figure.colorbar(image, cax=colorbar_axis)
-    colorbar.set_label("储能净功率 / MW", color=TEXT_COLOR)
+    colorbar.set_label("Net storage power / MW", color=TEXT_COLOR)
     colorbar.ax.tick_params(colors=TEXT_COLOR, labelsize=6.4)
     colorbar.outline.set_edgecolor(TEXT_COLOR)
     colorbar.outline.set_linewidth(0.6)
 
-    # 下半区仅保留真正活跃的RegionD-F。
+    # Retain only active RegionD--F in the lower area.
     active_regions = [
         region for region in ("RegionD", "RegionE", "RegionF")
         if region in regions
     ]
     if not active_regions:
-        logging.error("Q3结果中缺少RegionD/RegionE/RegionF活跃区域")
+        logging.error("Q3 results are missing active RegionD/RegionE/RegionF")
         plt.close(figure)
         return False
 
@@ -355,26 +356,26 @@ def plot_group1_storage_mechanism() -> bool:
             color=TEXT_COLOR,
             linestyle=":",
             linewidth=0.75,
-            label="初始SOC",
+            label="Initial SOC",
         )
         axis.axhline(
             minimum,
             color=REFERENCE_COLOR,
             linestyle="--",
             linewidth=0.75,
-            label="SOC下限",
+            label="Minimum SOC",
         )
         axis.axhline(
             capacity,
             color="#5CB85C",
             linestyle="--",
             linewidth=0.75,
-            label="容量上限",
+            label="Capacity limit",
         )
 
         axis.set_title(region, fontsize=8.3, pad=2.0)
         axis.set_xticks([0, 1200, 2405])
-        axis.set_xlabel("时段 t / h", fontsize=9.6)
+        axis.set_xlabel("Time t / h", fontsize=9.6)
         axis.set_ylabel("SOC / MWh", fontsize=9.6)
         _style_axis(axis)
 
@@ -387,7 +388,7 @@ def plot_group1_storage_mechanism() -> bool:
             color="#D77071",
             linewidth=0.42,
             alpha=0.62,
-            label="有符号功率",
+            label="Signed power",
         )
         power_axis_twin.axhline(
             0.0,
@@ -400,13 +401,13 @@ def plot_group1_storage_mechanism() -> bool:
         power_axis_twin.spines["top"].set_visible(False)
         power_axis_twin.spines["right"].set_visible(False)
 
-    # 下排采用共享图例，避免图例被高密度SOC曲线遮住。
+    # Use a shared lower-row legend to avoid overlap with dense SOC curves.
     legend_handles = [
         plt.Line2D([], [], color="#357EBD", linewidth=1.05, label="SOC"),
-        plt.Line2D([], [], color=TEXT_COLOR, linestyle=":", linewidth=0.75, label="初始SOC"),
-        plt.Line2D([], [], color=REFERENCE_COLOR, linestyle="--", linewidth=0.75, label="SOC下限"),
-        plt.Line2D([], [], color="#5CB85C", linestyle="--", linewidth=0.75, label="容量上限"),
-        plt.Line2D([], [], color="#D77071", linewidth=0.55, label="有符号功率"),
+        plt.Line2D([], [], color=TEXT_COLOR, linestyle=":", linewidth=0.75, label="Initial SOC"),
+        plt.Line2D([], [], color=REFERENCE_COLOR, linestyle="--", linewidth=0.75, label="Minimum SOC"),
+        plt.Line2D([], [], color="#5CB85C", linestyle="--", linewidth=0.75, label="Capacity limit"),
+        plt.Line2D([], [], color="#D77071", linewidth=0.55, label="Signed power"),
     ]
     legend = figure.legend(
         handles=legend_handles,
@@ -424,7 +425,7 @@ def plot_group1_storage_mechanism() -> bool:
     anchor_axis = soc_axes[1 if len(soc_axes) > 1 else 0]
     _panel_caption(
         anchor_axis,
-        "(b) RegionD–F SOC与充放电时移特征",
+        "(b) RegionD--F SOC and charging/discharging time shifts",
         y=-0.31,
         fontsize=9.0,
     )
@@ -472,7 +473,7 @@ def _absolute_change_from_baseline(
 
 
 def _plot_cost_change(axis: plt.Axes, summary: pd.DataFrame) -> None:
-    """显示净运行结算的绝对变化，避免把跨过零点的成本写成改善率。"""
+    """Show absolute net-settlement changes; do not report a percentage when cost crosses zero."""
 
     schemes = ("NoStorage", "Balanced")
     changes = _absolute_change_from_baseline(summary, "Cost", schemes)
@@ -492,7 +493,7 @@ def _plot_cost_change(axis: plt.Axes, summary: pd.DataFrame) -> None:
             axis.text(
                 bar.get_x() + bar.get_width() / 2.0,
                 value + offset if value >= 0 else value - offset,
-                f"{value:+,.0f}万元",
+                f"{value:+,.0f} x 10,000 CNY",
                 ha="center",
                 va="bottom" if value >= 0 else "top",
                 fontsize=6.2,
@@ -507,17 +508,17 @@ def _plot_cost_change(axis: plt.Axes, summary: pd.DataFrame) -> None:
     axis.axhline(0.0, color=REFERENCE_COLOR, linestyle="--", linewidth=0.9)
     axis.set_xticks(x)
     axis.set_xticklabels([SCHEME_LABELS[scheme] for scheme in schemes])
-    axis.set_xlabel("方案")
-    axis.set_ylabel("相对附件基准净运行结算变化 / 万元", fontsize=9.1)
-    _panel_caption(axis, "(a) 净运行结算绝对变化（附件基准−方案）", y=-0.25, fontsize=9.4)
+    axis.set_xlabel("Solution")
+    axis.set_ylabel("Net-settlement change versus attachment baseline / 10,000 CNY", fontsize=9.1)
+    _panel_caption(axis, "(a) Absolute net-settlement change (attachment baseline - solution)", y=-0.25, fontsize=9.4)
     _style_axis(axis)
 
 
 def _plot_relative_improvement_metrics(axis: plt.Axes, summary: pd.DataFrame) -> None:
     metric_specs = [
-        ("Carbon", "碳排放"),
-        ("Peak", "峰值净购电"),
-        ("Ramp", "净购电波动"),
+        ("Carbon", "Carbon emissions"),
+        ("Peak", "Peak net grid import"),
+        ("Ramp", "Net-import fluctuation"),
     ]
     schemes = ("NoStorage", "Balanced")
     x = np.arange(len(metric_specs), dtype=float)
@@ -552,7 +553,7 @@ def _plot_relative_improvement_metrics(axis: plt.Axes, summary: pd.DataFrame) ->
                     fontsize=5.9,
                     color=TEXT_COLOR,
                 )
-    axis.axhline(0.0, color=REFERENCE_COLOR, linestyle="--", linewidth=0.9, label="附件基准=0%")
+    axis.axhline(0.0, color=REFERENCE_COLOR, linestyle="--", linewidth=0.9, label="Attachment baseline=0%")
     if all_values:
         low = min(all_values)
         high = max(all_values)
@@ -560,9 +561,9 @@ def _plot_relative_improvement_metrics(axis: plt.Axes, summary: pd.DataFrame) ->
         axis.set_ylim(min(-5.0, low - 0.12 * span), high + 0.16 * span)
     axis.set_xticks(x)
     axis.set_xticklabels([label for _, label in metric_specs], fontsize=6.5)
-    axis.set_xlabel("指标")
-    axis.set_ylabel("相对附件基准改善率 / %", fontsize=10.2)
-    _panel_caption(axis, "(b) 三项运行指标相对附件基准改善率", y=-0.25, fontsize=9.4)
+    axis.set_xlabel("Metric")
+    axis.set_ylabel("Improvement versus attachment baseline / %", fontsize=10.2)
+    _panel_caption(axis, "(b) Three operating-metric improvements versus attachment baseline", y=-0.25, fontsize=9.4)
     _style_axis(axis)
 
 
@@ -593,14 +594,14 @@ def _plot_regional_improvement(axis: plt.Axes, regional: pd.DataFrame, metric: s
     axis.axhline(0.0, color=REFERENCE_COLOR, linestyle="--", linewidth=0.8)
     axis.set_xticks(x)
     axis.set_xticklabels(regions)
-    axis.set_xlabel("区域", fontsize=10.0)
+    axis.set_xlabel("Region", fontsize=10.0)
     axis.set_ylabel(ylabel, fontsize=10.0)
     _panel_caption(axis, caption, y=-0.25, fontsize=9.6)
     _style_axis(axis)
 
 
 def plot_group2_optimization_effect() -> bool:
-    """图2：净运行结算绝对变化、三项相对改善率与区域差异。"""
+    """Figure 2: absolute net-settlement changes, three relative improvements, and regional differences."""
 
     summary = _read_table("q3_objective_summary.csv", ("Solution", "Cost", "Carbon", "Peak", "Ramp"))
     regional = _read_table("q3_regional_metrics.csv", ("Scheme", "Region", "Peak", "Ramp"))
@@ -609,7 +610,7 @@ def plot_group2_optimization_effect() -> bool:
     summary = _numeric(summary, ("Cost", "Carbon", "Peak", "Ramp"))
     regional = _numeric(regional, ("Peak", "Ramp"))
     if not set(SCHEME_ORDER).issubset(set(summary["Solution"].astype(str))):
-        logging.error("q3_objective_summary.csv缺少三类方案")
+        logging.error("q3_objective_summary.csv is missing the three solution types")
         return False
 
     figure = plt.figure(figsize=(6.85, 7.75))
@@ -630,22 +631,22 @@ def plot_group2_optimization_effect() -> bool:
         peak_axis,
         regional,
         "Peak",
-        "峰值净购电降低量 / MW",
-        "(c) 六区域峰值净购电绝对变化",
+        "Peak net-import reduction / MW",
+        "(c) Absolute peak net-import changes in six regions",
     )
     _plot_regional_improvement(
         ramp_axis,
         regional,
         "Ramp",
-        "净购电波动降低量 / MW",
-        "(d) 六区域净购电波动绝对变化",
+        "Net-import fluctuation reduction / MW",
+        "(d) Absolute net-import fluctuation changes in six regions",
     )
     _legend(ramp_axis, loc="upper left", ncol=2, fontsize=6.0, handlelength=1.1, columnspacing=0.7)
     legend = figure.legend(
         handles=[
-            plt.Line2D([], [], color=REFERENCE_COLOR, linestyle="--", linewidth=0.9, label="附件基准=0%"),
-            Patch(facecolor=SCHEME_COLORS["NoStorage"], label="无储能"),
-            Patch(facecolor=SCHEME_COLORS["Balanced"], edgecolor=TEXT_COLOR, linewidth=0.35, label="优化方案"),
+            plt.Line2D([], [], color=REFERENCE_COLOR, linestyle="--", linewidth=0.9, label="Attachment baseline=0%"),
+            Patch(facecolor=SCHEME_COLORS["NoStorage"], label="No storage"),
+            Patch(facecolor=SCHEME_COLORS["Balanced"], edgecolor=TEXT_COLOR, linewidth=0.35, label="Optimized solution"),
         ],
         loc="upper center",
         bbox_to_anchor=(0.5, 0.985),
@@ -669,17 +670,17 @@ def _diagnostic_value(profile: pd.DataFrame, check: str) -> float:
 
 def _plot_baseline_diagnostics(axis: plt.Axes, profile_checks: pd.DataFrame) -> None:
     checks = (
-        ("RenewableBalanceResidual_MW", "能源｜新能源平衡", "#5CB85C"),
-        ("EnergyBalanceResidual_MW", "能源｜负荷平衡", "#EEA236"),
-        ("SOCRecurrenceResidual_MWh", "储能｜SOC递推", "#357EBD"),
-        ("TerminalSOCDeficit_MWh", "储能｜终端SOC缺口", "#D43F3A"),
+        ("RenewableBalanceResidual_MW", "Energy | renewable balance", "#5CB85C"),
+        ("EnergyBalanceResidual_MW", "Energy | load balance", "#EEA236"),
+        ("SOCRecurrenceResidual_MWh", "Storage | SOC recurrence", "#357EBD"),
+        ("TerminalSOCDeficit_MWh", "Storage | terminal SOC gap", "#D43F3A"),
     )
     values = np.asarray([_diagnostic_value(profile_checks, check) for check, _, _ in checks], dtype=float)
     labels = [label for _, label, _ in checks]
     colors = [color for _, _, color in checks]
     finite = values[np.isfinite(values) & (values > 0)]
     if finite.size == 0:
-        axis.text(0.5, 0.5, "缺少基准诊断数据", ha="center", va="center", color=TEXT_COLOR)
+        axis.text(0.5, 0.5, "Baseline diagnostics unavailable", ha="center", va="center", color=TEXT_COLOR)
         axis.set_axis_off()
         return
     y = np.asarray([0.0, 1.0, 3.0, 4.0])
@@ -688,15 +689,15 @@ def _plot_baseline_diagnostics(axis: plt.Axes, profile_checks: pd.DataFrame) -> 
     lower = min(float(finite.min()) / 3.0, 1e-8)
     upper = float(finite.max()) * 3.5
     axis.set_xlim(lower, upper)
-    axis.axvline(1e-5, color=TEXT_COLOR, linestyle="--", linewidth=0.8, label="检验容差")
+    axis.axvline(1e-5, color=TEXT_COLOR, linestyle="--", linewidth=0.8, label="Validation tolerance")
     for position, value in zip(y, values):
         if np.isfinite(value) and value > 0:
             axis.text(value * 1.06, position, f"{value:.4g}", va="center", fontsize=6.1, color=TEXT_COLOR)
     axis.axhline(2.0, color=GRID_COLOR, linewidth=0.8)
     axis.set_yticks(y)
     axis.set_yticklabels(labels)
-    axis.set_xlabel("最大偏差（对数尺度） / MW 或 MWh")
-    # 图题由主布局统一放置，使左右两组caption严格对齐。
+    axis.set_xlabel("Maximum deviation (log scale) / MW or MWh")
+    # Place captions in the main layout so both groups align exactly.
     _legend(axis, loc="upper right", fontsize=5.6, handlelength=1.2)
     _style_axis(axis)
 
@@ -741,7 +742,7 @@ def _plot_multiobjective_hold(
             color=REFERENCE_COLOR,
             linestyle="--",
             linewidth=0.85,
-            label="求解容差",
+            label="Solver tolerance",
         )
     for position, value in zip(x, errors):
         if np.isfinite(value):
@@ -749,13 +750,13 @@ def _plot_multiobjective_hold(
     error_axis.set_yscale("log")
     error_axis.set_xticks(x)
     error_axis.set_xticklabels(["|Δz|", "|ΔΦ|"])
-    error_axis.set_ylabel("最优性保持误差 / 绝对值")
-    error_axis.set_title("前两级目标", fontsize=7.2, pad=3.0, color=TEXT_COLOR)
+    error_axis.set_ylabel("Optimality preservation error / absolute value")
+    error_axis.set_title("First two objectives", fontsize=7.2, pad=3.0, color=TEXT_COLOR)
     _legend(error_axis, loc="upper left", fontsize=5.5, handlelength=1.2)
     _style_axis(error_axis)
 
     throughput_axis.bar([0], [throughput_difference], width=0.48, color="#D43F3A")
-    throughput_axis.axhline(0.0, color=REFERENCE_COLOR, linestyle="--", linewidth=0.85, label="不增加")
+    throughput_axis.axhline(0.0, color=REFERENCE_COLOR, linestyle="--", linewidth=0.85, label="No increase")
     if np.isfinite(throughput_difference):
         offset = max(abs(throughput_difference) * 0.06, 1.0)
         throughput_axis.text(
@@ -773,15 +774,15 @@ def _plot_multiobjective_hold(
         )
     throughput_axis.set_xticks([0])
     throughput_axis.set_xticklabels(["ΔG = G(3)−G(2)"])
-    throughput_axis.set_ylabel("吞吐量变化 / MWh")
-    throughput_axis.set_title("末级吞吐量", fontsize=7.2, pad=3.0, color=TEXT_COLOR)
+    throughput_axis.set_ylabel("Throughput change / MWh")
+    throughput_axis.set_title("Final throughput stage", fontsize=7.2, pad=3.0, color=TEXT_COLOR)
     _legend(throughput_axis, loc="upper left", fontsize=5.5, handlelength=1.2)
     _style_axis(throughput_axis)
-    # 右侧两幅图共用一个组题，统一由外层 caption 轴放置。
+    # The right-hand panels share one group caption placed by the outer caption axis.
 
 
 def plot_group3_validation_credibility() -> bool:
-    """图3：附件基准口径诊断和三级择优保持性。"""
+    """Figure 3: attachment-baseline diagnostics and three-stage selection preservation."""
 
     profile_checks = _read_table(
         "q3_validation_profile_checks.csv",
@@ -808,7 +809,7 @@ def plot_group3_validation_credibility() -> bool:
 
     figure = plt.figure(figsize=(7.35, 4.82))
 
-    # 外层统一保留一行图题，保证(a)(b)严格对齐。
+    # Reserve one outer caption row to align panels (a) and (b) exactly.
     outer = figure.add_gridspec(
         2,
         2,
@@ -818,8 +819,8 @@ def plot_group3_validation_credibility() -> bool:
         wspace=0.24,
     )
 
-    # 左图内部再留一小段底部空白，使坐标轴更短，
-    # 避免x轴标题、图例和子图题堆在一起。
+    # Add a small lower margin inside the left panel to shorten its axes,
+    # preventing x-labels, legends, and captions from crowding.
     left_grid = outer[0, 0].subgridspec(
         2,
         1,
@@ -830,7 +831,7 @@ def plot_group3_validation_credibility() -> bool:
     left_spacer = figure.add_subplot(left_grid[1, 0])
     left_spacer.axis("off")
 
-    # 右侧检验图使用完整高度，并略加宽。
+    # Use full height and slightly more width for the right validation panel.
     right_grid = outer[0, 1].subgridspec(
         1,
         2,
@@ -849,7 +850,7 @@ def plot_group3_validation_credibility() -> bool:
     left_caption_axis.text(
         0.5,
         caption_y,
-        "(a) 附件基准口径诊断",
+        "(a) Attachment-baseline convention diagnostics",
         ha="center",
         va="bottom",
         fontsize=9.0,
@@ -860,7 +861,7 @@ def plot_group3_validation_credibility() -> bool:
     right_caption_axis.text(
         0.5,
         caption_y,
-        "(b) 三级择优保持性检验",
+        "(b) Three-stage selection preservation",
         ha="center",
         va="bottom",
         fontsize=9.0,
@@ -887,13 +888,13 @@ def plot_group3_validation_credibility() -> bool:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="绘制问题3静态结果图")
+    parser = argparse.ArgumentParser(description="Plot static Question 3 results")
     parser.add_argument(
         "--groups",
         nargs="+",
         choices=("group1", "group2", "group3"),
         default=("group1", "group2", "group3"),
-        help="只绘制指定图组；默认绘制全部三组",
+        help="Plot only the specified figure group; default plots all three",
     )
     args = parser.parse_args()
     _configure_style()
@@ -903,7 +904,7 @@ def main() -> int:
         force=True,
     )
     if not TABLES_DIR.is_dir():
-        logging.info("缺少问题3结果目录，跳过绘图：%s", TABLES_DIR)
+        logging.info("Q3 result directory is missing; skipping plotting: %s", TABLES_DIR)
         return 0
     figure_functions = {
         "group1": plot_group1_storage_mechanism,
@@ -913,11 +914,11 @@ def main() -> int:
     selected_functions = [figure_functions[group] for group in args.groups]
     generated = 0
     for function in selected_functions:
-        logging.info("开始绘制：%s", function.__name__)
+        logging.info("Plotting started: %s", function.__name__)
         if function():
             generated += 1
     logging.info(
-        "Q3指定图组绘制完成：生成%d/%d组图，输出目录：%s",
+        "Q3 selected groups completed: %d/%d groups generated in %s",
         generated,
         len(selected_functions),
         FIGURES_DIR,

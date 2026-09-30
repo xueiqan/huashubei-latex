@@ -157,10 +157,10 @@ Once results stabilize:
 
 ## 9. Original organizer files
 
-The files in `materials/rules/` retain their original official filenames and content. Use:
+The files in `materials/rules/` retain their official content under English repository filenames. Original names are recorded in `docs/filename-map.json`. Use:
 
-- The 2026 competition handbook for registration, rules, historical statements, and sample papers.
-- The paper-format/submission guidance for deadlines, sizes, naming, layout, and fallback email rules.
-- The AI-use policy for permitted/prohibited uses, statements, source comments, appendix disclosures, and review rules.
-- The paper template for first-page, AI-statement, reference, and appendix structure; remove instructional text before use.
-- The commitment-form document for required fields and signatures.
+- [The 2026 competition handbook](../materials/rules/huashu-2026-competition-handbook.pdf) for registration, rules, historical statements, and sample papers.
+- [The paper-format/submission guidance](../materials/rules/huashu-2026-paper-format-and-submission.pdf) for deadlines, sizes, naming, layout, and fallback email rules.
+- [The AI-use policy](../materials/rules/huashu-ai-use-policy.pdf) for permitted/prohibited uses, statements, source comments, appendix disclosures, and review rules.
+- [The paper template](../materials/rules/huashu-2026-paper-template.docx) for first-page, AI-statement, reference, and appendix structure; remove instructional text before use.
+- [The commitment-form document](../materials/rules/huashu-2026-signed-commitment-form.docx) for required fields and signatures.

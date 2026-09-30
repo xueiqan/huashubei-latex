@@ -1,12 +1,13 @@
-"""C题第一问及全题共享数据的预处理入口。
+"""Preprocess Question 1 and shared Problem C inputs.
 
-本模块只生成两类结果：
+Generate only two output layers:
 
-* ``data/processed/shared``：Q1、Q2、Q3、Q4共同使用的确定性数据层；
-* ``data/processed/q1``：第一问的需求预测面板和基础调度容量接口。
+* ``data/processed/shared``: deterministic data shared by Q1--Q4.
+* ``data/processed/q1``: the Q1 demand panel and compute-capacity interface.
 
-不在预处理阶段生成任务的目标区域、开工/完工时刻、逐小时运行矩阵或能源
-优化结果。第2406小时只保留为终端结算时点，不生成任何任务执行记录。
+Preprocessing does not assign task regions or start/finish times, create hourly
+operation matrices, or optimize energy. Hour 2406 is a terminal settlement point
+only, with no task execution records.
 """
 
 from __future__ import annotations
@@ -132,22 +133,22 @@ def _normalise_columns(frame: pd.DataFrame) -> pd.DataFrame:
     renamed = frame.rename(columns=lambda value: str(value).strip())
     if renamed.columns.duplicated().any():
         duplicated = renamed.columns[renamed.columns.duplicated()].tolist()
-        raise ValueError(f"工作表字段名重复：{duplicated}")
+        raise ValueError(f"Duplicate worksheet column names: {duplicated}")
     return renamed
 
 
 def _read_table(path: Path, required_columns: Sequence[str]) -> pd.DataFrame:
-    """从带字段说明页的工作簿中定位主数据表。"""
+    """Locate the main data sheet in a workbook that also contains column documentation."""
 
     if not path.is_file():
-        raise FileNotFoundError(f"找不到输入附件：{path}")
+        raise FileNotFoundError(f"Input attachment not found: {path}")
 
     try:
         workbook = pd.ExcelFile(path)
     except ImportError as exc:
         raise RuntimeError(
-            f"无法读取 {path.name}：当前Python环境缺少Excel读取引擎；"
-            "请在既有比赛环境中提供与pandas兼容的xlsx读取引擎。"
+            f"Cannot read {path.name}: the Python environment lacks an Excel reader; "
+            "Provide a pandas-compatible xlsx reader in the existing competition environment."
         ) from exc
 
     required = set(required_columns)
@@ -161,15 +162,15 @@ def _read_table(path: Path, required_columns: Sequence[str]) -> pd.DataFrame:
         workbook.close()
 
     raise ValueError(
-        f"{path.name}中没有找到包含字段{sorted(required)}的主数据表；"
-        f"已检查工作表：{sheets}"
+        f"{path.name} has no main data sheet containing columns {sorted(required)}; "
+        f"Worksheets checked: {sheets}"
     )
 
 
 def _require_columns(frame: pd.DataFrame, columns: Iterable[str], source_name: str) -> None:
     missing = [column for column in columns if column not in frame.columns]
     if missing:
-        raise ValueError(f"{source_name}缺少必要字段：{missing}")
+        raise ValueError(f"{source_name} is missing required columns: {missing}")
 
 
 def _require_no_missing(frame: pd.DataFrame, columns: Iterable[str], source_name: str) -> None:
@@ -178,21 +179,21 @@ def _require_no_missing(frame: pd.DataFrame, columns: Iterable[str], source_name
     missing_counts = missing_counts[missing_counts > 0]
     if not missing_counts.empty:
         details = ", ".join(f"{column}={int(count)}" for column, count in missing_counts.items())
-        raise ValueError(f"{source_name}必要字段存在缺失值：{details}")
+        raise ValueError(f"{source_name} contains missing values in required columns: {details}")
 
 
 def _coerce_numeric(frame: pd.DataFrame, columns: Iterable[str], source_name: str) -> None:
     for column in columns:
         frame[column] = pd.to_numeric(frame[column], errors="coerce")
         if not np.isfinite(frame[column].to_numpy(dtype=float)).all():
-            raise ValueError(f"{source_name}字段{column}包含非有限数值或缺失值")
+            raise ValueError(f"{source_name} column {column} contains nonfinite or missing values")
 
 
 def _coerce_integer_columns(frame: pd.DataFrame, columns: Iterable[str], source_name: str) -> None:
     for column in columns:
         values = frame[column].to_numpy(dtype=float)
         if not np.isclose(values, np.round(values)).all():
-            raise ValueError(f"{source_name}字段{column}包含非整数小时值")
+            raise ValueError(f"{source_name} column {column} contains noninteger hour values")
         frame[column] = np.round(values).astype("int64")
 
 
@@ -205,7 +206,7 @@ def _validate_membership(values: pd.Series, allowed: Sequence[str], field_name: 
     observed = set(values.dropna().astype(str))
     unexpected = sorted(observed.difference(allowed))
     if unexpected:
-        raise ValueError(f"字段{field_name}出现题面未定义取值：{unexpected}")
+        raise ValueError(f"Column {field_name} contains values undefined by the problem: {unexpected}")
 
 
 def _validate_complete_region_hour(frame: pd.DataFrame, source_name: str) -> None:
@@ -215,8 +216,8 @@ def _validate_complete_region_hour(frame: pd.DataFrame, source_name: str) -> Non
     extra = sorted(actual.difference(expected))
     if missing or extra:
         raise ValueError(
-            f"{source_name}必须完整覆盖Hour 0--{TERMINAL_HOUR}×六区域；"
-            f"缺失示例={missing[:5]}，越界示例={extra[:5]}"
+            f"{source_name} must cover hours 0--{TERMINAL_HOUR} in all six regions; "
+            f"missing examples={missing[:5]}; out-of-range examples={extra[:5]}"
         )
 
 
@@ -227,15 +228,15 @@ def _validate_tasks(tasks: pd.DataFrame) -> None:
 
     if tasks["TaskID"].duplicated().any():
         duplicated = tasks.loc[tasks["TaskID"].duplicated(keep=False), "TaskID"].head(10).tolist()
-        raise ValueError(f"{TASK_SOURCE}的TaskID不唯一，示例：{duplicated}")
+        raise ValueError(f"{TASK_SOURCE} contains duplicate TaskID values; examples: {duplicated}")
     if (tasks["TaskID"] == "").any():
-        raise ValueError(f"{TASK_SOURCE}存在空TaskID")
+        raise ValueError(f"{TASK_SOURCE} contains empty TaskID values")
 
     _validate_membership(tasks["TaskType"], TASK_TYPES, "TaskType")
     _validate_membership(tasks["SourceRegion"], REGIONS, "SourceRegion")
     if set(tasks["ExecutionMode"].astype(str)) != {"NonPreemptive"}:
         modes = sorted(set(tasks["ExecutionMode"].astype(str)))
-        raise ValueError(f"{TASK_SOURCE}包含非NonPreemptive执行方式：{modes}")
+        raise ValueError(f"{TASK_SOURCE} contains execution modes other than NonPreemptive: {modes}")
 
     numeric_columns = (
         "ArrivalHour",
@@ -253,20 +254,20 @@ def _validate_tasks(tasks: pd.DataFrame) -> None:
     )
 
     if not tasks["ArrivalHour"].between(WORKLOAD_START_HOUR, WORKLOAD_END_HOUR).all():
-        raise ValueError(f"{TASK_SOURCE}的ArrivalHour必须位于0--2399")
+        raise ValueError(f"{TASK_SOURCE} ArrivalHour must be within 0--2399")
     if not (tasks["GPU_Demand"] > 0).all():
-        raise ValueError(f"{TASK_SOURCE}的GPU_Demand必须为正")
+        raise ValueError(f"{TASK_SOURCE} GPU_Demand must be positive")
     if not (tasks["EstimatedDuration_min"] > 0).all():
-        raise ValueError(f"{TASK_SOURCE}的EstimatedDuration_min必须为正")
+        raise ValueError(f"{TASK_SOURCE} EstimatedDuration_min must be positive")
     if not (tasks["MaxLatency_ms"] >= 0).all():
-        raise ValueError(f"{TASK_SOURCE}的MaxLatency_ms不能为负")
+        raise ValueError(f"{TASK_SOURCE} MaxLatency_ms must be nonnegative")
     if not (tasks["EarliestStartHour"] >= tasks["ArrivalHour"]).all():
-        raise ValueError(f"{TASK_SOURCE}存在EarliestStartHour早于ArrivalHour的任务")
+        raise ValueError(f"{TASK_SOURCE} contains tasks with EarliestStartHour before ArrivalHour")
     if not (tasks["LatestFinishHour"] >= tasks["EarliestStartHour"]).all():
-        raise ValueError(f"{TASK_SOURCE}存在LatestFinishHour早于EarliestStartHour的任务")
-    # 2406是允许出现在原始最晚完成边界中的终端时点，但不是可占用的任务小时。
+        raise ValueError(f"{TASK_SOURCE} contains tasks with LatestFinishHour before EarliestStartHour")
+    # Hour 2406 is permitted as a raw latest-finish boundary but cannot be occupied by tasks.
     if not tasks["LatestFinishHour"].between(WORKLOAD_START_HOUR, TERMINAL_HOUR).all():
-        raise ValueError(f"{TASK_SOURCE}的LatestFinishHour超出0--2406边界")
+        raise ValueError(f"{TASK_SOURCE} LatestFinishHour exceeds the 0--2406 boundary")
 
 
 def _validate_gpu_information(gpu_info: pd.DataFrame) -> pd.DataFrame:
@@ -275,9 +276,9 @@ def _validate_gpu_information(gpu_info: pd.DataFrame) -> pd.DataFrame:
     _normalise_text(gpu_info, ("Region",))
     _validate_membership(gpu_info["Region"], REGIONS, "Region")
     if gpu_info["Region"].duplicated().any():
-        raise ValueError(f"{GPU_SOURCE}的Region必须唯一")
+        raise ValueError(f"{GPU_SOURCE} Region values must be unique")
     if set(gpu_info["Region"]) != set(REGIONS):
-        raise ValueError(f"{GPU_SOURCE}必须完整覆盖六个区域：{REGIONS}")
+        raise ValueError(f"{GPU_SOURCE} must cover all six regions: {REGIONS}")
 
     _coerce_numeric(
         gpu_info,
@@ -285,17 +286,17 @@ def _validate_gpu_information(gpu_info: pd.DataFrame) -> pd.DataFrame:
         GPU_SOURCE,
     )
     if not (gpu_info["Total_GPU"] >= 0).all():
-        raise ValueError(f"{GPU_SOURCE}的Total_GPU不能为负")
+        raise ValueError(f"{GPU_SOURCE} Total_GPU must be nonnegative")
     if not (gpu_info["Available_GPU"] >= 0).all():
-        raise ValueError(f"{GPU_SOURCE}的Available_GPU不能为负")
+        raise ValueError(f"{GPU_SOURCE} Available_GPU must be nonnegative")
     if not (gpu_info["Available_GPU"] <= gpu_info["Total_GPU"]).all():
-        raise ValueError(f"{GPU_SOURCE}存在Available_GPU大于Total_GPU的区域")
+        raise ValueError(f"{GPU_SOURCE} contains regions where Available_GPU exceeds Total_GPU")
     if not (gpu_info["Max_IT_Power_MW"] > 0).all():
-        raise ValueError(f"{GPU_SOURCE}的Max_IT_Power_MW必须为正")
+        raise ValueError(f"{GPU_SOURCE} Max_IT_Power_MW must be positive")
     if not (gpu_info["PUE"] > 0).all():
-        raise ValueError(f"{GPU_SOURCE}的PUE必须为正")
+        raise ValueError(f"{GPU_SOURCE} PUE must be positive")
     if not (gpu_info["Max_Facility_Power_MW"] > 0).all():
-        raise ValueError(f"{GPU_SOURCE}的Max_Facility_Power_MW必须为正")
+        raise ValueError(f"{GPU_SOURCE} Max_Facility_Power_MW must be positive")
     return gpu_info.loc[:, list(GPU_COLUMNS)].copy()
 
 
@@ -305,12 +306,12 @@ def _validate_power_mapping(power_mapping: pd.DataFrame) -> pd.DataFrame:
     _normalise_text(power_mapping, ("TaskType",))
     _validate_membership(power_mapping["TaskType"], TASK_TYPES, "TaskType")
     if power_mapping["TaskType"].duplicated().any():
-        raise ValueError(f"{POWER_MAPPING_SOURCE}的TaskType必须唯一")
+        raise ValueError(f"{POWER_MAPPING_SOURCE} TaskType values must be unique")
     if set(power_mapping["TaskType"]) != set(TASK_TYPES):
-        raise ValueError(f"{POWER_MAPPING_SOURCE}必须完整覆盖三类任务：{TASK_TYPES}")
+        raise ValueError(f"{POWER_MAPPING_SOURCE} must cover all three task types: {TASK_TYPES}")
     _coerce_numeric(power_mapping, ("GPU_Power_MW_per_EquivalentGPU",), POWER_MAPPING_SOURCE)
     if not (power_mapping["GPU_Power_MW_per_EquivalentGPU"] > 0).all():
-        raise ValueError(f"{POWER_MAPPING_SOURCE}的单位GPU功率必须为正")
+        raise ValueError(f"{POWER_MAPPING_SOURCE} power per GPU must be positive")
     return power_mapping.loc[:, list(POWER_MAPPING_COLUMNS)].copy()
 
 
@@ -325,15 +326,15 @@ def _validate_latency(network_latency: pd.DataFrame) -> pd.DataFrame:
     _validate_membership(network_latency["ToRegion"], REGIONS, "ToRegion")
     _coerce_numeric(network_latency, ("NetworkLatency_ms",), LATENCY_SOURCE)
     if not (network_latency["NetworkLatency_ms"] >= 0).all():
-        raise ValueError(f"{LATENCY_SOURCE}的NetworkLatency_ms不能为负")
+        raise ValueError(f"{LATENCY_SOURCE} NetworkLatency_ms must be nonnegative")
     if network_latency.duplicated(["FromRegion", "ToRegion"]).any():
-        raise ValueError(f"{LATENCY_SOURCE}存在重复的区域有序对")
+        raise ValueError(f"{LATENCY_SOURCE} contains duplicate ordered region pairs")
 
     expected_pairs = {(source, target) for source in REGIONS for target in REGIONS}
     actual_pairs = set(zip(network_latency["FromRegion"], network_latency["ToRegion"]))
     missing_pairs = sorted(expected_pairs.difference(actual_pairs))
     if missing_pairs:
-        raise ValueError(f"{LATENCY_SOURCE}缺少区域有序对，示例：{missing_pairs[:10]}")
+        raise ValueError(f"{LATENCY_SOURCE} is missing ordered region pairs; examples: {missing_pairs[:10]}")
 
     output_columns = list(LATENCY_COLUMNS)
     if "LatencyClass" in network_latency.columns:
@@ -360,13 +361,13 @@ def _validate_region_time(region_time: pd.DataFrame) -> pd.DataFrame:
     _coerce_numeric(region_time, numeric_columns, REGION_TIME_SOURCE)
     _coerce_integer_columns(region_time, ("Hour",), REGION_TIME_SOURCE)
     if not region_time["Hour"].between(WORKLOAD_START_HOUR, TERMINAL_HOUR).all():
-        raise ValueError(f"{REGION_TIME_SOURCE}的Hour超出0--2406边界")
+        raise ValueError(f"{REGION_TIME_SOURCE} Hour exceeds the 0--2406 boundary")
     if not (region_time["AvailableRenewable_MW"] >= 0).all():
-        raise ValueError(f"{REGION_TIME_SOURCE}的AvailableRenewable_MW不能为负")
+        raise ValueError(f"{REGION_TIME_SOURCE} AvailableRenewable_MW must be nonnegative")
     if not (region_time["NonAI_IT_Load_MW"] >= 0).all():
-        raise ValueError(f"{REGION_TIME_SOURCE}的NonAI_IT_Load_MW不能为负")
+        raise ValueError(f"{REGION_TIME_SOURCE} NonAI_IT_Load_MW must be nonnegative")
     if region_time.duplicated(["Hour", "Region"]).any():
-        raise ValueError(f"{REGION_TIME_SOURCE}存在重复的Hour×Region记录")
+        raise ValueError(f"{REGION_TIME_SOURCE} contains duplicate Hour x Region records")
     _validate_complete_region_hour(region_time, REGION_TIME_SOURCE)
     return region_time
 
@@ -377,24 +378,24 @@ def _validate_storage_params(storage_params: pd.DataFrame) -> pd.DataFrame:
     _normalise_text(storage_params, ("Region",))
     _validate_membership(storage_params["Region"], REGIONS, "Region")
     if storage_params["Region"].duplicated().any():
-        raise ValueError(f"{STORAGE_SOURCE}的Region必须唯一")
+        raise ValueError(f"{STORAGE_SOURCE} Region values must be unique")
     if set(storage_params["Region"]) != set(REGIONS):
-        raise ValueError(f"{STORAGE_SOURCE}必须完整覆盖六个区域：{REGIONS}")
+        raise ValueError(f"{STORAGE_SOURCE} must cover all six regions: {REGIONS}")
 
     numeric_columns = [column for column in STORAGE_COLUMNS if column != "Region"]
     _coerce_numeric(storage_params, numeric_columns, STORAGE_SOURCE)
     if not (storage_params["StorageCapacity_MWh"] >= 0).all():
-        raise ValueError(f"{STORAGE_SOURCE}的StorageCapacity_MWh不能为负")
+        raise ValueError(f"{STORAGE_SOURCE} StorageCapacity_MWh must be nonnegative")
     if not (
         (storage_params["MinSOC_MWh"] >= 0)
         & (storage_params["MinSOC_MWh"] <= storage_params["StorageCapacity_MWh"])
     ).all():
-        raise ValueError(f"{STORAGE_SOURCE}存在越界的MinSOC_MWh")
+        raise ValueError(f"{STORAGE_SOURCE} contains out-of-bounds MinSOC_MWh")
     if not (
         (storage_params["InitialSOC_MWh"] >= 0)
         & (storage_params["InitialSOC_MWh"] <= storage_params["StorageCapacity_MWh"])
     ).all():
-        raise ValueError(f"{STORAGE_SOURCE}存在越界的InitialSOC_MWh")
+        raise ValueError(f"{STORAGE_SOURCE} contains out-of-bounds InitialSOC_MWh")
     for column in (
         "MaxChargePower_MW",
         "MaxDischargePower_MW",
@@ -403,10 +404,10 @@ def _validate_storage_params(storage_params: pd.DataFrame) -> pd.DataFrame:
         "MaxGridExport_MW",
     ):
         if not (storage_params[column] >= 0).all():
-            raise ValueError(f"{STORAGE_SOURCE}的{column}不能为负")
+            raise ValueError(f"{STORAGE_SOURCE} {column} must be nonnegative")
     for column in ("ChargeEfficiency", "DischargeEfficiency"):
         if not storage_params[column].between(0, 1, inclusive="right").all():
-            raise ValueError(f"{STORAGE_SOURCE}的{column}必须位于(0,1]")
+            raise ValueError(f"{STORAGE_SOURCE} {column} must be within (0,1]")
     return storage_params.loc[:, list(STORAGE_COLUMNS)].copy()
 
 
@@ -458,7 +459,7 @@ def _build_task_candidate_regions(
     no_candidate = sorted(task_ids.difference(candidate_task_ids))
     if no_candidate:
         raise ValueError(
-            "存在没有任何满足任务级时延约束候选区域的任务："
+            "Tasks have no candidate region satisfying task-level latency constraints: "
             f"{no_candidate[:10]}"
         )
 
@@ -527,7 +528,7 @@ def _build_hourly_demand_panel(tasks_clean: pd.DataFrame) -> pd.DataFrame:
     )
     expected_rows = 2400 * len(REGIONS) * len(TASK_TYPES)
     if len(panel) != expected_rows:
-        raise ValueError(f"hourly_demand_panel行数错误：期望{expected_rows}，实际{len(panel)}")
+        raise ValueError(f"Invalid hourly_demand_panel row count: expected {expected_rows}; actual {len(panel)}")
     return panel.loc[
         :,
         [
@@ -609,14 +610,14 @@ def _write_csv(relative_path: str, frame: pd.DataFrame) -> None:
     root_name, filename = relative_path.split("/", 1)
     output_root = {"shared": SHARED_DIR, "q1": Q1_DIR}.get(root_name)
     if output_root is None:
-        raise ValueError(f"不允许写入未声明的输出层：{relative_path}")
+        raise ValueError(f"Writing to an undeclared output layer is forbidden: {relative_path}")
     output_path = output_root / filename
     output_path.parent.mkdir(parents=True, exist_ok=True)
     frame.to_csv(output_path, index=False, encoding="utf-8-sig")
 
 
 def build_processed_tables() -> dict[str, pd.DataFrame]:
-    """读取六份原始附件，构造共享层和Q1专属接口。"""
+    """Read six raw attachments and construct shared data and Q1-specific interfaces."""
 
     task_data = _read_table(RAW_DIR / TASK_SOURCE, TASK_COLUMNS)
     gpu_info = _validate_gpu_information(_read_table(RAW_DIR / GPU_SOURCE, GPU_COLUMNS))

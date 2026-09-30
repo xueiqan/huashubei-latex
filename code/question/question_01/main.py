@@ -1,8 +1,9 @@
-"""问题1独立流程入口。
+"""Independent Question 1 workflow.
 
-执行顺序固定为：本题预处理 → 模型求解 → 模型检验 → 结果绘图。
-每个阶段都使用独立脚本，并在阶段结束后检查关键输出是否落盘；任一阶段失败
-或关键结果缺失，入口返回非零状态，避免把不完整结果交给建模手或论文写作。
+Run preprocessing, modeling, validation, and plotting in that order. Each stage
+uses its own script and checks its required artifacts. A failed stage or missing
+artifact produces a nonzero exit status to prevent incomplete results from
+being used for modeling or paper preparation.
 """
 
 from __future__ import annotations
@@ -52,27 +53,27 @@ STAGE_ARTIFACTS: dict[str, tuple[Path, ...]] = {
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="华数杯C题问题1：预处理、建模、检验和绘图完整入口"
+        description="Huashu Cup Problem C, Question 1: preprocessing, modeling, validation, and plotting"
     )
     parser.add_argument(
         "--skip-preprocess",
         action="store_true",
-        help="跳过本题预处理；仅当data/processed中的关键输入已存在时使用",
+        help="Skip preprocessing only when the required data/processed inputs already exist",
     )
     parser.add_argument(
         "--skip-model",
         action="store_true",
-        help="跳过模型求解；仅当outputs/tables中的模型结果已存在时使用",
+        help="Skip solving only when the model results in outputs/tables already exist",
     )
     parser.add_argument(
         "--skip-validation",
         action="store_true",
-        help="跳过模型检验；不建议用于论文最终取数",
+        help="Skip validation; discouraged when collecting final paper results",
     )
     parser.add_argument(
         "--skip-plot",
         action="store_true",
-        help="跳过结果绘图；不影响模型表和检验表生成",
+        help="Skip plotting; model and validation tables are still generated",
     )
     return parser.parse_args()
 
@@ -98,22 +99,22 @@ def _check_artifacts(stage: str) -> bool:
     missing = _missing_artifacts(stage)
     if missing:
         logging.error(
-            "阶段%s关键输出缺失：%s",
+            "Stage %s is missing required artifacts: %s",
             stage,
             "; ".join(str(path) for path in missing),
         )
         return False
-    logging.info("阶段%s关键输出已确认：%d项。", stage, len(STAGE_ARTIFACTS[stage]))
+    logging.info("Stage %s artifacts confirmed: %d items.", stage, len(STAGE_ARTIFACTS[stage]))
     return True
 
 
 def run_stage(stage: str) -> bool:
     script = QUESTION_DIR / f"{stage}.py"
     if not script.is_file():
-        logging.error("阶段脚本不存在：%s", script)
+        logging.error("Stage script does not exist: %s", script)
         return False
 
-    logging.info("========== Q1阶段开始：%s ==========", stage)
+    logging.info("========== Q1 stage started: %s ==========", stage)
     try:
         process = subprocess.Popen(
             [sys.executable, str(script)],
@@ -124,7 +125,7 @@ def run_stage(stage: str) -> bool:
             bufsize=1,
         )
         if process.stdout is None:
-            logging.error("阶段%s没有可读取的标准输出。", stage)
+            logging.error("Stage %s has no readable standard output.", stage)
             process.kill()
             process.wait()
             return False
@@ -134,24 +135,24 @@ def run_stage(stage: str) -> bool:
                 logging.info("[%s] %s", stage, message)
         return_code = process.wait()
     except OSError:
-        logging.exception("阶段%s无法启动。", stage)
+        logging.exception("Stage %s could not start.", stage)
         return False
 
     if return_code != 0:
-        logging.error("阶段%s失败，退出码=%d。", stage, return_code)
+        logging.error("Stage %s failed with exit code %d.", stage, return_code)
         return False
     if not _check_artifacts(stage):
-        logging.error("阶段%s虽正常退出，但关键结果不完整。", stage)
+        logging.error("Stage %s exited normally but required artifacts are incomplete.", stage)
         return False
-    logging.info("========== Q1阶段完成：%s ==========", stage)
+    logging.info("========== Q1 stage completed: %s ==========", stage)
     return True
 
 
 def _skip_requested_stage(stage: str, skip_flags: dict[str, bool]) -> bool:
-    logging.info("跳过阶段%s。", stage)
+    logging.info("Skipping stage %s.", stage)
     later_requested = any(not skip_flags[later] for later in STAGES[STAGES.index(stage) + 1 :])
     if later_requested and not _check_artifacts(stage):
-        logging.error("后续阶段需要阶段%s的结果，但现有结果不完整。", stage)
+        logging.error("Later stages require stage %s, but its existing results are incomplete.", stage)
         return False
     return True
 
@@ -168,7 +169,7 @@ def main() -> int:
         "validation": args.skip_validation,
         "plot": args.skip_plot,
     }
-    logging.info("Q1流程入口启动：目录=%s。", QUESTION_DIR)
+    logging.info("Q1 workflow started: directory=%s.", QUESTION_DIR)
 
     for stage in STAGES:
         if skip_flags[stage]:
@@ -176,12 +177,12 @@ def main() -> int:
                 return 1
             continue
         if not run_stage(stage):
-            logging.error("Q1流程在阶段%s停止。", stage)
+            logging.error("Q1 workflow stopped at stage %s.", stage)
             return 1
 
-    logging.info("Q1流程完成：预处理、模型、检验、绘图阶段均已按请求处理。")
-    logging.info("结果表目录：%s", TABLES_DIR)
-    logging.info("结果图目录：%s", FIGURES_DIR)
+    logging.info("Q1 workflow completed: all requested preprocessing, modeling, validation, and plotting stages were handled.")
+    logging.info("Table directory: %s", TABLES_DIR)
+    logging.info("Figure directory: %s", FIGURES_DIR)
     return 0
 
 

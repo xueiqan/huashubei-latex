@@ -1,11 +1,13 @@
-"""准备和归档问题2的隔离验证运行。
+"""Prepare and collect isolated Question 2 validation runs.
 
-本文件不启动长时间求解。它只完成两件事：
+This file does not launch long solves. It performs only two operations:
 
-1. prepare：建立K=24或K=72的最小独立运行目录，并打印用户应执行的model.py命令；
-2. collect：检查独立运行已完成后，把tables和logs复制到正式验证专用目录。
+1. prepare: create a minimal independent K=24 or K=72 run directory and print
+   the model.py command to execute.
+2. collect: verify completion, then copy tables and logs into the dedicated
+   official validation directory.
 
-正式K=48的tables、logs和checkpoints不在本文件的写入范围内。
+Official K=48 tables, logs, and checkpoints are outside this write scope.
 """
 
 from __future__ import annotations
@@ -55,11 +57,11 @@ CALIBRATION_FILES = (
 
 def _require_file(path: Path, label: str) -> None:
     if not path.is_file():
-        raise FileNotFoundError(f"{label}不存在：{path}")
+        raise FileNotFoundError(f"{label} does not exist: {path}")
 
 
 def _copy_file(source: Path, target: Path, *, overwrite: bool) -> None:
-    _require_file(source, "源文件")
+    _require_file(source, "Source file")
     target.parent.mkdir(parents=True, exist_ok=True)
     if target.exists() and not overwrite:
         return
@@ -76,7 +78,7 @@ def _sha256(path: Path) -> str:
 
 def _experiment_root(lookahead: int) -> Path:
     if lookahead not in (24, 72):
-        raise ValueError("lookahead只能取24或72")
+        raise ValueError("lookahead must be 24 or 72")
     return EXPERIMENT_PROJECTS_DIR / f"K{lookahead}"
 
 
@@ -98,23 +100,23 @@ def _read_state(experiment_root: Path) -> dict[str, object] | None:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        raise RuntimeError(f"无法读取隔离运行状态：{path}；{exc}") from exc
+        raise RuntimeError(f"Cannot read isolated run state: {path}；{exc}") from exc
     if not isinstance(data, dict):
-        raise RuntimeError(f"隔离运行状态不是JSON对象：{path}")
+        raise RuntimeError(f"Isolated run state is not a JSON object: {path}")
     return data
 
 
 def prepare(lookahead: int) -> Path:
-    """建立一个不含正式结果的独立Q2运行目录。"""
+    """Create an independent Q2 run directory containing no official results."""
     experiment_root = _experiment_root(lookahead)
     if experiment_root.resolve() == PROJECT_DIR.resolve():
-        raise RuntimeError("拒绝把正式项目目录作为隔离实验目录")
+        raise RuntimeError("Refusing to use the official project directory for an isolated experiment")
 
     existing_state = _read_state(experiment_root)
     if existing_state and str(existing_state.get("status", "")).upper() == "RUNNING":
         raise RuntimeError(
-            f"{experiment_root}当前状态为RUNNING，拒绝覆盖运行中的实验；"
-            "请先让它完成或停止后再执行prepare。"
+            f"{experiment_root} is RUNNING; refusing to overwrite an active experiment; "
+            "wait for completion or stop it before prepare."
         )
 
     q2_question_dir = experiment_root / "question" / "question_02"
@@ -167,14 +169,14 @@ def prepare(lookahead: int) -> Path:
 def print_run_command(lookahead: int, experiment_root: Path) -> None:
     python_exe = PROJECT_DIR / ".venv" / "Scripts" / "python.exe"
     model_path = experiment_root / "question" / "question_02" / "model.py"
-    print("请在新的PowerShell窗口执行以下命令：")
+    print("Run these commands in a new PowerShell window:")
     print(
         f'& "{python_exe}" "{model_path}" '
         f"--decision-window 24 --lookahead {lookahead} --no-resume "
         "--progress-interval 30 --solver-time-limit 180 "
         "--max-solver-time-limit 900"
     )
-    print("运行日志：")
+    print("Run log:")
     print(
         experiment_root
         / "question"
@@ -183,31 +185,31 @@ def print_run_command(lookahead: int, experiment_root: Path) -> None:
         / "logs"
         / "question_02_model_refactored.log"
     )
-    print("完成后执行collect，把结果归档到正式验证目录。")
+    print("After completion, run collect to archive results into the official validation directory.")
 
 
 def collect(lookahead: int) -> Path:
-    """只复制已完成隔离实验的tables/logs，不复制检查点。"""
+    """Copy tables/logs from completed isolated experiments only, excluding checkpoints."""
     experiment_root = _experiment_root(lookahead)
     state = _read_state(experiment_root)
     if state is None:
-        raise RuntimeError(f"尚未找到K={lookahead}的运行状态：{_state_path(experiment_root)}")
+        raise RuntimeError(f"No run state found for K={lookahead}: {_state_path(experiment_root)}")
     if str(state.get("status", "")).upper() != "COMPLETED":
         raise RuntimeError(
-            f"K={lookahead}尚未完成：status={state.get('status')}；"
-            "不要把未完成结果纳入稳定性检验。"
+            f"K={lookahead} has not completed: status={state.get('status')}；"
+            "Do not include incomplete results in stability validation."
         )
     if int(state.get("decision_window", -1)) != 24:
-        raise RuntimeError("隔离实验的decision_window不是24，拒绝归档")
+        raise RuntimeError("Isolated experiment decision_window is not 24; collection refused")
     if int(state.get("lookahead", -1)) != lookahead:
-        raise RuntimeError("隔离实验的lookahead与归档目标不一致，拒绝归档")
+        raise RuntimeError("Isolated experiment lookahead differs from the collection target; collection refused")
 
     source_outputs = experiment_root / "question" / "question_02" / "outputs"
     source_tables = source_outputs / "tables"
     source_logs = source_outputs / "logs"
     required = ("q2_assignments.csv", "q2_objective_summary.csv")
     for name in required:
-        _require_file(source_tables / name, f"K={lookahead}结果")
+        _require_file(source_tables / name, f"K={lookahead}Result ")
 
     target_root = FORMAL_OUTPUT_DIR / "validation_runs" / f"K{lookahead}"
     target_tables = target_root / "tables"
@@ -242,27 +244,27 @@ def collect(lookahead: int) -> Path:
 def status(lookahead: int) -> None:
     experiment_root = _experiment_root(lookahead)
     state = _read_state(experiment_root)
-    print(f"实验目录：{experiment_root}")
+    print(f"Experiment directory: {experiment_root}")
     if state is None:
-        print("状态：未启动或尚未生成检查点")
+        print("Status: not started or no checkpoint generated yet")
         return
     for key in ("status", "next_window_id", "next_tau", "decision_window", "lookahead"):
         print(f"{key}: {state.get(key)}")
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="准备/归档Q2 K=24、K=72隔离验证运行")
+    parser = argparse.ArgumentParser(description="Prepare/collect isolated Q2 K=24 and K=72 validation runs")
     parser.add_argument("action", choices=("prepare", "collect", "status"))
     parser.add_argument("--lookahead", type=int, required=True, choices=(24, 72))
     args = parser.parse_args()
 
     if args.action == "prepare":
         root = prepare(args.lookahead)
-        print(f"隔离目录已准备：{root}")
+        print(f"Isolated directory prepared: {root}")
         print_run_command(args.lookahead, root)
     elif args.action == "collect":
         root = collect(args.lookahead)
-        print(f"归档完成：{root}")
+        print(f"Collection completed: {root}")
     else:
         status(args.lookahead)
     return 0

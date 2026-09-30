@@ -1,4 +1,4 @@
-"""全题入口：按题目运行各自的完整流程。"""
+"""Project entry point: run the complete workflow for each selected question."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ QUESTION_NAMES = ("question_01", "question_02", "question_03", "question_04")
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="华数杯全题运行入口")
+    parser = argparse.ArgumentParser(description="Huashu Cup workflow runner")
     parser.add_argument("--question", choices=("all", "1", "2", "3", "4"), default="all")
     parser.add_argument("--skip-shared-preprocess", action="store_true")
     return parser.parse_args()
@@ -32,7 +32,7 @@ def run_script(script_path: Path) -> bool:
     if result.stderr:
         logging.warning("%s", result.stderr.strip())
     if result.returncode:
-        logging.error("失败：%s", script_path)
+        logging.error("Failed: %s", script_path)
         return False
     return True
 
@@ -54,9 +54,9 @@ def main() -> int:
 
     selected = QUESTION_NAMES if args.question == "all" else (f"question_0{args.question}",)
     failed = [name for name in selected if not run_script(ROOT_DIR / "question" / name / "main.py")]
-    logging.info("完成问题：%s", ", ".join(name for name in selected if name not in failed))
+    logging.info("Completed questions: %s", ", ".join(name for name in selected if name not in failed))
     if failed:
-        logging.error("失败问题：%s", ", ".join(failed))
+        logging.error("Failed questions: %s", ", ".join(failed))
         return 1
     return 0
 

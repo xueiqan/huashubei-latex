@@ -1,12 +1,15 @@
-"""问题2精确同窗对照：在同一历史状态下比较精确MILP与启发式+LNS。
+"""Question 2 exact same-window comparison: exact MILP versus heuristic plus LNS.
 
-本脚本只用于验证，不调用model.py的main，不写正式Q2 tables/checkpoints。
-每个窗口先在当前“精确历史”上构造启发式候选，再求同一历史状态下的精确
-min-max窗口模型；随后只提交精确解进入下一窗口。因此窗口0--9的两种结果
-具有相同的H=24、K=48、任务池、历史负荷和全局定标参数。
+This validation-only script never calls model.py main or writes official Q2
+tables/checkpoints. Each window first builds a heuristic candidate against the
+current exact history, then solves the exact min-max model against the same
+history. Only the exact solution is committed to the next window. Both methods
+therefore share H=24, K=48, task pools, historical loads, and global calibration
+parameters in windows 0--9.
 
-若精确窗口未返回status=0，本脚本拒绝把时间截断的解写成“精确对照”，并保留
-已经完成的窗口，用户可提高限时后续算。
+If an exact window does not return status=0, do not label a time-limited solution
+as exact comparison evidence. Preserve completed windows for resumption with
+a larger solver time limit.
 """
 
 from __future__ import annotations
@@ -40,7 +43,7 @@ def _configure_logging(output_root: Path, level_name: str) -> None:
     output_root.mkdir(parents=True, exist_ok=True)
     level = getattr(logging, level_name.upper(), None)
     if not isinstance(level, int):
-        raise ValueError(f"不支持的日志级别：{level_name}")
+        raise ValueError(f"Unsupported log level: {level_name}")
     formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
     logging.basicConfig(
         level=level,
@@ -63,22 +66,22 @@ def _read_calibration(
 ) -> q2.GlobalCalibration:
     path = FORMAL_CHECKPOINT_DIR / "q2_refactored_global_calibration_v6.json"
     if not path.is_file():
-        raise FileNotFoundError(f"缺少正式全局定标缓存：{path}")
+        raise FileNotFoundError(f"Official global calibration cache is missing: {path}")
     data = json.loads(path.read_text(encoding="utf-8"))
     if data.get("schema_version") != q2.CALIBRATION_SCHEMA_VERSION:
         raise RuntimeError(
-            f"定标缓存版本不匹配：实际={data.get('schema_version')}，"
-            f"期望={q2.CALIBRATION_SCHEMA_VERSION}"
+            f"Calibration cache version mismatch: actual={data.get('schema_version')}，"
+            f"expected={q2.CALIBRATION_SCHEMA_VERSION}"
         )
     signature = q2._task_signature(bundle)
     if data.get("task_signature") != signature:
-        raise RuntimeError("定标缓存与当前Q2输入任务签名不一致，拒绝对照")
+        raise RuntimeError("Calibration cache does not match the current Q2 task-input signature; comparison refused")
     for metric in q2.OBJECTIVE_NAMES:
         cached = float(data["baseline_value"][metric])
         current = float(baseline_metrics[metric])
         if not math.isclose(cached, current, rel_tol=1e-10, abs_tol=1e-8):
             raise RuntimeError(
-                f"定标缓存基准值不一致：{metric}；缓存={cached}，当前={current}"
+                f"Calibration cache baseline mismatch: {metric}; cached={cached}; current={current}"
             )
     return q2.GlobalCalibration(
         ideal_lb={key: float(value) for key, value in data["ideal_lb"].items()},
@@ -98,11 +101,11 @@ def _load_baseline(
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, float]]:
     path = FORMAL_TABLES_DIR / "q2_baseline_assignments.csv"
     if not path.is_file():
-        raise FileNotFoundError(f"缺少正式Q2纯算力基准任务安排：{path}")
+        raise FileNotFoundError(f"Official Q2 compute-only baseline assignments are missing: {path}")
     baseline = pd.read_csv(path, encoding="utf-8-sig")
-    q2._validate_assignments(bundle, baseline, "正式纯算力基准")
+    q2._validate_assignments(bundle, baseline, "Official compute-only baseline")
     profile, metrics = q2._schedule_profile(bundle, baseline)
-    q2._validate_profile(profile, "正式纯算力基准")
+    q2._validate_profile(profile, "Official compute-only baseline")
     return baseline, profile, metrics
 
 
@@ -214,7 +217,7 @@ def _heuristic_record(
     )
     if abs(z_before - z_greedy) > 1e-6 * max(1.0, abs(z_before)):
         logging.info(
-            "窗口%d启发式构造z略有差异：增量=%.9g，独立复算=%.9g；以后者为准。",
+            "Window %d heuristic z differs slightly: incremental=%.9g, independent=%.9g; use independent recomputation.",
             tau // DECISION_WINDOW,
             z_greedy,
             z_before,
@@ -425,13 +428,13 @@ def _load_progress(
         return 0, [], [], pd.DataFrame()
     if not resume:
         raise RuntimeError(
-            f"{output_root}已有对照进度；为防止覆盖，请换一个--output-root或使用默认续算。"
+            f"{output_root} already contains comparison progress; use another --output-root or resume to avoid overwriting."
         )
     state = json.loads(state_path.read_text(encoding="utf-8"))
     if int(state.get("decision_window", -1)) != DECISION_WINDOW or int(
         state.get("lookahead", -1)
     ) != LOOKAHEAD:
-        raise RuntimeError("已有对照进度的H/K与当前脚本不一致")
+        raise RuntimeError("Existing comparison H/K does not match this script")
     exact_path = output_root / "exact_windows.csv"
     heuristic_path = output_root / "heuristic_windows.csv"
     assignments_path = output_root / "exact_assignments.csv"
@@ -452,7 +455,7 @@ def _load_progress(
     )
     next_window_id = int(state.get("next_window_id", len(exact)))
     if next_window_id != len(exact) or len(exact) != len(heuristic):
-        raise RuntimeError("对照进度文件数量不一致，拒绝继续以免错配窗口")
+        raise RuntimeError("Comparison progress file counts disagree; continuation refused to avoid mismatched windows")
     return next_window_id, exact, heuristic, assignments
 
 
@@ -464,12 +467,12 @@ def run(args: argparse.Namespace) -> int:
         args.resume,
     )
     if next_window_id >= args.windows:
-        logging.info("精确同窗对照已完成：窗口0--%d。", next_window_id - 1)
+        logging.info("Exact same-window comparison already completed: windows 0--%d.", next_window_id - 1)
         return 0
 
     logging.info(
-        "精确同窗对照启动：目标窗口0--%d，H=%d，K=%d，MIP gap=%.4g，"
-        "单窗口限时=%.0f→%.0fs。",
+        "Exact same-window comparison started: target windows 0--%d, H=%d, K=%d, MIP gap=%.4g, "
+        "per-window time limit=%.0f->%.0fs.",
         args.windows - 1,
         DECISION_WINDOW,
         LOOKAHEAD,
@@ -488,7 +491,7 @@ def run(args: argparse.Namespace) -> int:
     if not exact_assignments.empty:
         q2._remove_committed_from_pools(pools, exact_assignments)
     logging.info(
-        "输入和正式基准已锁定：任务=%d、同质类=%d、已完成对照窗口=%d、已固定任务=%d。",
+        "Inputs and official baseline locked: tasks=%d, homogeneous classes=%d, completed comparison windows=%d, fixed tasks=%d.",
         len(bundle.tasks),
         len(classes),
         next_window_id,
@@ -507,9 +510,9 @@ def run(args: argparse.Namespace) -> int:
             plan_end,
         )
         if not active_task_ids:
-            raise RuntimeError(f"窗口{next_window_id}没有活动任务，无法生成同窗对照")
+            raise RuntimeError(f"Window {next_window_id} has no active tasks for same-window comparison")
         logging.info(
-            "窗口%d开始：tau=%d，活动任务=%d，活动类=%d；先启发式后精确MILP。",
+            "Window %d started: tau=%d, active tasks=%d, active classes=%d; heuristic first, exact MILP second.",
             next_window_id,
             tau,
             len(active_task_ids),
@@ -554,7 +557,7 @@ def run(args: argparse.Namespace) -> int:
             progress_interval=args.progress_interval,
         )
         logging.info(
-            "窗口%d启发式完成：zBefore=%.9g，zFinal=%.9g，LNS=%s，耗时=%.1fs。",
+            "Window %d heuristic completed: zBefore=%.9g, zFinal=%.9g, LNS=%s, elapsed=%.1fs.",
             next_window_id,
             heuristic_row["ZBeforeLNS"],
             heuristic_row["ZStar"],
@@ -595,10 +598,10 @@ def run(args: argparse.Namespace) -> int:
             raise
         if result.status != 0:
             message = (
-                f"窗口{next_window_id}精确MILP未返回status=0："
+                f"Window {next_window_id} exact MILP did not return status=0: "
                 f"status={result.status}，message={result.message}，"
                 f"elapsed={time.perf_counter() - exact_started:.1f}s。"
-                "提高--max-solver-time-limit后再续算，当前对照不写成精确证据。"
+                "Increase --max-solver-time-limit before resuming; this comparison is not saved as exact evidence."
             )
             del result, model
             gc.collect()
@@ -613,7 +616,7 @@ def run(args: argparse.Namespace) -> int:
         if committed.empty:
             del result, model
             gc.collect()
-            raise RuntimeError(f"窗口{next_window_id}精确MILP未提交任何H区任务")
+            raise RuntimeError(f"Window {next_window_id} exact MILP committed no tasks in the H interval")
         exact_assignments = pd.concat(
             [exact_assignments, committed],
             ignore_index=True,
@@ -644,8 +647,8 @@ def run(args: argparse.Namespace) -> int:
             "RUNNING" if next_window_id < args.windows else "COMPLETED",
         )
         logging.info(
-            "窗口%d精确MILP完成：z=%.9g，提交=%d，status=%d，gap=%s，耗时=%.1fs；"
-            "进度=%d/%d。",
+            "Window %d exact MILP completed: z=%.9g, committed=%d, status=%d, gap=%s, elapsed=%.1fs; "
+            "progress=%d/%d.",
             next_window_id - 1,
             exact_row["ZStar"],
             len(committed),
@@ -658,19 +661,19 @@ def run(args: argparse.Namespace) -> int:
         del result, model, committed
         gc.collect()
 
-    logging.info("精确同窗对照完成：exact_windows.csv和heuristic_windows.csv已生成。")
+    logging.info("Exact same-window comparison completed: exact_windows.csv and heuristic_windows.csv generated.")
     return 0
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="问题2窗口0--9同历史状态精确MILP与启发式+LNS对照"
+        description="Q2 windows 0--9: exact MILP versus heuristic plus LNS under identical history"
     )
     parser.add_argument(
         "--output-root",
         type=Path,
         default=DEFAULT_OUTPUT_ROOT,
-        help="对照结果目录；默认outputs/validation_runs/exact_vs_heuristic",
+        help="Comparison directory; default outputs/validation_runs/exact_vs_heuristic",
     )
     parser.add_argument("--windows", type=int, default=WINDOW_COUNT)
     parser.add_argument("--mip-rel-gap", type=float, default=5e-3)
@@ -681,7 +684,7 @@ def main() -> int:
         "--resume",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="是否续算已写入的窗口；默认开启",
+        help="Resume saved windows; enabled by default",
     )
     parser.add_argument(
         "--log-level",
@@ -690,18 +693,18 @@ def main() -> int:
     )
     args = parser.parse_args()
     if not 1 <= args.windows <= WINDOW_COUNT:
-        raise SystemExit(f"--windows必须在1--{WINDOW_COUNT}之间")
+        raise SystemExit(f"--windows must be within 1--{WINDOW_COUNT} inclusive")
     if not math.isfinite(args.mip_rel_gap) or args.mip_rel_gap < 0:
-        raise SystemExit("--mip-rel-gap必须为非负有限数")
+        raise SystemExit("--mip-rel-gap must be finite and nonnegative")
     if not math.isfinite(args.solver_time_limit) or args.solver_time_limit <= 0:
-        raise SystemExit("--solver-time-limit必须为正有限数")
+        raise SystemExit("--solver-time-limit must be finite and positive")
     if (
         not math.isfinite(args.max_solver_time_limit)
         or args.max_solver_time_limit < args.solver_time_limit
     ):
-        raise SystemExit("--max-solver-time-limit必须>=--solver-time-limit")
+        raise SystemExit("--max-solver-time-limit must be >= --solver-time-limit")
     if not math.isfinite(args.progress_interval) or args.progress_interval < 0:
-        raise SystemExit("--progress-interval必须>=0")
+        raise SystemExit("--progress-interval must be >= 0")
     try:
         return run(args)
     except Exception as exc:
@@ -743,7 +746,7 @@ def main() -> int:
             )
         except Exception:
             pass
-        logging.exception("精确同窗对照失败：%s", exc)
+        logging.exception("Exact same-window comparison failed: %s", exc)
         return 2
 
 

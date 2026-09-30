@@ -17,6 +17,8 @@ latexmk -xelatex -interaction=nonstopmode -halt-on-error -file-line-error -outdi
 
 Read the newly compiled English paper at `build/main.pdf`. Compilation does not overwrite the preserved `main.pdf`. The font configuration uses Windows Chinese fonts, Times New Roman, and Consolas; adjust the font configuration for other systems.
 
+The translated source compiled successfully into a 36-page PDF. The cover and key tables were visually checked; no overfull boxes or unresolved references remained.
+
 The English translation preserves mathematical definitions, numerical findings, and version boundaries. Existing figure files are historical assets and may retain Chinese labels. English plotting labels are available in the active Python source for subsequent figure generation; translation alone does not rerun the models or regenerate historical figures.
 
 The original competition paper, supporting materials, and archive guide are in [archive/](../archive/). The editable paper, active Python source, and frozen ZIP files may belong to different versions; align their evidence before comparing results.

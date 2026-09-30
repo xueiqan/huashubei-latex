@@ -1,21 +1,23 @@
-"""问题2三组论文图。
+"""Three groups of Question 2 paper figures.
 
-本文件只读取已经生成的Q2结果表，不重新求解模型、不调用MILP，也不修改
-正式结果。运行后输出：
+Read generated Q2 tables without solving models, invoking MILP, or modifying
+official results. Produce:
 
-1. q2_group1_core_results.pdf/png：标准化多目标结果与新能源利用结构；
-2. q2_group2_dispatch_mechanism.pdf/png：跨区域迁移GPU工作量矩阵；
-3. q2_group3_model_validation.pdf/png：精确同窗对照与K=24/48/72敏感性。
+1. q2_group1_core_results.pdf/png: normalized objectives and renewable usage.
+2. q2_group2_dispatch_mechanism.pdf/png: migrated GPU workload matrix.
+3. q2_group3_model_validation.pdf/png: exact same-window comparison and
+   K=24/48/72 sensitivity.
 
-颜色来自《绘图颜色搭配.docx》：
-- 双系列：#5773cc、#ffb900；
-- 三系列：#eeca40、#fd763f、#23bac5；
-- 四系列：#dd5129、#0f7ba2、#43b284、#fab255；
-- 热力图：文档中的蓝色梯度系列；
-- 文字、网格、参考线沿用Q1/Q3的深蓝色体系。
+Colors come from the supplied plotting palette:
+- Two series: #5773cc, #ffb900.
+- Three series: #eeca40, #fd763f, #23bac5.
+- Four series: #dd5129, #0f7ba2, #43b284, #fab255.
+- Heatmap: the blue-gradient series.
+- Text, grids, and references: the dark-blue scheme used in Q1/Q3.
 
-如果精确同窗或某个K的独立结果尚未生成，本程序仍会输出检验图，但在相应
-面板中明确标记“待补证据”，不使用旧版本或不匹配的结果代替。
+Missing exact comparisons or independent K results are explicitly marked as
+pending evidence in the affected panels. Never substitute old or incompatible
+results.
 """
 
 from __future__ import annotations
@@ -53,13 +55,13 @@ REGION_ORDER = [
 REGION_LABELS = {region: region.replace("Region", "") for region in REGION_ORDER}
 
 OBJECTIVE_SPECS = (
-    ("Cost", "运行成本", "OperatingCost_CNY"),
-    ("Carbon", "碳排放", "CarbonEmission_tCO2"),
-    ("MeanLatency", "平均网络时延", "MeanNetworkLatency_ms"),
-    ("RenewableUnusedRate", "新能源未利用率", "RenewableUnusedRate"),
+    ("Cost", "Operating cost", "OperatingCost_CNY"),
+    ("Carbon", "Carbon emissions", "CarbonEmission_tCO2"),
+    ("MeanLatency", "Mean network latency", "MeanNetworkLatency_ms"),
+    ("RenewableUnusedRate", "Renewable unused rate", "RenewableUnusedRate"),
 )
 
-# 色值全部来自用户提供的《绘图颜色搭配.docx》。
+# All colors come from the user-supplied plotting palette.
 PALETTE = {
     "series_blue": "#5773cc",
     "series_gold": "#ffb900",
@@ -122,16 +124,16 @@ def _configure_style() -> None:
 
 def _read_csv(path: Path, required: tuple[str, ...] = ()) -> pd.DataFrame | None:
     if not path.is_file():
-        logging.warning("图表输入缺失：%s", path)
+        logging.warning("Plot input missing: %s", path)
         return None
     try:
         frame = pd.read_csv(path, encoding="utf-8-sig")
     except (OSError, UnicodeError, pd.errors.ParserError) as exc:
-        logging.warning("图表输入读取失败：%s；%s", path, exc)
+        logging.warning("Cannot read plot input: %s; %s", path, exc)
         return None
     missing = [column for column in required if column not in frame.columns]
     if missing:
-        logging.warning("%s缺少字段：%s", path.name, missing)
+        logging.warning("%s is missing columns: %s", path.name, missing)
         return None
     return frame
 
@@ -211,7 +213,7 @@ def _style_colorbar(colorbar: matplotlib.colorbar.Colorbar, label: str) -> None:
 
 
 def _save(figure: plt.Figure, stem: str) -> None:
-    """同时输出论文PDF和450dpi PNG预览。"""
+    """Export paper PDFs and 450 dpi PNG previews together."""
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     pdf_path = FIGURES_DIR / f"{stem}.pdf"
     png_path = FIGURES_DIR / f"{stem}.png"
@@ -231,7 +233,7 @@ def _save(figure: plt.Figure, stem: str) -> None:
                 bbox_inches="tight",
                 pad_inches=0.06,
             )
-            logging.warning("%s被占用，PDF改写为%s。", pdf_path.name, fallback.name)
+            logging.warning("%s is locked; writing the PDF to %s instead.", pdf_path.name, fallback.name)
         figure.savefig(
             png_path,
             format="png",
@@ -239,7 +241,7 @@ def _save(figure: plt.Figure, stem: str) -> None:
             bbox_inches="tight",
             pad_inches=0.06,
         )
-        logging.info("已生成：%s和%s。", pdf_path.name, png_path.name)
+        logging.info("Generated: %s and %s.", pdf_path.name, png_path.name)
     finally:
         plt.close(figure)
 
@@ -278,18 +280,18 @@ def _normalised_objectives() -> tuple[pd.DataFrame, pd.DataFrame] | None:
     baseline = _solution_row(summary, "Q1PureComputeBaseline")
     balanced = _solution_row(summary, "Q2Balanced")
     if baseline is None or balanced is None:
-        logging.warning("q2_objective_summary.csv缺少基准或Q2Balanced行。")
+        logging.warning("q2_objective_summary.csv is missing the baseline or Q2Balanced row.")
         return None
 
     rows: list[dict[str, float | str]] = []
     for objective, label, value_column in OBJECTIVE_SPECS:
         if objective not in calibration.index:
-            logging.warning("全局定标表缺少目标：%s。", objective)
+            logging.warning("Global calibration table is missing objective: %s.", objective)
             return None
         ideal = float(calibration.loc[objective, "IdealLowerBound"])
         scale = float(calibration.loc[objective, "NormalizationScale"])
         if not math.isfinite(scale) or abs(scale) <= 1e-12:
-            logging.warning("目标%s的NormalizationScale无效。", objective)
+            logging.warning("Objective %s has invalid NormalizationScale.", objective)
             return None
         base_value = float(baseline[value_column])
         balanced_value = float(balanced[value_column])
@@ -305,7 +307,7 @@ def _normalised_objectives() -> tuple[pd.DataFrame, pd.DataFrame] | None:
 
 
 def plot_group1_core_results() -> bool:
-    """图1：四目标标准化偏离 + 新能源利用结构变化。"""
+    """Figure 1: four normalized objective deviations and renewable-usage changes."""
     normalised = _normalised_objectives()
     balanced_energy = _read_table(
         "q2_energy_profile.csv",
@@ -350,7 +352,7 @@ def plot_group1_core_results() -> bool:
         x - width / 2,
         base,
         width,
-        label="纯算力基准",
+        label="Compute-only baseline",
         color=PALETTE["series_blue"],
         edgecolor=PALETTE["text"],
         linewidth=0.45,
@@ -359,7 +361,7 @@ def plot_group1_core_results() -> bool:
         x + width / 2,
         balanced,
         width,
-        label="Q2多目标调度",
+        label="Q2 multiobjective schedule",
         color=PALETTE["series_gold"],
         edgecolor=PALETTE["text"],
         linewidth=0.45,
@@ -370,12 +372,12 @@ def plot_group1_core_results() -> bool:
         color=PALETTE["reference"],
         linestyle="--",
         linewidth=1.0,
-        label=f"Q2最大偏离 z={q2_z:.2f}",
+        label=f"Q2 maximum deviation z={q2_z:.2f}",
     )
     ax_left.set_xticks(x)
-    ax_left.set_xticklabels(["成本", "碳排放", "平均\n网络时延", "新能源\n未利用率"])
-    ax_left.set_ylabel("标准化目标偏离 $d_m$")
-    ax_left.set_title("全局定标后的多目标比较")
+    ax_left.set_xticklabels(["Cost", "Carbon emissions", "Mean\nnetwork latency", "Renewable\nunused rate"])
+    ax_left.set_ylabel("Normalized objective deviation $d_m$")
+    ax_left.set_title("Multiobjective comparison after global calibration")
     max_value = float(np.nanmax(np.r_[base, balanced, q2_z]))
     ax_left.set_ylim(0, max(1.0, max_value * 1.25))
     ax_left.axhline(0, color=PALETTE["text"], linewidth=0.7)
@@ -393,9 +395,9 @@ def plot_group1_core_results() -> bool:
                 fontsize=6.4,
                 color=PALETTE["text"],
             )
-    _panel_caption(ax_left, "(a) 四项目标标准化偏离", y=-0.22)
+    _panel_caption(ax_left, "(a) Four normalized objective deviations", y=-0.22)
 
-    energy_labels = ["直接消纳", "新能源外送", "弃新能源"]
+    energy_labels = ["Direct consumption", "Renewable export", "Renewable curtailment"]
     energy_values = delta.to_numpy(dtype=float)
     energy_colors = [
         PALETTE["series_cyan"],
@@ -413,8 +415,8 @@ def plot_group1_core_results() -> bool:
     ax_right.axhline(0, color=PALETTE["text"], linewidth=0.8)
     ax_right.set_xticks(np.arange(3))
     ax_right.set_xticklabels(energy_labels)
-    ax_right.set_ylabel("Q2 − 基准（MWh）")
-    ax_right.set_title("全时域累计（0—2405 h）")
+    ax_right.set_ylabel("Q2 - baseline (MWh)")
+    ax_right.set_title("Full-horizon total (0--2405 h)")
     energy_min = float(np.nanmin(energy_values))
     energy_max = float(np.nanmax(energy_values))
     energy_span = max(energy_max - energy_min, 1.0)
@@ -446,8 +448,8 @@ def plot_group1_core_results() -> bool:
         ax_right.text(
             0.02,
             0.08,
-            f"净运行成本降低：{cost_improvement_wan:.2f} 万元\n"
-            f"弃新能源减少：{curtail_reduction:,.0f} MWh",
+            f"Net operating cost reduction: {cost_improvement_wan:.2f} x 10,000 CNY\n"
+            f"Renewable curtailment reduction: {curtail_reduction:,.0f} MWh",
             transform=ax_right.transAxes,
             ha="left",
             va="top",
@@ -460,7 +462,7 @@ def plot_group1_core_results() -> bool:
                 "linewidth": 0.6,
             },
         )
-    _panel_caption(ax_right, "(b) 新能源利用结构变化", y=-0.22)
+    _panel_caption(ax_right, "(b) Renewable-usage changes", y=-0.22)
     _save(figure, "q2_group1_core_results")
     return True
 
@@ -481,7 +483,7 @@ def _compact_millions(value: float, _position: int) -> str:
 
 
 def plot_group2_dispatch_mechanism() -> bool:
-    """图2：跨区域迁移GPU工作量矩阵及迁入/迁出边缘统计。"""
+    """Figure 2: migrated GPU workload matrix with inbound/outbound marginal totals."""
     assignments = _read_table(
         "q2_balanced_assignments.csv",
         (
@@ -511,7 +513,7 @@ def plot_group2_dispatch_mechanism() -> bool:
     )
     regions = _ordered_regions(assignments)
     if len(regions) < 2:
-        logging.warning("迁移矩阵的区域数量不足。")
+        logging.warning("Insufficient regions in the migration matrix.")
         return False
 
     work = (
@@ -567,7 +569,7 @@ def plot_group2_dispatch_mechanism() -> bool:
     ax_top.set_xticks(np.arange(len(regions)))
     ax_top.set_xticklabels([REGION_LABELS.get(r, r) for r in regions])
     ax_top.set_ylabel("GPU·h", labelpad=2)
-    ax_top.set_title("跨区域迁入", fontsize=8.5, pad=3)
+    ax_top.set_title("Inbound migration", fontsize=8.5, pad=3)
     ax_top.yaxis.set_major_formatter(FuncFormatter(_compact_millions))
     _style_axis(ax_top, "y")
     ax_top.spines["bottom"].set_visible(False)
@@ -584,8 +586,8 @@ def plot_group2_dispatch_mechanism() -> bool:
     ax_heat.set_yticks(np.arange(len(regions)))
     ax_heat.set_xticklabels([REGION_LABELS.get(r, r) for r in regions])
     ax_heat.set_yticklabels([REGION_LABELS.get(r, r) for r in regions])
-    ax_heat.set_xlabel("目标区域")
-    ax_heat.set_ylabel("源区域")
+    ax_heat.set_xlabel("Target region")
+    ax_heat.set_ylabel("Source region")
     ax_heat.set_xticks(np.arange(-0.5, len(regions), 1), minor=True)
     ax_heat.set_yticks(np.arange(-0.5, len(regions), 1), minor=True)
     ax_heat.grid(which="minor", color=PALETTE["white"], linewidth=0.85)
@@ -596,7 +598,7 @@ def plot_group2_dispatch_mechanism() -> bool:
             value = float(work.loc[source, target])
             count = int(counts.loc[source, target])
             if row_index == column_index:
-                label = f"本地\nN={count:,}"
+                label = f"Local\nN={count:,}"
                 color = PALETTE["text"]
             elif value <= 0:
                 label = "—"
@@ -627,15 +629,15 @@ def plot_group2_dispatch_mechanism() -> bool:
     ax_right.set_yticks(np.arange(len(regions)))
     ax_right.set_yticklabels([])
     ax_right.set_xlabel("GPU·h", labelpad=2)
-    ax_right.set_title("跨区域迁出", fontsize=8.5, pad=3)
+    ax_right.set_title("Outbound migration", fontsize=8.5, pad=3)
     ax_right.xaxis.set_major_formatter(FuncFormatter(_compact_millions))
     _style_axis(ax_right, "x")
     ax_right.spines["left"].set_visible(False)
     ax_right.tick_params(axis="y", left=False, labelleft=False)
     _panel_caption(
         ax_heat,
-        "Q2任务跨区域迁移与算力工作量重分配\n"
-        "灰色对角线仅表示本地执行任务数；色阶仅统计跨区域迁移GPU·h",
+        "Q2 interregional migration and compute-workload redistribution\n"
+        "Gray diagonal shows local task counts only; color scale shows migrated GPU-hours only",
         y=-0.20,
         fontsize=8.4,
     )
@@ -670,7 +672,7 @@ def _load_pair() -> pd.DataFrame | None:
     exact_z = _z_column(exact)
     heuristic_z = _z_column(heuristic)
     if exact_z is None or heuristic_z is None:
-        logging.warning("精确同窗文件缺少Z指标字段。")
+        logging.warning("Exact same-window files are missing Z metric columns.")
         return None
     exact = _numeric(exact, ("WindowID", exact_z, "ElapsedSeconds"))
     heuristic = _numeric(heuristic, ("WindowID", heuristic_z, "ElapsedSeconds"))
@@ -722,17 +724,17 @@ def _lookahead_normalised() -> pd.DataFrame | None:
     for lookahead, root in roots.items():
         summary = _load_summary_root(root)
         if summary is None:
-            logging.info("K=%d独立结果未找到，敏感性图暂不绘制该点。", lookahead)
+            logging.info("Independent K=%d results are missing; omitting this sensitivity point.", lookahead)
             continue
         summary = _numeric(summary, tuple(value_columns.values()))
         balanced = _solution_row(summary, "Q2Balanced")
         if balanced is None:
-            logging.warning("K=%d结果缺少Q2Balanced行。", lookahead)
+            logging.warning("K=%d results are missing the Q2Balanced row.", lookahead)
             continue
         row: dict[str, float | int | str] = {"LookaheadHours": lookahead}
         for objective, value_column in value_columns.items():
             if objective not in calibration.index:
-                logging.warning("敏感性图定标表缺少目标：%s。", objective)
+                logging.warning("Sensitivity calibration table is missing objective: %s.", objective)
                 return None
             scale = float(calibration.loc[objective, "NormalizationScale"])
             ideal = float(calibration.loc[objective, "IdealLowerBound"])
@@ -775,7 +777,7 @@ def _validation_placeholder(axis: plt.Axes, message: str, detail: str) -> None:
 
 
 def plot_group3_model_validation() -> bool:
-    """图3：精确同窗质量对照 + 滚动前瞻敏感性。"""
+    """Figure 3: exact same-window quality comparison and rolling-lookahead sensitivity."""
     pair = _load_pair()
     lookahead = _lookahead_normalised()
     figure = plt.figure(figsize=(7.15, 4.75))
@@ -787,8 +789,8 @@ def plot_group3_model_validation() -> bool:
     if pair is None:
         _validation_placeholder(
             ax_pair,
-            "精确同窗对照待补",
-            "需要exact_windows.csv与heuristic_windows.csv\n窗口0—9、相同历史状态",
+            "Exact same-window evidence pending",
+            "Requires exact_windows.csv and heuristic_windows.csv\nfor windows 0--9 under identical history",
         )
     else:
         ax_pair.scatter(
@@ -808,7 +810,7 @@ def plot_group3_model_validation() -> bool:
         )
         for row in label_rows.itertuples(index=False):
             ax_pair.annotate(
-                f"窗口{int(row.WindowID)}",
+                f"Window {int(row.WindowID)}",
                 (float(row.ZExact), float(row.ZHeuristic)),
                 xytext=(5, 5),
                 textcoords="offset points",
@@ -834,11 +836,11 @@ def plot_group3_model_validation() -> bool:
         mean_relative = float(pair["RelativeDelta"].abs().mean())
         max_relative = float(pair["RelativeDelta"].abs().max())
         text = (
-            f"平均|相对偏差|：{mean_relative:.2%}\n"
-            f"最大|相对偏差|：{max_relative:.2%}"
+            f"Mean |relative deviation|: {mean_relative:.2%}\n"
+            f"Maximum |relative deviation|: {max_relative:.2%}"
         )
         if "Speedup" in pair.columns:
-            text += f"\n中位数加速比：{float(pair['Speedup'].median()):.1f}×"
+            text += f"\nMedian speedup: {float(pair['Speedup'].median()):.1f}×"
         ax_pair.text(
             0.96,
             0.96,
@@ -855,18 +857,18 @@ def plot_group3_model_validation() -> bool:
                 "linewidth": 0.6,
             },
         )
-        ax_pair.set_xlabel(r"精确MILP $z_\tau$")
-        ax_pair.set_ylabel(r"启发式+LNS $z_\tau$")
-        ax_pair.set_title("窗口0—9同窗对照")
+        ax_pair.set_xlabel(r"Exact MILP $z_\tau$")
+        ax_pair.set_ylabel(r"Heuristic + LNS $z_\tau$")
+        ax_pair.set_title("Same-window comparison, windows 0--9")
         _style_axis(ax_pair, "both")
         _legend(ax_pair, loc="lower right")
-    _panel_caption(ax_pair, "(a) 精确MILP与数学启发式", y=-0.22, fontsize=8.8)
+    _panel_caption(ax_pair, "(a) Exact MILP versus matheuristic", y=-0.22, fontsize=8.8)
 
     if lookahead is None:
         _validation_placeholder(
             ax_k,
-            "前瞻敏感性数据待补",
-            "需要K=24、K=48、K=72的Q2Balanced结果",
+            "Lookahead sensitivity evidence pending",
+            "Requires Q2Balanced results for K=24, K=48, and K=72",
         )
     else:
         colors = [
@@ -903,9 +905,9 @@ def plot_group3_model_validation() -> bool:
         ax_k.axvspan(47, 49, color=PALETTE["light_blue"], alpha=0.28, linewidth=0)
         ax_k.set_xticks([24, 48, 72])
         ax_k.set_xlim(20, 76)
-        ax_k.set_xlabel(r"前瞻长度 $K$ / h")
-        ax_k.set_ylabel(r"Q2标准化目标偏离 $d_m$")
-        ax_k.set_title("不同前瞻长度下的目标结构", pad=10)
+        ax_k.set_xlabel(r"Lookahead length $K$ / h")
+        ax_k.set_ylabel(r"Q2 normalized objective deviation $d_m$")
+        ax_k.set_title("Objective structure at different lookahead lengths", pad=10)
         _style_axis(ax_k, "both")
         _legend(
             ax_k,
@@ -921,14 +923,14 @@ def plot_group3_model_validation() -> bool:
             ax_k.text(
                 0.97,
                 0.96,
-                "待补K=" + ",".join(missing),
+                "Pending K=" + ",".join(missing),
                 transform=ax_k.transAxes,
                 ha="right",
                 va="top",
                 fontsize=6.5,
                 color=PALETTE["reference"],
             )
-    _panel_caption(ax_k, "(b) 滚动前瞻长度敏感性", y=-0.22, fontsize=8.8)
+    _panel_caption(ax_k, "(b) Rolling-lookahead sensitivity", y=-0.22, fontsize=8.8)
     _save(figure, "q2_group3_model_validation")
     return True
 
@@ -946,7 +948,7 @@ def main() -> int:
         "group2": plot_group2_dispatch_mechanism(),
         "group3": plot_group3_model_validation(),
     }
-    logging.info("Q2绘图完成状态：%s。", results)
+    logging.info("Q2 plotting completion status: %s.", results)
     return 0 if all(results.values()) else 1
 
 

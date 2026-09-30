@@ -1,28 +1,37 @@
-"""问题2最终版：精确聚合 + 全局连续定标 + 滚动数学启发式多目标调度。
+"""Question 2: exact aggregation, global continuous calibration, and rolling multiobjective matheuristics.
 
-对应论文 Q2 重构模型，目标是在不删减合法区域/合法整数开工时刻的前提下，
-通过“等价聚合、约束消元、全局定标、滚动边际构造 + 大邻域MILP精修”兼顾模型质量与求解速度。
+The paper model retains every valid region and integer start time. Equivalent
+aggregation, constraint elimination, global calibration, marginal construction,
+and large-neighborhood MILP refinement balance solution quality and speed.
 
-核心口径
---------
-1. 使用 0--2399 小时实际到达任务；2400--2405 仅用于结清；第 2406 小时不得占用。
-2. 任务不可抢占、不可拆分；实时推理到达即开工；弹性任务在合法时间窗内错峰。
-3. 仅合并在全部 Q2 有效属性上完全相同的任务；聚合变量是整数计数，属于严格等价重参数化。
-4. GPU 约束独立保留；IT、设施功率、最大购电边界合并为逐时有效 AI IT 容量。
-5. Q2 不启用储能；给定设施负荷后，购电、外送、弃电按题面无储能口径结算。
-6. 纯算力基准优先采用解析零迁移快路；四个全局连续理想点采用紧凑精确列生成，不一次性展开全时域候选矩阵。
-7. 均衡滚动采用 H=24、K=48：先按原 min-max 目标进行多目标边际贪心构造，再对关键任务做小规模大邻域MILP精修。
-8. 最终结果回到 TaskID 层并独立复算全部硬约束、资源曲线和四项指标。
+Model conventions
+-----------------
+1. Actual arrivals use hours 0--2399; hours 2400--2405 only clear remaining work;
+   hour 2406 cannot be occupied.
+2. Tasks are nonpreemptive and indivisible. Real-time inference starts at arrival;
+   flexible tasks shift within valid windows.
+3. Aggregate only tasks identical in every effective Q2 attribute. Integer count
+   variables are an exactly equivalent reparameterization.
+4. Retain independent GPU constraints. Combine IT, facility power, and maximum
+   grid purchase into hourly effective AI IT capacity.
+5. Q2 has no storage. Settle grid purchases, exports, and curtailment according
+   to the no-storage problem convention after facility loads are fixed.
+6. Prefer an analytical zero-migration baseline. Compute four global continuous
+   ideal points by compact exact column generation without expanding all candidates.
+7. Balanced rolling uses H=24 and K=48: original min-max marginal greedy
+   construction followed by small large-neighborhood MILP refinement.
+8. Restore TaskID-level results and independently recompute all hard constraints,
+   resource curves, and four metrics.
 
-依赖
-----
+Dependencies
+------------
 Python 3.10+
 numpy, pandas, scipy
 
-阶段4默认采用滚动数学启发式，不依赖全窗口大规模MILP；highspy仅为旧版
-原生HiGHS兼容接口的可选依赖，新主线不要求安装。
+Stage 4 uses rolling matheuristics rather than a large full-window MILP. highspy
+is optional for the legacy native HiGHS interface, not required by the main path.
 
-8GB可用内存建议正式运行：
+Recommended formal run with 8 GB available memory:
 python model.py --decision-window 24 --lookahead 48 --mip-rel-gap 0.005 \
     --solver-time-limit 180 --max-solver-time-limit 900 --resume
 """
@@ -48,7 +57,7 @@ import pandas as pd
 
 
 # =============================================================================
-# 0. 路径、时域与默认参数
+# 0. Paths, time horizon, and defaults
 # =============================================================================
 
 QUESTION_DIR = Path(__file__).resolve().parent
@@ -74,21 +83,21 @@ DEFAULT_MAX_SOLVER_TIME_LIMIT = 900.0
 EMERGENCY_SOLVER_TIME_LIMIT = 900.0
 BALANCED_MAX_ACCEPTABLE_MIP_GAP = 0.02
 
-# 阶段4原生HiGHS/MIP Start。主检查点版本保持不变，保证已完成窗口直接续算。
+# Stage 4 native HiGHS/MIP Start. Keep the checkpoint version unchanged to resume completed windows.
 BALANCED_WARMSTART_SCHEMA_VERSION = 1
 BALANCED_WARMSTART_VALUE_TOL = 1e-7
 BALANCED_WARMSTART_POSITIVE_TOL = 1e-9
 HIGHS_MIP_MAX_START_NODES = 2000
-HIGHS_PARALLEL = "choose"   # 8GB机器不强制并行，交给HiGHS按模型自行选择
-HIGHS_THREADS = 0           # 0=自动
-# 阶段4结构证书快路：不额外求LP。由 min-max 行的非负系数直接给出严格 z 下界，
-# 再把 z 限制在满足目标 MIP gap 的窄带内，只做整数可行性搜索。
+HIGHS_PARALLEL = "choose"   # Do not force parallelism on an 8 GB machine; let HiGHS select its mode.
+HIGHS_THREADS = 0           # 0 = automatic
+# Stage 4 structural-certificate shortcut: no extra LP. Nonnegative min-max coefficients imply a strict z lower bound.
+# Restrict z to a narrow band satisfying the target MIP gap and search for integer feasibility only.
 BALANCED_STRUCTURAL_FASTPATH = True
 BALANCED_STRUCTURAL_FASTPATH_TIME_LIMIT = 180.0
 BALANCED_STRUCTURAL_COEF_TOL = 1e-10
 
-# 新阶段4：滚动数学启发式。保持 balanced v3 主检查点不变，因此此前已完成窗口
-# 会原样恢复；从下一个未完成窗口开始改用快速构造 + 小规模LNS-MILP。
+# New stage 4 rolling matheuristic retains balanced v3 checkpoints and restores completed windows unchanged.
+# Use fast construction plus small LNS MILPs from the next unfinished window.
 HEURISTIC_LNS_ENABLED = True
 HEURISTIC_LNS_MAX_CLASSES = 60
 HEURISTIC_LNS_TIME_LIMIT = 20.0
@@ -115,12 +124,12 @@ CG_COLUMNS_PER_CLASS = 2
 CG_POSITIVE_COLUMN_TOL = 1e-9
 CG_COLUMN_POOL_LIMIT = 60000
 CG_POOL_NEAR_ZERO_KEEP = 10000
-# RenewableUnusedRate 锚点存在大面积退化最优面，允许更大的工作列池与批量入列，
-# 但最终仍由完整定价或严格的对偶下界证书控制误差。
+# RenewableUnusedRate has a large degenerate optimum face, so allow larger working column pools and batches.
+# Complete pricing or a strict dual lower-bound certificate still controls final error.
 CG_RENEWABLE_MAX_NEW_COLUMNS_PER_ITERATION = 5000
 CG_RENEWABLE_COLUMNS_PER_CLASS = 3
 CG_RENEWABLE_COLUMN_POOL_LIMIT = 80000
-CG_RENEWABLE_CERTIFIED_ABS_GAP = 0.0025  # 未利用率绝对误差 <= 0.25 个百分点
+CG_RENEWABLE_CERTIFIED_ABS_GAP = 0.0025  # Absolute unused-rate error <= 0.25 percentage points
 CG_ITERATION_CHECKPOINT_EVERY = 1
 MEMORY_SOFT_LIMIT_GB = 6.25
 MEMORY_HARD_LIMIT_GB = 7.20
@@ -167,7 +176,7 @@ BOUNDARY_COLUMNS = (
 
 
 # =============================================================================
-# 1. 数据结构
+# 1. Data structures
 # =============================================================================
 
 @dataclass(frozen=True, slots=True)
@@ -316,13 +325,13 @@ class CGAnchorResult:
 
 
 # =============================================================================
-# 2. 日志、读写与基础工具
+# 2. Logging, I/O, and basic utilities
 # =============================================================================
 
 def _configure_logging(level_name: str) -> None:
     level = getattr(logging, level_name.upper(), None)
     if not isinstance(level, int):
-        raise ValueError(f"不支持的日志级别：{level_name}")
+        raise ValueError(f"Unsupported log level: {level_name}")
     LOGS_DIR.mkdir(parents=True, exist_ok=True)
     formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
     stream_handler = logging.StreamHandler()
@@ -334,11 +343,11 @@ def _configure_logging(level_name: str) -> None:
 
 def _read_csv(path: Path, required_columns: Iterable[str]) -> pd.DataFrame:
     if not path.is_file():
-        raise FileNotFoundError(f"缺少模型输入文件：{path}")
+        raise FileNotFoundError(f"Model input file is missing: {path}")
     frame = pd.read_csv(path, encoding="utf-8-sig")
     missing = [column for column in required_columns if column not in frame.columns]
     if missing:
-        raise ValueError(f"{path.name}缺少字段：{missing}")
+        raise ValueError(f"{path.name} is missing columns: {missing}")
     return frame
 
 
@@ -347,7 +356,7 @@ def _to_numeric(frame: pd.DataFrame, columns: Iterable[str], source_name: str) -
     for column in columns:
         result[column] = pd.to_numeric(result[column], errors="coerce")
         if result[column].isna().any():
-            raise ValueError(f"{source_name}的{column}存在无法转换为数值的记录")
+            raise ValueError(f"{source_name} column {column} contains records that cannot be converted to numbers")
     return result
 
 
@@ -382,7 +391,7 @@ def _task_signature(bundle: InputBundle) -> str:
 
 
 def _float_key(value: float) -> str:
-    """使用读入后的浮点精确值做聚合键，不人为四舍五入。"""
+    """Use exact loaded floating-point values as aggregation keys without artificial rounding."""
     return float(value).hex()
 
 
@@ -470,7 +479,7 @@ def _result_float(result: Any, name: str) -> float:
 
 
 def _process_rss_gb() -> float:
-    """尽量读取当前 Python 进程工作集；失败时返回 NaN，不引入强制新依赖。"""
+    """Read this Python process working set when possible; return NaN on failure without requiring new dependencies."""
     try:
         import psutil  # type: ignore
         return float(psutil.Process(os.getpid()).memory_info().rss) / (1024.0 ** 3)
@@ -510,24 +519,24 @@ def _process_rss_gb() -> float:
 
 
 def _memory_guard(label: str, hard: bool = False) -> float:
-    """8GB机器内存保护：软阈值只警告并回收，硬阈值才主动终止。"""
+    """Memory protection for an 8 GB machine: warn and collect at the soft threshold; stop only at the hard threshold."""
     rss = _process_rss_gb()
     if not math.isfinite(rss):
         return rss
-    logging.info("内存状态：%s，当前进程 RSS=%.2f GB。", label, rss)
+    logging.info("Memory state: %s, process RSS=%.2f GB.", label, rss)
     if rss >= MEMORY_SOFT_LIMIT_GB:
         gc.collect()
         rss = _process_rss_gb()
         if math.isfinite(rss):
             logging.warning(
-                "%s前内存已进入高水位：RSS=%.2f GB（软阈值%.2f GB）。",
+                "High memory use before %s: RSS=%.2f GB (soft threshold %.2f GB).",
                 label, rss, MEMORY_SOFT_LIMIT_GB,
             )
     if hard and math.isfinite(rss) and rss >= MEMORY_HARD_LIMIT_GB:
         raise MemoryError(
-            f"{label}前进程内存已达{rss:.2f} GB，超过硬保护阈值"
-            f"{MEMORY_HARD_LIMIT_GB:.2f} GB；为避免系统死机主动停止。"
-            "可使用已有检查点恢复。"
+            f"{label}: process memory has reached {rss:.2f} GB before execution, exceeding the hard protection threshold "
+            f"{MEMORY_HARD_LIMIT_GB:.2f} GB; stopping to prevent system failure."
+            "Resume from existing checkpoints."
         )
     return rss
 
@@ -539,7 +548,7 @@ def _run_with_heartbeat(callable_obj, *, label: str, interval: float, **kwargs):
 
     def heartbeat() -> None:
         while not stop_event.wait(interval):
-            logging.info("求解心跳：%s仍在运行，已耗时%.1fs。", label, time.perf_counter() - started)
+            logging.info("Solver heartbeat: %s is still running, elapsed=%.1fs.", label, time.perf_counter() - started)
 
     thread = threading.Thread(target=heartbeat, name="q2-solver-heartbeat", daemon=True)
     thread.start()
@@ -551,11 +560,11 @@ def _run_with_heartbeat(callable_obj, *, label: str, interval: float, **kwargs):
 
 
 # =============================================================================
-# 3. 输入读取与严格校验
+# 3. Input loading and strict validation
 # =============================================================================
 
 def _load_inputs() -> InputBundle:
-    logging.info("阶段1：读取 Q2 输入。")
+    logging.info("Stage 1: reading Q2 inputs.")
     q2_input = _read_csv(Q2_DIR / "q2_region_hour_input.csv", REGION_HOUR_COLUMNS)
     tasks = _read_csv(SHARED_DIR / "tasks_clean.csv", TASK_COLUMNS)
     candidates = _read_csv(SHARED_DIR / "task_candidate_regions.csv", CANDIDATE_COLUMNS)
@@ -613,36 +622,36 @@ def _load_inputs() -> InputBundle:
     boundaries["Region"] = boundaries["Region"].astype(str)
 
     if tasks["TaskID"].duplicated().any():
-        raise ValueError("tasks_clean.csv 的 TaskID 必须唯一")
+        raise ValueError("tasks_clean.csv TaskID values must be unique")
     if candidates.duplicated(["TaskID", "TargetRegion"]).any():
-        raise ValueError("task_candidate_regions.csv 存在重复 TaskID×TargetRegion")
+        raise ValueError("task_candidate_regions.csv contains duplicate TaskID x TargetRegion keys")
     if q2_input.duplicated(["Hour", "Region"]).any():
-        raise ValueError("q2_region_hour_input.csv 存在重复 Hour×Region")
+        raise ValueError("q2_region_hour_input.csv contains duplicate Hour x Region keys")
     if boundaries["Region"].duplicated().any():
-        raise ValueError("storage_params.csv 的 Region 必须唯一")
+        raise ValueError("storage_params.csv Region values must be unique")
 
     if not tasks["ArrivalHour"].between(MAIN_START_HOUR, MAIN_END_HOUR).all():
-        raise ValueError("Q2 实际任务 ArrivalHour 必须位于 0--2399")
+        raise ValueError("Q2 actual task ArrivalHour must be within 0--2399")
     if (tasks["LatestFinishHour"] > TERMINAL_HOUR + FLOAT_EPS).any():
-        raise ValueError("存在 LatestFinishHour 超过 2406 的任务")
+        raise ValueError("Tasks have LatestFinishHour beyond 2406")
     if (
         tasks["LatestFinishHour"]
         < tasks["EarliestStartHour"] + tasks["Duration_h"] - FLOAT_EPS
     ).any():
-        raise ValueError("存在没有合法开工时刻的任务")
+        raise ValueError("Tasks have no valid start time")
 
     if not candidates["TaskID"].isin(set(tasks["TaskID"])).all():
-        raise ValueError("候选区域表包含不存在的 TaskID")
+        raise ValueError("Candidate-region table contains unknown TaskID values")
     if (
         candidates["NetworkLatency_ms"]
         > candidates["MaxLatency_ms"] + FLOAT_EPS
     ).any():
-        raise ValueError("候选区域表中存在超过 MaxLatency 的记录")
+        raise ValueError("Candidate-region table contains records exceeding MaxLatency")
 
     if (q2_input["Hour"] == TERMINAL_HOUR).any():
         q2_input = q2_input.loc[q2_input["Hour"] <= TAIL_END_HOUR].copy()
     if not q2_input["Hour"].between(MAIN_START_HOUR, TAIL_END_HOUR).all():
-        raise ValueError("Q2 逐时输入应覆盖 0--2405")
+        raise ValueError("Q2 hourly inputs must cover hours 0--2405")
 
     main_mismatch = q2_input.loc[
         q2_input["Hour"].between(MAIN_START_HOUR, MAIN_END_HOUR), "TimeRole"
@@ -651,7 +660,7 @@ def _load_inputs() -> InputBundle:
         q2_input["Hour"].between(MAIN_END_HOUR + 1, TAIL_END_HOUR), "TimeRole"
     ].ne("tail").any()
     if main_mismatch or tail_mismatch:
-        raise ValueError("TimeRole 与 0--2399 main、2400--2405 tail 的模型时域不一致")
+        raise ValueError("TimeRole disagrees with main hours 0--2399 and tail hours 2400--2405")
 
     region_hour = q2_input.merge(
         boundaries.loc[:, list(BOUNDARY_COLUMNS)],
@@ -660,14 +669,14 @@ def _load_inputs() -> InputBundle:
         validate="many_to_one",
     )
     if region_hour[list(BOUNDARY_COLUMNS[1:])].isna().any().any():
-        raise ValueError("storage_params.csv 无法覆盖所有区域")
+        raise ValueError("storage_params.csv does not cover all regions")
     region_hour["ExportLimit_MW"] = np.minimum(
         region_hour["SellLimit_MW"], region_hour["MaxGridExport_MW"]
     )
     if (region_hour["ExportLimit_MW"] < -FLOAT_EPS).any():
-        raise ValueError("新能源外送上限不能为负")
+        raise ValueError("Renewable export limits must be nonnegative")
 
-    # Q2 等价有效 AI IT 容量：IT、设施、最大购电三者取交集。
+    # Q2 equivalent AI IT capacity is the intersection of IT, facility, and grid-purchase limits.
     effective_it = region_hour["Max_IT_Power_MW"] - region_hour["NonAI_IT_Load_MW"]
     effective_facility = (
         region_hour["Max_Facility_Power_MW"] / region_hour["PUE"]
@@ -690,20 +699,20 @@ def _load_inputs() -> InputBundle:
             region_hour["Effective_AI_IT_Capacity_MW_Exact"] < -FLOAT_EPS,
             ["Hour", "Region", "Effective_AI_IT_Capacity_MW_Exact"],
         ].head()
-        raise ValueError(f"固定 NonAI 负荷已导致有效 AI 容量为负：\n{bad}")
+        raise ValueError(f"Fixed NonAI load already makes effective AI capacity negative:\n{bad}")
 
-    # 紧凑能源上图线性化成立条件：购电边际价格不低于售电价，
-    # 售电价与碳强度非负。满足时只需 B/W 两个下图约束即可精确表示
-    # 无储能结算；若数据不满足则拒绝使用紧凑版，避免牺牲模型正确性。
+    # Compact energy epigraph conditions: purchase marginal price is at least the sale price;
+    # sale prices and carbon intensities are nonnegative. Then the two B/W epigraph constraints exactly represent
+    # no-storage settlement. Reject incompatible data instead of compromising correctness.
     if (region_hour["SellPrice_CNY_per_MWh"] < -FLOAT_EPS).any():
-        raise ValueError("存在负售电价，8GB紧凑能源线性化不适用")
+        raise ValueError("Negative sale prices invalidate the compact 8 GB energy linearization")
     if (
         region_hour["ElectricityPrice_CNY_per_MWh"]
         < region_hour["SellPrice_CNY_per_MWh"] - FLOAT_EPS
     ).any():
-        raise ValueError("存在购电价低于售电价，8GB紧凑能源线性化不适用")
+        raise ValueError("Purchase prices below sale prices invalidate the compact 8 GB energy linearization")
     if (region_hour["CarbonIntensity_tCO2_per_MWh"] < -FLOAT_EPS).any():
-        raise ValueError("存在负碳强度，8GB紧凑能源线性化不适用")
+        raise ValueError("Negative carbon intensity invalidates the compact 8 GB energy linearization")
 
     regions = tuple(sorted(region_hour["Region"].unique().tolist()))
     expected_keys = pd.MultiIndex.from_product(
@@ -713,7 +722,7 @@ def _load_inputs() -> InputBundle:
     actual_keys = pd.MultiIndex.from_frame(region_hour.loc[:, ["Hour", "Region"]])
     missing = expected_keys.difference(actual_keys)
     if len(missing):
-        raise ValueError(f"逐时输入缺少 Hour×Region 记录，示例：{list(missing[:5])}")
+        raise ValueError(f"Hourly inputs are missing Hour x Region records; examples: {list(missing[:5])}")
 
     candidate_map: dict[str, tuple[CandidateRegion, ...]] = {}
     for task_id, group in candidates.groupby("TaskID", sort=False):
@@ -728,10 +737,10 @@ def _load_inputs() -> InputBundle:
         candidate_map[str(task_id)] = tuple(rows)
     missing_candidates = set(tasks["TaskID"]) - set(candidate_map)
     if missing_candidates:
-        raise ValueError(f"存在没有合法执行区域的任务，示例：{sorted(missing_candidates)[:5]}")
+        raise ValueError(f"Tasks have no valid execution region; examples: {sorted(missing_candidates)[:5]}")
 
     logging.info(
-        "输入完成：任务=%d，候选区域记录=%d，区域=%d，逐时记录=%d。",
+        "Inputs loaded: tasks=%d, candidate-region records=%d, regions=%d, hourly records=%d.",
         len(tasks),
         len(candidates),
         len(regions),
@@ -747,7 +756,7 @@ def _load_inputs() -> InputBundle:
 
 
 # =============================================================================
-# 4. 同质任务精确聚合
+# 4. Exact homogeneous-task aggregation
 # =============================================================================
 
 def _latest_start_for_class(task_class: ExactTaskClass) -> int:
@@ -775,7 +784,7 @@ def _window_valid_start_hours(
     decision_end: int,
     plan_end: int,
 ) -> list[int]:
-    """与现行滚动逻辑一致：H 内当前/紧急任务，K 中只做可重优化前瞻。"""
+    """Match existing rolling logic: current/urgent tasks in H; reoptimizable lookahead only in K."""
     latest_start = _latest_start_for_class(task_class)
     if task_class.task_type == "RealTimeInference":
         start = task_class.arrival_hour
@@ -854,7 +863,7 @@ def _build_exact_task_classes(
             ),
         )
         if not _all_valid_start_hours(task_class):
-            raise ValueError(f"任务类{class_id}没有合法整数开工时刻")
+            raise ValueError(f"Task class {class_id} has no valid integer start time")
         classes.append(task_class)
         for task_id in task_ids:
             task_to_class[task_id] = class_id
@@ -911,7 +920,7 @@ def _audit_frame(audit: AggregationAudit) -> pd.DataFrame:
 
 
 # =============================================================================
-# 5. 聚合窗口模型
+# 5. Aggregated window model
 # =============================================================================
 
 def _fixed_loads(
@@ -940,11 +949,12 @@ def _active_classes_and_options(
     decision_end: int,
     plan_end: int,
 ) -> tuple[list[int], list[ClassDispatchOption]]:
-    """生成当前滚动域内的完整合法候选。
+    """Generate all valid candidates in the current rolling horizon.
 
-    8GB 低内存版不在每个候选对象中缓存逐小时 overlap 元组；该信息由
-    (class_id, start_hour, duration_h) 可完全恢复，矩阵构造和结果复算时按需计算。
-    这只改变内存表示，不改变任何合法候选或约束系数。
+    The 8 GB implementation does not cache hourly overlap tuples in each candidate.
+    Reconstruct them from (class_id, start_hour, duration_h) during matrix building
+    and result recomputation. This changes memory representation only, preserving
+    every valid candidate and constraint coefficient.
     """
     class_ids: list[int] = []
     options: list[ClassDispatchOption] = []
@@ -957,7 +967,7 @@ def _active_classes_and_options(
         if not starts:
             if _latest_start_for_class(task_class) < decision_end:
                 raise RuntimeError(
-                    f"任务类{task_class.class_id}在tau={tau}已必须启动但无合法 H 区时刻"
+                    f"Task class {task_class.class_id} at tau={tau} must start now but has no valid H-interval time"
                 )
             continue
         class_ids.append(task_class.class_id)
@@ -993,13 +1003,15 @@ def _build_aggregated_model(
     relax_all_task_variables: bool = False,
     integerize_lookahead: bool = False,
 ) -> AggregatedModel:
-    """8GB混合优化版聚合模型。
+    """Aggregated model optimized for 8 GB memory.
 
-    与原数学模型等价，但能源线性化由 B/W/X 四组约束压缩为 B/W 两组下图约束。
-    在购电价>=售电价>=0、碳强度>=0时，Cost/Carbon/Q 的最小化或 min-max
-    会自动把 B、W 压到物理最小值：
+    Equivalent to the original model, with B/W/X energy constraints reduced to
+    two B/W epigraph groups. When purchase price >= sale price >= 0 and carbon
+    intensity >= 0, minimizing Cost/Carbon/Q or min-max drives B and W to
+    their physical minima:
         B=max(F-RE, 0), W=max(RE-F-ExportLimit, 0)
-    因而不需要显式 X 约束，减少约一半能源行和大量非零元。
+    Explicit X constraints are unnecessary, removing about half the energy rows
+    and many nonzero coefficients.
     """
     from scipy.sparse import coo_array
 
@@ -1007,7 +1019,7 @@ def _build_aggregated_model(
         classes, remaining_count, tau, decision_end, plan_end
     )
     if not class_ids or not options:
-        raise ValueError(f"tau={tau}没有进入当前模型的任务类/候选")
+        raise ValueError(f"tau={tau} not included in current model: task classes/candidates")
 
     max_finish = max(option.finish_hour for option in options)
     resource_end = min(
@@ -1066,7 +1078,7 @@ def _build_aggregated_model(
     gpu_offset = C
     ai_offset = gpu_offset + R
     energy_offset = ai_offset + R
-    # 每个目标时空键仅两行：B>=F-RE；W>=RE-F-ExportLimit。
+    # Only two rows per time/region key: B>=F-RE and W>=RE-F-ExportLimit.
     n_rows = energy_offset + (2 * O if include_energy_variables else 0)
 
     lower = np.full(n_rows, -np.inf, dtype=np.float64)
@@ -1138,7 +1150,7 @@ def _build_aggregated_model(
             if global_renewable > FLOAT_EPS:
                 objective_vectors["RenewableUnusedRate"][w_indices[k]] = 1.0 / global_renewable
 
-    # 直接按持续时间模式写稀疏系数，避免为每个候选缓存 overlap 元组。
+    # Write sparse coefficients from duration patterns without per-candidate overlap caches.
     for j, option in enumerate(options):
         task_class = class_lookup[option.class_id]
         add_coef(class_row[option.class_id], j, 1.0)
@@ -1164,7 +1176,7 @@ def _build_aggregated_model(
             key = (int(hour), option.target_region)
             pos = resource_pos.get(key)
             if pos is None:
-                raise ValueError(f"候选资源占用超出当前资源范围：{key}")
+                raise ValueError(f"Candidate resource occupancy exceeds the current resource range: {key}")
             gpu_contrib = task_class.gpu_demand * overlap
             ai_contrib = task_class.task_power_mw * overlap
             pue = float(resource_lookup[key].PUE)
@@ -1224,17 +1236,17 @@ def _objective_value(model: AggregatedModel, metric: str, vector: np.ndarray) ->
 
 
 # =============================================================================
-# 6. LP/MILP 求解器封装
+# 6. LP/MILP solver wrappers
 # =============================================================================
 
 def _prepare_lp_problem(
     model: AggregatedModel,
 ) -> tuple[Any | None, np.ndarray | None, Any | None, np.ndarray | None, np.ndarray]:
-    """一次性把统一双边约束转换为 linprog 形式，供四个全局锚点复用。"""
+    """Convert unified two-sided constraints to linprog form once for all four global anchors."""
     a_ub, b_ub, a_eq, b_eq = _linear_constraint_components(
         model.matrix, model.lower, model.upper
     )
-    # Nx2 ndarray 避免 list(zip(...)) 为每个变量创建 Python tuple。
+    # An Nx2 ndarray avoids a Python tuple per variable from list(zip(...)).
     bounds = np.column_stack(
         (model.variable_lower, model.variable_upper)
     ).astype(np.float64, copy=False)
@@ -1279,7 +1291,7 @@ def _solve_lp_optimal_prepared(
     elapsed = time.perf_counter() - started
     if int(result.status) != 0 or result.x is None:
         raise RuntimeError(
-            f"{label}未证明连续 LP 最优，不能作为理想下界："
+            f"{label}Continuous LP optimality is unproven; it cannot serve as an ideal lower bound: "
             f"status={result.status}; message={result.message}"
         )
     vector = np.asarray(result.x, dtype=np.float64)
@@ -1302,7 +1314,7 @@ def _solve_lp_optimal(
     progress_interval: float,
     time_limit: float | None,
 ) -> SolveResult:
-    """兼容普通LP调用；全局四锚点应使用 prepared 版本复用矩阵切分。"""
+    """Support ordinary LP calls; use the prepared variant to reuse matrix splits across four anchors."""
     prepared = _prepare_lp_problem(model)
     return _solve_lp_optimal_prepared(
         objective=objective,
@@ -1316,7 +1328,7 @@ def _extra_linear_constraint(
     n_variables: int,
     extra_rows: list[tuple[dict[int, float], float, float]] | None,
 ):
-    """把少量附加约束单独构造，避免 vstack 复制整张主矩阵。"""
+    """Build a few extra constraints separately to avoid copying the full matrix with vstack."""
     if not extra_rows:
         return None
     from scipy.optimize import LinearConstraint
@@ -1342,11 +1354,12 @@ def _solve_milp_adaptive(
     allow_infeasible: bool = False,
     retry_emergency: bool = True,
 ) -> SolveResult:
-    """单次 HiGHS MILP 求解。
+    """A single HiGHS MILP solve.
 
-    原版 180→360→720... 会在 SciPy ``milp`` 中从头重启，不能复用上一轮
-    分支树；8GB版直接给最终保护限时，HiGHS 一旦达到目标 gap 会自行提前停止。
-    因此数学精度不变，同时避免重复分支定界和重复内存分配。
+    The old 180->360->720 sequence restarts SciPy ``milp`` without reusing the
+    branch tree. This version passes the final protection time limit directly;
+    HiGHS stops early once the target gap is met. Mathematical precision is
+    unchanged while repeated branching and memory allocation are avoided.
     """
     from scipy.optimize import Bounds, LinearConstraint, milp
 
@@ -1367,11 +1380,11 @@ def _solve_milp_adaptive(
         else main_constraint
     )
 
-    # max_time_limit 只是保护上限；达到 mip_rel_gap 时 HiGHS 会提前结束。
+    # max_time_limit is a protection ceiling; HiGHS stops early on reaching mip_rel_gap.
     used_limit = float(max(max_time_limit, initial_time_limit))
-    _memory_guard(f"{label}-MILP求解前", hard=True)
+    _memory_guard(f"{label}-before-MILP-solve", hard=True)
     logging.info(
-        "%s开始：变量=%d，整数计数变量=%d，约束=%d，保护限时=%.0fs，gap=%.4g。",
+        "%s started: variables=%d, integer count variables=%d, constraints=%d, protection limit=%.0fs, gap=%.4g.",
         label,
         len(model.variable_lower),
         int(np.sum(model.integrality[: model.option_count] == 1)),
@@ -1400,7 +1413,7 @@ def _solve_milp_adaptive(
         if (not retry_emergency) or used_limit >= EMERGENCY_SOLVER_TIME_LIMIT:
             break
         logging.warning(
-            "%s在%.0fs限时内没有返回整数可行解；按文档自动延长到%.0fs重试。",
+            "%s found no integer feasible solution within %.0fs; automatically extending to %.0fs as specified.",
             label,
             used_limit,
             EMERGENCY_SOLVER_TIME_LIMIT,
@@ -1422,12 +1435,12 @@ def _solve_milp_adaptive(
                 time_limit_used=used_limit,
             )
         raise RuntimeError(
-            f"{label}没有返回可行解：status={result.status}; message={result.message}"
+            f"{label} returned no feasible solution: status={result.status}; message={result.message}"
         )
 
     if int(result.status) not in (0, 1):
         raise RuntimeError(
-            f"{label}失败：status={result.status}; message={result.message}"
+            f"{label} failed: status={result.status}; message={result.message}"
         )
 
     vector = np.asarray(result.x, dtype=np.float64)
@@ -1435,13 +1448,13 @@ def _solve_milp_adaptive(
     if integer_mask.any():
         values = vector[: model.option_count][integer_mask]
         if np.max(np.abs(values - np.rint(values))) > INTEGER_TOL:
-            raise RuntimeError(f"{label}返回的 H 区计数变量未形成整数解")
+            raise RuntimeError(f"{label} returned noninteger H-interval count variables")
 
     if int(result.status) == 1 and not (
         math.isfinite(gap) and gap <= mip_rel_gap + FLOAT_EPS
     ):
         logging.warning(
-            "%s达到保护限时，保留当前可行解；mip_gap=%s，目标gap=%g。",
+            "%s reached the protection limit; keeping its feasible solution; mip_gap=%s, target gap=%g.",
             label,
             gap,
             mip_rel_gap,
@@ -1461,14 +1474,14 @@ def _solve_milp_adaptive(
 
 
 def _require_highspy():
-    """阶段4需要原生 highspy；阶段2/3缓存仍与原版本完全兼容。"""
+    """Stage 4 requires native highspy; stage 2/3 caches remain compatible with the original version."""
     try:
         import highspy  # type: ignore
     except ImportError as exc:
         raise RuntimeError(
-            "阶段4原生HiGHS加速需要 highspy>=1.8。"
-            "请在当前项目环境执行 `uv add highspy` 或 `uv pip install highspy`，"
-            "然后使用同一条 --resume 命令继续；已有阶段2/3及阶段4检查点不会丢失。"
+            "Native HiGHS acceleration in stage 4 requires highspy>=1.8. "
+            "In the current environment run `uv add highspy` or `uv pip install highspy`, "
+            "then continue with the same --resume command; existing stage 2/3/4 checkpoints are retained."
         ) from exc
     return highspy
 
@@ -1502,12 +1515,13 @@ def _solve_milp_highspy(
     mip_start_values: np.ndarray | None = None,
     allow_infeasible: bool = False,
 ) -> SolveResult:
-    """用 highspy 原生 HiGHS 求解 MILP，并支持稀疏 partial MIP Start。
+    """Solve MILP with native highspy/HiGHS and sparse partial MIP Start support.
 
-    数学模型、变量边界、整数性与 SciPy milp 版本完全一致。区别仅在求解接口：
-    - 直接把 CSC 稀疏矩阵传给 HiGHS；
-    - 可用 setSolution(num_entries, index, value) 注入上一窗口的部分解；
-    - mip_max_start_nodes 控制补全 partial MIP start 的额外搜索成本。
+    The model, bounds, and integrality match the SciPy milp version. Only the
+    solver interface differs:
+    - pass CSC sparse matrices directly to HiGHS;
+    - inject a partial previous-window solution with setSolution(num_entries, index, value);
+    - control completion search with mip_max_start_nodes.
     """
     highspy = _require_highspy()
 
@@ -1544,9 +1558,9 @@ def _solve_milp_highspy(
     highs = highspy.Highs()
     status = highs.passModel(lp)
     if _highs_status_is_error(status, highspy):
-        raise RuntimeError(f"{label}向原生HiGHS传递模型失败：status={status}")
+        raise RuntimeError(f"{label}Failed to pass the model to native HiGHS: status={status}")
 
-    # min-max 的少量附加目标约束直接 addRows，避免 vstack 复制整张主矩阵。
+    # Add the few min-max constraints with addRows to avoid a full matrix copy through vstack.
     if extra_rows:
         extra_matrix = _sparse_from_rows(
             [row for row, _, _ in extra_rows], n_variables
@@ -1569,7 +1583,7 @@ def _solve_milp_highspy(
             np.asarray(extra_matrix.data, dtype=np.float64),
         )
         if _highs_status_is_error(add_status, highspy):
-            raise RuntimeError(f"{label}向原生HiGHS追加min-max约束失败：status={add_status}")
+            raise RuntimeError(f"{label}Failed to append min-max constraints to native HiGHS: status={add_status}")
         del extra_matrix, extra_lower, extra_upper
 
     used_limit = float(max(max_time_limit, initial_time_limit))
@@ -1588,7 +1602,7 @@ def _solve_milp_highspy(
         option_status = highs.setOptionValue(option_name, option_value)
         if _highs_status_is_error(option_status, highspy):
             raise RuntimeError(
-                f"{label}设置HiGHS参数失败：{option_name}={option_value!r}"
+                f"{label}Failed to set HiGHS option: {option_name}={option_value!r}"
             )
 
     start_count = 0
@@ -1596,7 +1610,7 @@ def _solve_milp_highspy(
         start_idx = np.asarray(mip_start_indices, dtype=np.int32)
         start_val = np.asarray(mip_start_values, dtype=np.float64)
         if len(start_idx) != len(start_val):
-            raise ValueError("MIP Start索引和值长度不一致")
+            raise ValueError("MIP Start indices and values have different lengths")
         valid = (
             (start_idx >= 0)
             & (start_idx < n_variables)
@@ -1612,20 +1626,20 @@ def _solve_milp_highspy(
             )
             if _highs_status_is_error(start_status, highspy):
                 logging.warning(
-                    "%s的MIP Start被HiGHS拒绝，自动无热启动继续；条目=%d，status=%s。",
+                    "HiGHS rejected the MIP Start for %s; continuing without warm start; entries=%d, status=%s.",
                     label, len(start_idx), start_status,
                 )
             else:
                 start_count = int(len(start_idx))
                 logging.info(
-                    "%s注入稀疏MIP Start：变量条目=%d，补全节点上限=%d。",
+                    "%s sparse MIP Start injected: variable entries=%d, completion node limit=%d.",
                     label, start_count, HIGHS_MIP_MAX_START_NODES,
                 )
 
-    _memory_guard(f"{label}-原生HiGHS求解前", hard=True)
+    _memory_guard(f"{label}-before-native-HiGHS-solve", hard=True)
     logging.info(
-        "%s开始[highspy]：变量=%d，整数计数变量=%d，约束=%d，"
-        "MIPStart=%d，保护限时=%.0fs，gap=%.4g。",
+        "%s started [highspy]: variables=%d, integer count variables=%d, constraints=%d, "
+        "MIPStart=%d, protection limit=%.0fs, gap=%.4g.",
         label,
         n_variables,
         int(np.sum(model.integrality[: model.option_count] == 1)),
@@ -1643,7 +1657,7 @@ def _solve_milp_highspy(
     )
     elapsed = time.perf_counter() - started
     if _highs_status_is_error(run_status, highspy):
-        raise RuntimeError(f"{label}原生HiGHS运行失败：status={run_status}")
+        raise RuntimeError(f"{label}Native HiGHS run failed: status={run_status}")
 
     model_status = highs.getModelStatus()
     status_text = str(highs.modelStatusToString(model_status))
@@ -1687,11 +1701,11 @@ def _solve_milp_highspy(
                 elapsed_seconds=elapsed,
                 time_limit_used=used_limit,
             )
-        raise RuntimeError(f"{label}被HiGHS证明不可行：{status_text}")
+        raise RuntimeError(f"{label} was proven infeasible by HiGHS: {status_text}")
 
     if not has_feasible_solution:
         raise RuntimeError(
-            f"{label}没有返回整数可行解：model_status={status_text}; "
+            f"{label} returned no integer feasible solution: model_status={status_text}; "
             f"primal_status={primal_status_text}"
         )
 
@@ -1700,23 +1714,23 @@ def _solve_milp_highspy(
     if integer_mask.any():
         values = vector[: model.option_count][integer_mask]
         if np.max(np.abs(values - np.rint(values))) > INTEGER_TOL:
-            raise RuntimeError(f"{label}返回的H区计数变量未形成整数解")
+            raise RuntimeError(f"{label} returned noninteger H-interval count variables")
 
     if model_status == optimal_status:
         scipy_like_status = 0
     elif model_status in limit_statuses:
         scipy_like_status = 1
     else:
-        # 某些HiGHS版本可能用其他“有可行解但提前终止”状态；按限时解处理，
-        # 后续仍由 balanced 的 gap 接受阈值决定是否允许提交。
+        # Some HiGHS versions use other early-termination statuses with feasible solutions; treat these as time-limited.
+        # The balanced gap acceptance threshold still determines whether a result may be committed.
         scipy_like_status = 1
 
     if scipy_like_status == 1 and not (
         math.isfinite(gap) and gap <= mip_rel_gap + FLOAT_EPS
     ):
         logging.warning(
-            "%s原生HiGHS提前终止，保留当前可行解；model_status=%s，"
-            "mip_gap=%s，目标gap=%g。",
+            "%s native HiGHS terminated early; retaining its feasible solution; model_status=%s, "
+            "mip_gap=%s, target gap=%g.",
             label, status_text, gap, mip_rel_gap,
         )
 
@@ -1744,13 +1758,14 @@ def _baseline_partial_mip_start_for_model(
     existing_indices: np.ndarray | None = None,
     existing_values: np.ndarray | None = None,
 ) -> tuple[np.ndarray | None, np.ndarray | None, dict[str, int]]:
-    """用纯算力基准为当前窗口构造稀疏 partial MIP Start。
+    """Build a sparse partial MIP Start for the current window from the compute-only baseline.
 
-    只映射“当前仍未提交”的 TaskID，并且只使用当前模型中真实存在的
-    (class, region, start) 变量。若上一窗口 K 区热启动已覆盖某任务类，
-    则该类优先使用上一窗口信息，基准不再重复注入，避免类等式冲突。
+    Map only uncommitted TaskID values and actual (class, region, start) variables
+    in the current model. Prefer previous-window K information for any class
+    already covered by that warm start; do not reinject baseline entries for it,
+    avoiding conflicts with class equalities.
 
-    这不会固定任何变量；HiGHS 仍可完全修改该起始方案。
+    No variable is fixed; HiGHS may completely revise this initial solution.
     """
     stats = {
         "BaselineMappedEntries": 0,
@@ -1808,7 +1823,7 @@ def _baseline_partial_mip_start_for_model(
             value = min(float(value), upper)
             if value <= BALANCED_WARMSTART_POSITIVE_TOL:
                 continue
-            # H 区必须给整数计数；基准映射本身就是整数任务计数。
+            # H-interval counts must be integers; baseline mappings already count integer tasks.
             if model.integrality[j]:
                 value = float(round(value))
             indices.append(int(j))
@@ -1820,7 +1835,7 @@ def _baseline_partial_mip_start_for_model(
     if not indices:
         return None, None, stats
 
-    # 相同变量若意外重复，只保留最后一个；正常情况下不会发生。
+    # Keep the last occurrence if a variable is accidentally repeated; normally this never happens.
     merged: dict[int, float] = {}
     for idx, value in zip(indices, values):
         merged[int(idx)] = float(value)
@@ -1843,13 +1858,13 @@ def _save_balanced_warmstart(
     vector: np.ndarray,
     source_window_id: int,
 ) -> None:
-    """保存当前窗口 K 区的非零任务变量，供下一窗口作为 partial MIP Start。
+    """Save nonzero K-interval task variables as a partial MIP Start for the next window.
 
-    K 区在当前窗口是连续前瞻；下一窗口中其前24小时会进入整数H区。
-    保存时不做取整，加载到下一窗口时：
-    - 对已经进入H区的变量，仅注入数值上已接近整数的条目；
-    - 对仍处于K区的连续变量，可直接注入原连续值。
-    这不会固定任何决策，只给HiGHS一个可修复的起点。
+    K is continuous lookahead in this window; its first 24 hours become integer H
+    in the next window. Do not round when saving. On loading:
+    - inject H variables only when already numerically close to integers;
+    - inject original continuous values for variables still in K.
+    This fixes no decisions; it gives HiGHS a repairable starting point.
     """
     CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
     region_code = {region: i for i, region in enumerate(bundle.regions)}
@@ -1886,7 +1901,7 @@ def _save_balanced_warmstart(
     )
     tmp.replace(path)
     logging.info(
-        "均衡窗口%d已保存下一窗口MIP Start候选：K区非零条目=%d，目标tau=%d。",
+        "Balanced window %d saved next-window MIP Start candidates: nonzero K entries=%d, target tau=%d.",
         source_window_id, len(values), model.decision_end,
     )
 
@@ -1898,9 +1913,10 @@ def _load_balanced_warmstart_for_model(
     window_id: int,
     tau: int,
 ) -> tuple[np.ndarray | None, np.ndarray | None, dict[str, int]]:
-    """把上一窗口 K 区解映射到当前模型变量索引。
+    """Map the previous-window K solution to current model variable indices.
 
-    主检查点不依赖此文件；文件缺失/陈旧/损坏时只是不热启动，不影响续算。
+    Main checkpoints are independent of this file. Missing, stale, or corrupt
+    files disable warm starts only and do not prevent resumption.
     """
     stats = {
         "SavedEntries": 0,
@@ -1923,13 +1939,13 @@ def _load_balanced_warmstart_for_model(
             return None, None, stats
         if int(data["source_window_id"][0]) != window_id - 1:
             logging.info(
-                "当前MIP Start来自窗口%d，而当前需要窗口%d；忽略陈旧热启动文件。",
+                "MIP Start comes from window %d, but window %d is required; ignoring the stale file.",
                 int(data["source_window_id"][0]), window_id - 1,
             )
             return None, None, stats
         if int(data["target_tau"][0]) != tau:
             logging.info(
-                "当前MIP Start目标tau=%d，与当前tau=%d不一致；忽略。",
+                "MIP Start target tau=%d differs from current tau=%d; ignoring it.",
                 int(data["target_tau"][0]), tau,
             )
             return None, None, stats
@@ -1986,13 +2002,13 @@ def _load_balanced_warmstart_for_model(
             stats,
         )
     except Exception as exc:
-        logging.warning("均衡MIP Start读取/映射失败，忽略热启动并正常求解：%s", exc)
+        logging.warning("Balanced MIP Start loading/mapping failed; solving without warm start: %s", exc)
         return None, None, stats
 
 
 
 # =============================================================================
-# 7. TaskID 池、计数提交和全时域复算
+# 7. TaskID pools, count commitment, and full-horizon recomputation
 # =============================================================================
 
 def _make_task_pools(classes: list[ExactTaskClass]) -> dict[int, list[str]]:
@@ -2006,14 +2022,14 @@ def _remove_committed_from_pools(
     if committed.empty:
         return
     if "ExactTaskClassID" not in committed.columns:
-        raise ValueError("检查点缺少 ExactTaskClassID，无法恢复聚合任务池")
+        raise ValueError("Checkpoint lacks ExactTaskClassID; aggregated task pools cannot be restored")
     grouped = committed.groupby("ExactTaskClassID")["TaskID"].apply(list)
     for class_id_raw, task_ids in grouped.items():
         class_id = int(class_id_raw)
         existing = set(pools[class_id])
         remove = set(str(x) for x in task_ids)
         if not remove.issubset(existing):
-            raise RuntimeError(f"检查点中任务类{class_id}包含无法恢复的 TaskID")
+            raise RuntimeError(f"Checkpoint task class {class_id} contains TaskID values that cannot be restored")
         pools[class_id] = [task_id for task_id in pools[class_id] if task_id not in remove]
 
 
@@ -2038,7 +2054,7 @@ def _commit_h_counts(
         pool = pools[option.class_id]
         if len(pool) < count:
             raise RuntimeError(
-                f"任务类{option.class_id}TaskID不足：需要{count}，剩余{len(pool)}"
+                f"Task class {option.class_id} has insufficient TaskID values: required {count}; remaining {len(pool)}"
             )
         chosen = pool[:count]
         del pool[:count]
@@ -2231,7 +2247,7 @@ def _energy_contribution(
 
 
 # =============================================================================
-# 8. 聚合纯算力基准：全题只求一次
+# 8. Aggregated compute-only baseline: solve once for all questions
 # =============================================================================
 
 
@@ -2239,10 +2255,12 @@ def _baseline_analytic_zero_migration_earliest(
     model: AggregatedModel,
     class_lookup: dict[int, ExactTaskClass],
 ) -> SolveResult | None:
-    """若“全部本地 + 当前模型内最早合法启动”已可行，则直接得到字典序全局最优。
+    """All-local earliest-valid-start feasibility directly proves lexicographic global optimality.
 
-    一级迁移GPU工作量的理论下界是0；在保持0迁移条件下，每类任务选择最早
-    合法时刻又逐项最小化等待时间。因此若该构造满足全部容量约束，无需调用MILP。
+    Migrated GPU workload has a theoretical lower bound of zero. With zero
+    migration fixed, selecting the earliest valid start for each class also
+    minimizes each waiting-time term. If all capacity constraints hold, no MILP
+    call is required.
     """
     vector = np.zeros(len(model.variable_lower), dtype=np.float64)
     by_class: dict[int, list[int]] = {}
@@ -2310,7 +2328,7 @@ def _solve_baseline_window(
             }
         )
         logging.info(
-            "基准窗口%d解析快路命中：零迁移且最早启动已满足全部容量约束，跳过2次MILP。",
+            "Baseline window %d analytical shortcut succeeded: zero migration and earliest starts satisfy all capacity constraints; skipping two MILPs.",
             window_id,
         )
         return analytic, records
@@ -2318,7 +2336,7 @@ def _solve_baseline_window(
     stage1 = _solve_milp_adaptive(
         model,
         model.migration_objective,
-        label=f"基准窗口{window_id}-一级迁移GPU工作量",
+        label=f"Baseline window {window_id}-stage-1-migrated-GPU-workload",
         mip_rel_gap=mip_rel_gap,
         initial_time_limit=initial_time_limit,
         max_time_limit=max_time_limit,
@@ -2349,7 +2367,7 @@ def _solve_baseline_window(
     stage2 = _solve_milp_adaptive(
         model,
         model.wait_objective,
-        label=f"基准窗口{window_id}-二级等待时间",
+        label=f"Baseline window {window_id}-stage-2-waiting-time",
         mip_rel_gap=mip_rel_gap,
         initial_time_limit=initial_time_limit,
         max_time_limit=max_time_limit,
@@ -2428,9 +2446,9 @@ def _load_checkpoint(
     if state.get("schema_version") != CHECKPOINT_SCHEMA_VERSION:
         return None
     if state.get("task_signature") != _task_signature(bundle):
-        raise RuntimeError(f"{mode}检查点任务数据已变化，拒绝恢复")
+        raise RuntimeError(f"{mode} checkpoint task data changed; restoration refused")
     if int(state.get("decision_window", -1)) != decision_window or int(state.get("lookahead", -1)) != lookahead:
-        raise RuntimeError(f"{mode}检查点的 H/K 与当前参数不同，拒绝恢复")
+        raise RuntimeError(f"{mode} checkpoint H/K differs from current parameters; restoration refused")
 
     def read_optional(path: Path) -> pd.DataFrame:
         if not path.is_file() or path.stat().st_size == 0:
@@ -2481,7 +2499,7 @@ def _run_baseline_rollout(
             if checkpoint["state"].get("status") == "COMPLETED":
                 profile, metrics = _schedule_profile(bundle, assignments)
                 return assignments, pd.DataFrame(window_records), pd.DataFrame(solver_records), metrics
-            logging.info("恢复纯算力基准：已完成任务=%d，下一窗口=%d，tau=%d。", len(assignments), window_id, tau)
+            logging.info("Compute-only baseline restored: completed tasks=%d, next window=%d, tau=%d.", len(assignments), window_id, tau)
 
     while any(pools.values()) and tau < TERMINAL_HOUR:
         if max_windows is not None and window_id >= max_windows:
@@ -2503,7 +2521,7 @@ def _run_baseline_rollout(
                 include_energy_variables=False,
             )
         except ValueError as exc:
-            if "没有进入当前模型" in str(exc):
+            if "not included in current model" in str(exc):
                 tau = decision_end
                 window_id += 1
                 continue
@@ -2562,7 +2580,7 @@ def _run_baseline_rollout(
             lookahead=lookahead,
         )
         logging.info(
-            "基准窗口%d完成：tau=%d，候选=%d，固定=%d，剩余=%d。",
+            "Baseline window %d completed: tau=%d, candidates=%d, fixed=%d, remaining=%d.",
             window_id, tau, candidate_count, len(committed), remaining_after,
         )
         tau = next_tau
@@ -2573,7 +2591,7 @@ def _run_baseline_rollout(
             profile, metrics = _schedule_profile(bundle, assignments)
             return assignments, pd.DataFrame(window_records), pd.DataFrame(solver_records), metrics
         remaining_ids = [task_id for values in pools.values() for task_id in values]
-        raise RuntimeError(f"纯算力基准滚动结束后仍有{len(remaining_ids)}个任务未固定")
+        raise RuntimeError(f"Compute-only rolling baseline ended with {len(remaining_ids)} tasks still unfixed")
 
     _write_checkpoint(
         bundle=bundle,
@@ -2592,7 +2610,7 @@ def _run_baseline_rollout(
 
 
 # =============================================================================
-# 9. 全局连续理想点与统一定标
+# 9. Global continuous ideal points and unified calibration
 # =============================================================================
 
 
@@ -2603,11 +2621,13 @@ def _recompute_global_metrics_from_aggregated_vector(
     class_lookup: dict[int, ExactTaskClass],
     vector: np.ndarray,
 ) -> dict[str, float]:
-    """仅由聚合任务变量重新做物理能源结算。
+    """Recompute physical energy settlement from aggregated task variables alone.
 
-    全局连续理想点中，未进入当前单目标的 B/W 辅助变量可能存在多重最优，
-    因而 payoff matrix 不能直接读取这些辅助变量；这里统一由 y 产生的设施负荷
-    重新计算购电、外送与弃电，保证四个锚点的交叉指标具有确定物理含义。
+    Global continuous ideal points may have multiple optimal values for B/W
+    auxiliaries outside the active objective. Do not read those auxiliaries
+    directly for the payoff matrix. Recompute purchases, exports, and curtailment
+    from y-induced facility load so cross-metrics at all anchors have a
+    deterministic physical interpretation.
     """
 
     frame = bundle.region_hour.copy().sort_values(["Hour", "Region"], kind="stable").reset_index(drop=True)
@@ -2653,11 +2673,11 @@ def _cg_seed_columns_from_baseline(
     baseline_assignments: pd.DataFrame,
     class_lookup: dict[int, ExactTaskClass],
 ) -> list[CGColumn]:
-    """用已验证纯算力基准作为列生成受限主问题的可行初始列。"""
+    """Use the verified compute-only baseline as feasible initial columns for the restricted master problem."""
     required = {"ExactTaskClassID", "TargetRegion", "NetworkLatency_ms", "StartHour"}
     missing = required - set(baseline_assignments.columns)
     if missing:
-        raise ValueError(f"纯算力基准缺少列生成初始列字段：{sorted(missing)}")
+        raise ValueError(f"Compute-only baseline lacks initial column-generation fields: {sorted(missing)}")
     columns: dict[tuple[int, str, int], CGColumn] = {}
     for row in baseline_assignments.itertuples(index=False):
         class_id = int(row.ExactTaskClassID)
@@ -2676,7 +2696,7 @@ def _cg_seed_columns_from_baseline(
     missing_classes = set(class_lookup) - covered
     if missing_classes:
         raise RuntimeError(
-            f"纯算力基准未覆盖{len(missing_classes)}个任务类，无法作为全局LP列生成可行初始解"
+            f"Compute-only baseline does not cover {len(missing_classes)} task classes; it cannot initialize a feasible global column-generation LP"
         )
     return sorted(columns.values(), key=lambda c: c.key)
 
@@ -2692,7 +2712,7 @@ def _cg_full_resource_environment(bundle: InputBundle) -> dict[str, Any]:
         pos = np.flatnonzero(region_array == region).astype(np.int64, copy=False)
         hours = frame.loc[pos, "Hour"].to_numpy(dtype=np.int64)
         if not np.array_equal(hours, np.arange(MAIN_START_HOUR, TAIL_END_HOUR + 1)):
-            raise RuntimeError(f"区域{region}全局列生成时域不完整")
+            raise RuntimeError(f"Region {region} has an incomplete global column-generation horizon")
         region_positions[region] = pos
     env = {
         "frame": frame,
@@ -2712,8 +2732,8 @@ def _cg_full_resource_environment(bundle: InputBundle) -> dict[str, Any]:
         "max_grid": frame["MaxGridImport_MW"].to_numpy(dtype=np.float64),
     }
     env["base_facility"] = env["non_ai"] * env["pue"]
-    # 物理下界：即使每个时空单元都把 AI 功率推到有效容量上限，仍无法吸收的
-    # 新能源也必然弃用。它不依赖任务分配，因此是 RenewableUnusedRate 的严格下界。
+    # Physical lower bound: renewable energy that cannot be absorbed even at full effective AI capacity
+    # must be curtailed. This is a strict RenewableUnusedRate lower bound independent of task assignments.
     max_facility = env["base_facility"] + env["pue"] * env["effective_ai"]
     unavoidable = np.maximum(
         env["renewable"] - max_facility - env["export_limit"], 0.0
@@ -2732,15 +2752,16 @@ def _cg_build_master(
     metric: str,
     env: dict[str, Any],
 ):
-    """构造低内存受限主LP；不同锚点只保留真正需要的能源上图变量/约束。
+    """Build a low-memory restricted master LP with only objective-relevant energy epigraph variables.
 
     Cost: GPU + AI + B + W
     Carbon: GPU + AI + B
     RenewableUnusedRate: GPU + AI + W
     MeanLatency: GPU + AI
 
-    由于购电上限已严格并入 Effective_AI_IT_Capacity_MW_Exact，且题面能源结算
-    满足单调性条件，这与完整 B/W/X 表达在 y 决策和最优值上等价。
+    Grid-purchase limits are already included in Effective_AI_IT_Capacity_MW_Exact,
+    and settlement satisfies monotonicity conditions. Thus y decisions and optimal
+    values equal those of the complete B/W/X formulation.
     """
     from scipy.sparse import coo_array
 
@@ -2757,7 +2778,7 @@ def _cg_build_master(
     elif metric == "MeanLatency":
         has_b, has_w = False, False
     else:
-        raise ValueError(f"未知CG目标：{metric}")
+        raise ValueError(f"Unknown CG objective: {metric}")
 
     next_idx = J
     b_idx = None
@@ -2770,7 +2791,7 @@ def _cg_build_master(
         next_idx += R
     n_variables = next_idx
 
-    # 行布局：GPU、AI，以及按目标需要的B/W下图。
+    # Row layout: GPU, AI, and objective-dependent B/W epigraphs.
     gpu_offset = 0
     ai_offset = R
     row_count = 2 * R
@@ -2826,7 +2847,7 @@ def _cg_build_master(
         if frac < FLOAT_EPS:
             frac = 0.0
 
-        # 直接根据区域连续Hour布局定位，避免字典查找与frame.iloc。
+        # Use contiguous regional Hour layouts for direct indexing instead of dictionaries or frame.iloc.
         for h in range(q):
             pos = int(pos_region[start + h])
             gpu = task_class.gpu_demand
@@ -2873,8 +2894,8 @@ def _cg_build_master(
         if metric == "Cost":
             c[w_idx] = env["sell"]
         elif metric == "RenewableUnusedRate":
-            # 乘以固定正数 TotalRenewable：由“未利用率”改为“未利用MWh”求解，
-            # 最优解完全相同，但避免 1/TotalRenewable 导致的微小系数和对偶病态。
+            # Multiply by positive TotalRenewable to optimize unused MWh instead of its rate.
+            # The optimum is unchanged, avoiding tiny 1/TotalRenewable coefficients and dual ill-conditioning.
             c[w_idx] = 1.0
         for pos in range(R):
             rr_ub.append(int(w_offset + pos))
@@ -2945,12 +2966,13 @@ def _cg_price_columns(
     max_new_columns: int,
     columns_per_class: int,
 ) -> tuple[list[CGColumn], float, float]:
-    """完整候选流式定价。
+    """Stream pricing over the complete candidate set.
 
-    返回：(新增列, 最负遗漏列约化成本, 对偶可行修正量)。
-    对每个任务类同时计算完整候选的最小约化成本 r_c。将受限主问题的
-    类等式对偶变量下调 -min(0,r_c) 后即可得到完整主问题的可行对偶，故
-    sum n_c*min(0,r_c) 是严格的目标下界修正量。
+    Return (new columns, most negative omitted reduced cost, dual-feasibility
+    correction). For each class compute the minimum reduced cost r_c across all
+    candidates. Lowering its restricted-master equality dual by -min(0,r_c) yields
+    a feasible complete-master dual, so sum n_c*min(0,r_c) is a strict objective
+    lower-bound correction.
     """
     R = int(layout["R"])
     d_gpu = ub_dual[layout["gpu_offset"]:layout["gpu_offset"] + R]
@@ -3038,7 +3060,7 @@ def _cg_price_columns(
             if reduced_all.size:
                 class_min_rc = min(class_min_rc, float(np.min(reduced_all)))
 
-            # 新列只从当前主问题之外挑选；对偶证书则使用上面的完整候选最小值。
+            # Choose new columns outside the current master; the dual certificate uses complete-set reduced-cost minima.
             reduced = reduced_all.copy()
             for active_start in active_by_class_region.get((class_id, target_region), ()):
                 idx = active_start - earliest
@@ -3149,10 +3171,11 @@ def _cg_prune_column_pool(
     reserve_for_new: int,
     pool_limit: int,
 ) -> tuple[list[CGColumn], int]:
-    """当列池过大时删除当前LP中无贡献的非基列。
+    """Remove nonbasic columns with no contribution to the current LP when the pool is too large.
 
-    删除并不改变完整候选集：下一轮定价仍扫描全部合法列，任何再次变为负约化成本
-    的已删列都会重新生成。因此这是内存管理，不是候选删减近似。
+    This does not alter the complete candidate set. Pricing still scans all valid
+    columns next iteration and regenerates removed columns with negative reduced
+    costs. This is memory management, not approximate candidate pruning.
     """
     J = len(columns)
     dynamic_limit = max(pool_limit, class_count + 8000)
@@ -3163,7 +3186,7 @@ def _cg_prune_column_pool(
     weights = np.asarray(result.x[:J], dtype=np.float64)
     mandatory = set(np.flatnonzero(weights > CG_POSITIVE_COLUMN_TOL).tolist())
 
-    # 数值保护：每个任务类至少保留当前权重最大的1列，确保删列后受限主问题仍可行。
+    # Numerical guard: retain at least the highest-weight column in each class to preserve master feasibility.
     best_by_class: dict[int, tuple[float, int]] = {}
     for j, column in enumerate(columns):
         w = float(weights[j])
@@ -3250,7 +3273,7 @@ def _load_cg_iteration_checkpoint(
             )
         return iteration, columns
     except Exception as exc:
-        logging.warning("列生成迭代检查点读取失败，忽略并重建：%s", exc)
+        logging.warning("Column-generation iteration checkpoint could not be read; ignoring and rebuilding: %s", exc)
         return None
 
 
@@ -3333,7 +3356,7 @@ def _load_cg_anchor_checkpoint(
             )
         return meta, columns
     except Exception as exc:
-        logging.warning("锚点检查点读取失败，忽略：%s", exc)
+        logging.warning("Anchor checkpoint could not be read; ignoring: %s", exc)
         return None
 
 
@@ -3356,7 +3379,7 @@ def _solve_global_anchor_column_generation(
         saved_iteration, columns = checkpoint
         start_iteration = saved_iteration + 1
         logging.info(
-            "恢复全局LP列生成 %s：从迭代%d后的列池继续，列=%d。",
+            "Global LP column generation restored for %s: continue after iteration %d with %d columns.",
             metric, saved_iteration, len(columns),
         )
     else:
@@ -3376,7 +3399,7 @@ def _solve_global_anchor_column_generation(
     pool_limit = CG_RENEWABLE_COLUMN_POOL_LIMIT if renewable else CG_COLUMN_POOL_LIMIT
 
     for iteration in range(start_iteration, CG_MAX_ITERATIONS + 1):
-        _memory_guard(f"CG-{metric}-迭代{iteration}-建模前")
+        _memory_guard(f"CG-{metric}-iteration-{iteration}-before-model-build")
         c, A_ub, b_ub, A_eq, b_eq, bounds, layout = _cg_build_master(
             bundle=bundle,
             class_lookup=class_lookup,
@@ -3385,17 +3408,17 @@ def _solve_global_anchor_column_generation(
             env=env,
         )
         logging.info(
-            "全局LP列生成 %s：迭代=%d，主问题列=%d，变量=%d，约束=%d，非零=%d。",
+            "Global LP column generation %s: iteration=%d, master columns=%d, variables=%d, constraints=%d, nonzeros=%d.",
             metric, iteration, len(columns), len(c),
             A_ub.shape[0] + A_eq.shape[0], A_ub.nnz + A_eq.nnz,
         )
-        _memory_guard(f"CG-{metric}-迭代{iteration}-求解前", hard=True)
+        _memory_guard(f"CG-{metric}-iteration-{iteration}-before-solve", hard=True)
 
         options: dict[str, Any] = {"disp": False, "presolve": True}
         if lp_time_limit is not None and lp_time_limit > 0:
             options["time_limit"] = float(lp_time_limit)
 
-        label = f"Q2全局连续理想点-{metric}-CG{iteration}"
+        label = f"Q2-global-continuous-ideal-point-{metric}-CG{iteration}"
         result = _run_with_heartbeat(
             linprog, label=label, interval=progress_interval,
             c=c, A_ub=A_ub, b_ub=b_ub, A_eq=A_eq, b_eq=b_eq,
@@ -3403,7 +3426,7 @@ def _solve_global_anchor_column_generation(
         )
         if int(result.status) != 0 or result.x is None:
             raise RuntimeError(
-                f"{label}受限主问题未证明最优：status={result.status}; message={result.message}"
+                f"{label} restricted master optimality is unproven: status={result.status}; message={result.message}"
             )
 
         eq_dual = np.asarray(result.eqlin.marginals, dtype=np.float64)
@@ -3434,13 +3457,13 @@ def _solve_global_anchor_column_generation(
             certified_lb_rate = min(certified_lb_rate, rmp_rate)
             certified_gap = max(0.0, rmp_rate - certified_lb_rate)
             logging.info(
-                "RenewableUnusedRate证书：RMP=%.10g，LB=%.10g，abs_gap=%.3g，物理LB=%.10g。",
+                "RenewableUnusedRate certificate: RMP=%.10g, LB=%.10g, abs_gap=%.3g, physical LB=%.10g.",
                 rmp_rate, certified_lb_rate, certified_gap,
                 float(env["renewable_physical_lb_rate"]),
             )
 
         logging.info(
-            "全局LP列生成 %s：迭代=%d，活跃列=%d，新列=%d，最小约化成本=%.6g。",
+            "Global LP column generation %s: iteration=%d, active columns=%d, new columns=%d, minimum reduced cost=%.6g.",
             metric, iteration, len(columns), len(new_columns), last_min_rc,
         )
 
@@ -3465,8 +3488,8 @@ def _solve_global_anchor_column_generation(
                 gap = float(certified_gap)
                 status = "certified_dual_gap"
                 logging.info(
-                    "RenewableUnusedRate以严格上下界证书停止：可行值=%.10g，下界=%.10g，"
-                    "绝对差=%.3g <= %.3g。",
+                    "RenewableUnusedRate stopped with strict bound certificate: feasible value=%.10g, lower bound=%.10g, "
+                    "absolute difference=%.3g <= %.3g.",
                     float(metrics[metric]), ideal_lb, gap, CG_RENEWABLE_CERTIFIED_ABS_GAP,
                 )
             anchor = CGAnchorResult(
@@ -3487,7 +3510,7 @@ def _solve_global_anchor_column_generation(
         )
         if removed:
             logging.info(
-                "全局LP列池整理 %s：删除当前无贡献非基列=%d，%d→%d。",
+                "Global LP column pool cleanup %s: removed noncontributing nonbasic columns=%d, %d->%d.",
                 metric, removed, len(columns), len(pruned_columns),
             )
             columns = pruned_columns
@@ -3510,8 +3533,8 @@ def _solve_global_anchor_column_generation(
         bundle=bundle, metric=metric, iteration=CG_MAX_ITERATIONS, columns=columns
     )
     raise RuntimeError(
-        f"全局LP列生成-{metric}达到{CG_MAX_ITERATIONS}次迭代仍未满足完整定价/"
-        f"对偶证书停止条件（min_rc={last_min_rc}）；已保存迭代列池，下次--resume可继续。"
+        f"Global LP column generation-{metric} reached {CG_MAX_ITERATIONS} iterations without satisfying complete-pricing/"
+        f"dual-certificate stopping conditions (min_rc={last_min_rc}); iteration pool saved for continuation with --resume."
     )
 
 def _calibration_cache_path() -> Path:
@@ -3556,7 +3579,7 @@ def _compute_or_load_calibration(
                 scale={k: float(v) for k, v in data["scale"].items()},
                 active_metrics=tuple(data["active_metrics"]),
             )
-            logging.info("复用全局连续定标缓存：%s", path)
+            logging.info("Reusing global continuous calibration cache: %s", path)
             rows = [
                 {
                     "Objective": metric,
@@ -3573,7 +3596,7 @@ def _compute_or_load_calibration(
             return calibration, pd.DataFrame(rows)
 
     logging.info(
-        "阶段3：全局连续定标改用Dantzig-Wolfe列生成；完整候选流式定价，不再一次性展开全时域矩阵。"
+        "Stage 3: Dantzig-Wolfe global continuous calibration with streamed complete-candidate pricing, without full-horizon matrix expansion."
     )
     baseline_seed = _cg_seed_columns_from_baseline(baseline_assignments, class_lookup)
     seed_map = {column.key: column for column in baseline_seed}
@@ -3608,7 +3631,7 @@ def _compute_or_load_calibration(
             for column in positive_columns:
                 seed_map[column.key] = column
             logging.info(
-                "复用阶段3锚点缓存 %s：ideal_lb=%.12g，正列=%d。",
+                "Reusing stage-3 anchor cache %s: ideal_lb=%.12g, positive columns=%d.",
                 metric, ideal_lb[metric], len(positive_columns),
             )
             continue
@@ -3639,14 +3662,14 @@ def _compute_or_load_calibration(
             }
         )
         logging.info(
-            "全局理想点 %s：下界=%.12g，可行锚点=%.12g，CG迭代=%d，状态=%s。",
+            "Global ideal point %s: lower bound=%.12g, feasible anchor=%.12g, CG iterations=%d, status=%s.",
             metric, ideal_lb[metric], float(anchor.metrics[metric]),
             anchor.iterations, anchor.convergence_status,
         )
         for column, weight in zip(anchor.columns, anchor.weights):
             if float(weight) > CG_POSITIVE_COLUMN_TOL:
                 seed_map[column.key] = column
-        # 锚点函数内部已落盘，之后即使后续目标失败也不会丢失。
+        # The anchor function already saved its result, so later objective failures cannot lose it.
         del anchor
         gc.collect()
 
@@ -3664,7 +3687,7 @@ def _compute_or_load_calibration(
         if math.isfinite(diff) and diff > FLOAT_EPS:
             active.append(metric)
     if len(active) < 2:
-        raise RuntimeError("全局定标后有效目标不足2个，请检查基准与连续 payoff matrix")
+        raise RuntimeError("Fewer than two effective objectives after global calibration; inspect the baseline and continuous payoff matrix")
 
     calibration = GlobalCalibration(
         ideal_lb=ideal_lb,
@@ -3703,7 +3726,7 @@ def _compute_or_load_calibration(
 
 
 # =============================================================================
-# 10. 均衡滚动：每窗口仅一次 min z
+# 10. Balanced rolling: one min-z solve per window
 # =============================================================================
 
 def _baseline_latency_lookup(baseline_assignments: pd.DataFrame) -> dict[str, float]:
@@ -3795,19 +3818,19 @@ def _solve_balanced_minmax_window(
     previous_k_warmstart_available: bool = False,
 ) -> tuple[SolveResult, dict[str, float], list[dict[str, Any]]]:
     if model.z_index is None:
-        raise ValueError("均衡模型必须包含 z")
+        raise ValueError("The balanced model must contain z")
     extra_rows: list[tuple[dict[int, float], float, float]] = []
     estimate_constants: dict[str, float] = {}
     structural_lb_available = True
 
-    # 未来未进入当前计划域的部分沿用纯算力基准，因此估计的全局指标为：
+    # Future work outside the current horizon retains the compute-only baseline; estimated global metrics are:
     # f_hat = f_baseline_global + past_delta + f_scope(y) - f_scope_baseline。
-    # 对每个目标：
+    # For each objective:
     # d_m = constant_m + a_m^T x <= z。
-    # 当前Q2紧凑上图在已校验的 price>=sell>=0、carbon>=0 条件下，
-    # Cost/Carbon/Latency/Renewable 的 raw objective 系数都非负。
-    # 又因全部任务/能源变量下界为0，所以 d_m >= constant_m，
-    # 从而 z >= max_m constant_m 是不依赖LP求解的严格结构下界。
+    # Under the validated price>=sell>=0 and carbon>=0 conditions, the compact Q2 epigraph
+    # has nonnegative raw Cost/Carbon/Latency/Renewable objective coefficients.
+    # All task/energy variables have lower bound zero, so d_m >= constant_m;
+    # therefore z >= max_m constant_m is a strict structural lower bound requiring no LP solve.
     for metric in calibration.active_metrics:
         scale = calibration.scale[metric]
         raw_vector = model.objective_vectors[metric]
@@ -3842,9 +3865,9 @@ def _solve_balanced_minmax_window(
         else float("nan")
     )
 
-    # 快路不再额外求大LP。若结构下界为正，则把z直接限制在能保证原目标gap的窄带，
-    # 以零目标只寻找一个整数可行解。零目标下，一旦找到可行解，HiGHS无需继续
-    # 为min-z做漫长的最优性证明；外部用严格结构下界完成gap证书。
+    # The shortcut avoids another large LP. If the structural lower bound is positive, restrict z to a band ensuring the target gap
+    # and seek one integer feasible solution with zero objective. Once found, HiGHS need not continue
+    # a lengthy min-z optimality proof; the external strict structural bound certifies the gap.
     fast_result: SolveResult | None = None
     if (
         BALANCED_STRUCTURAL_FASTPATH
@@ -3859,8 +3882,8 @@ def _solve_balanced_minmax_window(
         zero_objective = np.zeros(len(model.variable_lower), dtype=np.float64)
 
         logging.info(
-            "均衡窗口%d结构证书快路：严格z下界=%.12g；只需找到z<=%.12g的整数可行解"
-            "即可证明gap<=%.4g；快路限时=%.0fs。",
+            "Balanced window %d structural shortcut: strict z lower bound=%.12g; an integer feasible solution with z<=%.12g "
+            "proves gap<=%.4g; shortcut time limit=%.0fs.",
             window_id,
             structural_lb,
             z_cap,
@@ -3871,7 +3894,7 @@ def _solve_balanced_minmax_window(
             trial = _solve_milp_highspy(
                 model,
                 zero_objective,
-                label=f"均衡窗口{window_id}-结构下界目标带可行性",
+                label=f"Balanced window {window_id}-structural-bound-objective-band-feasibility",
                 mip_rel_gap=0.0,
                 initial_time_limit=BALANCED_STRUCTURAL_FASTPATH_TIME_LIMIT,
                 max_time_limit=BALANCED_STRUCTURAL_FASTPATH_TIME_LIMIT,
@@ -3922,14 +3945,14 @@ def _solve_balanced_minmax_window(
                     time_limit_used=trial.time_limit_used,
                 )
                 logging.info(
-                    "均衡窗口%d结构证书快路命中：z=%.12g，严格LB=%.12g，"
-                    "证书gap=%.6g；无需继续完整min-z。",
+                    "Balanced window %d structural shortcut succeeded: z=%.12g, strict LB=%.12g, "
+                    "certified gap=%.6g; no full min-z solve needed.",
                     window_id, z_value, structural_lb, certified_gap,
                 )
         except RuntimeError as exc:
             logging.info(
-                "均衡窗口%d结构证书快路未在%.0fs内找到目标带整数可行解，"
-                "回退完整min-z：%s",
+                "Balanced window %d shortcut found no integer feasible solution in the target band within %.0fs; "
+                "falling back to full min-z: %s",
                 window_id,
                 BALANCED_STRUCTURAL_FASTPATH_TIME_LIMIT,
                 exc,
@@ -3938,18 +3961,18 @@ def _solve_balanced_minmax_window(
     if fast_result is not None:
         result = fast_result
     else:
-        # 无跨窗口K区热启动时，优先用此前已实测稳定的SciPy milp作为bootstrap，
-        # 避免原生highspy在首个无MIP Start窗口长时间只保留z=1e6的劣质incumbent。
+        # Without a cross-window K warm start, bootstrap with the previously stable SciPy milp interface,
+        # avoiding a first-window native highspy run that retains a poor z=1e6 incumbent for too long.
         if not previous_k_warmstart_available:
             logging.info(
-                "均衡窗口%d完整min-z无上一窗口K区热启动，使用SciPy/HiGHS bootstrap；"
-                "完成后仍保存K区供下一窗口原生HiGHS热启动。",
+                "Balanced window %d full min-z has no previous K warm start; using SciPy/HiGHS bootstrap; "
+                "K results are still saved for native HiGHS warm starts in the next window.",
                 window_id,
             )
             result = _solve_milp_adaptive(
                 model,
                 z_objective,
-                label=f"均衡窗口{window_id}-全局定标min-max-bootstrap",
+                label=f"Balanced window {window_id}-global-calibration-min-max-bootstrap",
                 mip_rel_gap=mip_rel_gap,
                 initial_time_limit=initial_time_limit,
                 max_time_limit=max_time_limit,
@@ -3961,7 +3984,7 @@ def _solve_balanced_minmax_window(
             result = _solve_milp_highspy(
                 model,
                 z_objective,
-                label=f"均衡窗口{window_id}-全局定标min-max",
+                label=f"Balanced window {window_id}-global-calibration-min-max",
                 mip_rel_gap=mip_rel_gap,
                 initial_time_limit=initial_time_limit,
                 max_time_limit=max_time_limit,
@@ -4013,7 +4036,7 @@ def _solve_balanced_minmax_window(
 
 
 def _heuristic_resource_environment(bundle: InputBundle) -> dict[str, Any]:
-    """把逐时输入转成 [hour, region] 小矩阵，供快速构造反复 O(1) 查询。"""
+    """Convert hourly inputs to small [hour, region] arrays for repeated O(1) construction lookups."""
     region_index = {region: idx for idx, region in enumerate(bundle.regions)}
     shape = (TERMINAL_HOUR, len(bundle.regions))
     names = (
@@ -4340,11 +4363,11 @@ def _materialize_integer_model_plan(
         if count <= 0:
             continue
         if abs(value - count) > INTEGER_TOL:
-            raise RuntimeError("局部整数模型返回了非整数任务计数")
+            raise RuntimeError("The local integer model returned noninteger task counts")
         ids = local_ids.get(option.class_id, [])
         offset = assigned_count.get(option.class_id, 0)
         if offset + count > len(ids):
-            raise RuntimeError(f"局部模型任务类{option.class_id}计数超过TaskID池")
+            raise RuntimeError(f"Local model task class {option.class_id} count exceeds its TaskID pool")
         task_class = class_lookup[option.class_id]
         for task_id in ids[offset:offset + count]:
             rows.append(
@@ -4362,7 +4385,7 @@ def _materialize_integer_model_plan(
     for cid, ids in local_ids.items():
         if assigned_count.get(cid, 0) != len(ids):
             raise RuntimeError(
-                f"局部模型任务类{cid}未完整落到TaskID："
+                f"Local model task class {cid} could not be fully mapped to TaskID values: "
                 f"{assigned_count.get(cid, 0)}/{len(ids)}"
             )
     return pd.DataFrame(rows)
@@ -4379,7 +4402,7 @@ def _heuristic_repair_classes(
     env: dict[str, Any],
     max_classes: int,
 ) -> set[int]:
-    """从最接近可行的候选时空槽中提取真正造成容量冲突的任务类。"""
+    """Extract classes causing actual capacity conflicts from the closest-to-feasible candidate time/region slots."""
     ranked: list[tuple[float, set[str]]] = []
     for region, _lat, _start, overlaps in candidates:
         r = env["region_index"][region]
@@ -4430,7 +4453,7 @@ def _heuristic_repair_with_local_milp(
     time_limit: float,
     progress_interval: float,
 ) -> pd.DataFrame | None:
-    """只重开冲突任务类，以零目标小MILP做严格容量修复。"""
+    """Reopen only conflicting classes and repair capacity exactly with a small zero-objective MILP."""
     remaining = {task_class.class_id: 0 for task_class in classes}
     task_ids_by_class: dict[int, list[str]] = {}
     for cid in selected_classes:
@@ -4471,7 +4494,7 @@ def _heuristic_repair_with_local_milp(
         result = _solve_milp_adaptive(
             model,
             objective,
-            label=f"启发式容量修复-{len(task_ids_by_class)}类",
+            label=f"Heuristic capacity repair-{len(task_ids_by_class)}-classes",
             mip_rel_gap=0.0,
             initial_time_limit=time_limit,
             max_time_limit=time_limit,
@@ -4490,7 +4513,7 @@ def _heuristic_repair_with_local_milp(
         return repaired
     except (RuntimeError, ValueError, MemoryError) as exc:
         logging.info(
-            "启发式局部容量修复未成功：类=%d，限时=%.0fs，原因=%s",
+            "Heuristic local capacity repair failed: classes=%d, limit=%.0fs, reason=%s",
             len(task_ids_by_class), time_limit, exc,
         )
         return None
@@ -4515,7 +4538,7 @@ def _construct_heuristic_window_plan(
     plan_end: int,
     progress_interval: float,
 ) -> tuple[pd.DataFrame, float, dict[str, float], dict[str, Any]]:
-    """按原 min-max 标准化目标做紧迫度排序 + 边际代价快速构造。"""
+    """Use urgency ordering and fast marginal-cost construction under the original normalized min-max objective."""
     global_task_count = len(bundle.tasks)
     plan_gpu = committed_gpu.copy()
     plan_ai = committed_ai.copy()
@@ -4545,7 +4568,7 @@ def _construct_heuristic_window_plan(
         if not candidates:
             if _latest_start_for_class(task_class) < decision_end:
                 raise RuntimeError(
-                    f"启发式窗口tau={tau}：任务类{cid}已经必须开工但没有合法候选"
+                    f"Heuristic window tau={tau}: task class {cid} must start now but has no valid candidate"
                 )
             continue
         candidate_cache[cid] = candidates
@@ -4562,7 +4585,7 @@ def _construct_heuristic_window_plan(
         future = int(task_class.arrival_hour >= decision_end)
         realtime = 0 if task_class.task_type == "RealTimeInference" else 1
         resource_work = task_class.gpu_demand * task_class.duration_h
-        # current/urgent first；时间窗越窄、资源越大越优先。
+        # Current/urgent first; prioritize narrower time windows and greater resource needs.
         priority = (
             future,
             urgent,
@@ -4646,8 +4669,8 @@ def _construct_heuristic_window_plan(
                 )
 
         if best_payload is None:
-            # 贪心被局部容量卡住时，不回退到几十万变量全窗口MILP；
-            # 只提取真正占用冲突时空槽的任务类，做一个小规模零目标MILP修复。
+            # If local capacity blocks greedy construction, avoid a full-window MILP with hundreds of thousands of variables;
+            # extract only classes occupying the conflicting slots for a small zero-objective repair MILP.
             selected = _heuristic_repair_classes(
                 task_class=task_class,
                 candidates=candidates,
@@ -4699,11 +4722,11 @@ def _construct_heuristic_window_plan(
                 )
             if repaired is None:
                 raise RuntimeError(
-                    f"窗口tau={tau}快速构造在任务{task_id}/类{cid}处无法恢复可行性；"
-                    "已尝试局部容量修复，不会修改上一检查点。"
+                    f"Window tau={tau} fast construction cannot restore feasibility at task {task_id}/class {cid}; "
+                    "Local capacity repair was attempted; the previous checkpoint remains unchanged."
                 )
 
-            # 删除修复邻域原先的安排，并用局部MILP结果替换；随后重建小型状态数组。
+            # Replace original repair-neighborhood assignments with the local MILP result, then rebuild small state arrays.
             for old_task_id, row in list(placements.items()):
                 if int(row["ExactTaskClassID"]) in selected:
                     placements.pop(old_task_id, None)
@@ -4745,16 +4768,16 @@ def _construct_heuristic_window_plan(
 
         if index % 1000 == 0:
             logging.info(
-                "启发式窗口tau=%d构造进度：%d/%d，直接放置=%d，容量修复=%d。",
+                "Heuristic window tau=%d construction progress: %d/%d, direct placements=%d, capacity repairs=%d.",
                 tau, index, len(entries), placed_direct, repair_count,
             )
 
-    # 所有进入当前H+K规划域的任务都必须有一份临时计划。
+    # Every task in the current H+K horizon requires a provisional plan.
     expected_ids = {task_id for _, task_id, _ in entries}
     missing = expected_ids - set(placements)
     if missing:
         raise RuntimeError(
-            f"启发式窗口tau={tau}规划不完整：仍缺{len(missing)}个活动任务"
+            f"Heuristic window tau={tau} plan is incomplete: missing {len(missing)} active tasks"
         )
 
     plan_df = pd.DataFrame(list(placements.values()))
@@ -4792,7 +4815,7 @@ def _lns_select_classes(
     for row in plan.itertuples(index=False):
         cid = int(row.ExactTaskClassID)
         task_class = class_lookup[cid]
-        # 实时任务的开始时刻不可改变，除非只允许区域迁移；仍可入邻域，但优先级较低。
+        # Real-time start times cannot change; only region migration is possible. They may enter a neighborhood at lower priority.
         r = env["region_index"][str(row.TargetRegion)]
         pressure = 0.0
         for h, _overlap in _overlap_by_hour(float(row.StartHour), float(row.Duration_h)):
@@ -4836,7 +4859,7 @@ def _solve_lns_refinement(
     plan_end: int,
     progress_interval: float,
 ) -> tuple[pd.DataFrame | None, dict[str, Any]]:
-    """固定邻域外启发式方案，仅对关键任务类求原 min-max 小MILP。"""
+    """Fix heuristic assignments outside the neighborhood; solve the original min-max small MILP for key classes only."""
     if not selected_classes:
         return None, {"LNSStatus": "skipped_empty"}
 
@@ -4874,8 +4897,8 @@ def _solve_lns_refinement(
         if model.z_index is None:
             return None, {"LNSStatus": "failed_no_z"}
 
-        # 能源固定项已由 fixed_assignments 进入紧凑B/W模型；
-        # 时延是可分项，需把邻域外活动任务的固定时延显式加入scope常数。
+        # Fixed energy terms enter the compact B/W model through fixed_assignments;
+        # latency is separable, so explicitly add fixed latency from outside active classes to the scope constant.
         model.objective_constants["MeanLatency"] += (
             float(fixed_outside["NetworkLatency_ms"].astype(float).sum())
             / max(len(bundle.tasks), 1)
@@ -4906,7 +4929,7 @@ def _solve_lns_refinement(
         result = _solve_milp_adaptive(
             model,
             objective,
-            label=f"窗口{tau//max(1, decision_end-tau)}-LNS精修-{len(task_ids_by_class)}类",
+            label=f"Window {tau//max(1, decision_end-tau)}-LNS-refinement-{len(task_ids_by_class)}-classes",
             mip_rel_gap=HEURISTIC_LNS_MIP_GAP,
             initial_time_limit=HEURISTIC_LNS_TIME_LIMIT,
             max_time_limit=HEURISTIC_LNS_TIME_LIMIT,
@@ -4940,7 +4963,7 @@ def _solve_lns_refinement(
         gc.collect()
         return candidate, info
     except (RuntimeError, ValueError, MemoryError) as exc:
-        logging.info("大邻域MILP精修未得到可用解，保留贪心方案：%s", exc)
+        logging.info("Large-neighborhood MILP refinement returned no usable solution; retaining greedy assignments: %s", exc)
         return None, {
             "LNSStatus": "failed_keep_greedy",
             "LNSClassCount": len(task_ids_by_class),
@@ -4962,7 +4985,7 @@ def _evaluate_heuristic_plan(
     global_task_count: int,
 ) -> tuple[float, dict[str, float], dict[str, float], np.ndarray, np.ndarray]:
     if not plan.empty and plan["TaskID"].astype(str).duplicated().any():
-        raise RuntimeError("启发式候选计划存在重复TaskID")
+        raise RuntimeError("Heuristic candidate plan contains duplicate TaskID values")
     gpu = committed_gpu.copy()
     ai = committed_ai.copy()
     latency_sum = 0.0
@@ -4977,12 +5000,12 @@ def _evaluate_heuristic_plan(
             )
             latency_sum += float(row.NetworkLatency_ms)
 
-    # 独立容量复核；不相信构造器/局部MILP内部状态。
+    # Recheck capacity independently instead of relying on constructor/local-MILP internal state.
     gpu_violation = float(np.maximum(gpu - env["available_gpu"], 0.0).max())
     ai_violation = float(np.maximum(ai - env["effective_ai"], 0.0).max())
     if gpu_violation > 1e-6 or ai_violation > 1e-6:
         raise RuntimeError(
-            f"启发式候选独立容量复核失败：GPU={gpu_violation}, AI={ai_violation}"
+            f"Heuristic candidate failed independent capacity checks: GPU={gpu_violation}, AI={ai_violation}"
         )
 
     scope = _heuristic_scope_energy(env, ai, tau, plan_end)
@@ -5014,7 +5037,7 @@ def _commit_heuristic_h_plan(
         cid = int(row.ExactTaskClassID)
         task_id = str(row.TaskID)
         if task_id not in pools[cid]:
-            raise RuntimeError(f"启发式提交时TaskID {task_id}不在任务类{cid}剩余池")
+            raise RuntimeError(f"Heuristic commit TaskID {task_id} is absent from task class {cid} remaining pool")
         pools[cid].remove(task_id)
 
     committed["TaskID"] = committed["TaskID"].astype(str)
@@ -5043,13 +5066,13 @@ def _run_balanced_rollout(
     resume: bool,
     max_windows: int | None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, float]]:
-    """新阶段4：恢复原 balanced v3 历史，然后从下一未完成窗口切换数学启发式。
+    """New stage 4: restore balanced v3 history, then switch to matheuristics at the next unfinished window.
 
-    关键兼容性：
-    - CHECKPOINT_SCHEMA_VERSION 保持3；
-    - checkpoint文件名前缀仍为 q2_refactored_balanced_v3；
-    - H/K 校验仍由 _load_checkpoint 原样执行；
-    - 已提交窗口绝不重算、不删除，只把它们作为固定历史负荷。
+    Compatibility:
+    - CHECKPOINT_SCHEMA_VERSION remains 3;
+    - checkpoint prefix remains q2_refactored_balanced_v3;
+    - _load_checkpoint performs the same H/K checks;
+    - committed windows are never recomputed or deleted, only used as fixed load.
     """
     pools = _make_task_pools(classes)
     assignments = pd.DataFrame()
@@ -5073,8 +5096,8 @@ def _run_balanced_rollout(
                 profile, metrics = _schedule_profile(bundle, assignments)
                 return assignments, pd.DataFrame(window_records), pd.DataFrame(solver_records), metrics
             logging.info(
-                "恢复均衡滚动：已完成任务=%d，下一窗口=%d，tau=%d；"
-                "既有窗口全部保留，从该窗口起改用滚动数学启发式。",
+                "Balanced rolling restored: completed tasks=%d, next window=%d, tau=%d; "
+                "all existing windows retained; switching to rolling matheuristics from this window.",
                 len(assignments), window_id, tau,
             )
 
@@ -5088,7 +5111,7 @@ def _run_balanced_rollout(
         decision_end = min(tau + decision_window, TERMINAL_HOUR)
         plan_end = min(decision_end + lookahead, TERMINAL_HOUR)
 
-        # 当前H+K真正进入规划域的任务集合，用于滚动全局指标修正。
+        # Tasks actually entering the current H+K horizon define rolling global-metric corrections.
         active_task_ids: set[str] = set()
         active_class_count = 0
         for task_class in classes:
@@ -5163,8 +5186,8 @@ def _run_balanced_rollout(
         )
         if abs(z_verified - z_greedy) > 1e-6 * max(1.0, abs(z_verified)):
             logging.info(
-                "窗口%d构造器增量z与独立复算略有差异：增量=%.9g，复算=%.9g；"
-                "以后者为准。",
+                "Window %d incremental constructor z differs slightly from independent recomputation: incremental=%.9g, independent=%.9g; "
+                "use independent recomputation.",
                 window_id, z_greedy, z_verified,
             )
         z_before = z_verified
@@ -5214,7 +5237,7 @@ def _run_balanced_rollout(
                     )
                     if z_refined < z_before - HEURISTIC_SCORE_TOL:
                         logging.info(
-                            "均衡窗口%d LNS精修接受：z %.9g → %.9g，邻域类=%s。",
+                            "Balanced window %d LNS refinement accepted: z %.9g -> %.9g, neighborhood classes=%s.",
                             window_id, z_before, z_refined,
                             lns_info.get("LNSClassCount", np.nan),
                         )
@@ -5229,8 +5252,8 @@ def _run_balanced_rollout(
                         deviations_final = deviations_before
                         lns_info["LNSAccepted"] = 0
                         logging.info(
-                            "均衡窗口%d LNS精修未改善独立复算z：候选=%.9g，原=%.9g；"
-                            "保留快速构造方案。",
+                            "Balanced window %d LNS refinement did not improve independently recomputed z: candidate=%.9g, original=%.9g; "
+                            "retaining fast construction.",
                             window_id, z_refined, z_before,
                         )
                 except RuntimeError as exc:
@@ -5248,7 +5271,7 @@ def _run_balanced_rollout(
             estimated_final = estimated_before
             deviations_final = deviations_before
 
-        # 最终窗口计划再次独立验容量，再提交H区。
+        # Independently recheck capacity for the final window plan before committing H.
         _evaluate_heuristic_plan(
             plan=plan,
             committed_gpu=committed_gpu,
@@ -5268,7 +5291,7 @@ def _run_balanced_rollout(
         )
 
         if committed.empty:
-            # 若当前存在已到达或必须开工任务却没有提交，说明滚动策略发生停滞。
+            # If arrived or urgent tasks exist but none are committed, the rolling strategy has stalled.
             must_start = any(
                 pools[task_class.class_id]
                 and task_class.arrival_hour < decision_end
@@ -5277,7 +5300,7 @@ def _run_balanced_rollout(
             )
             if must_start:
                 raise RuntimeError(
-                    f"均衡窗口{window_id}存在必须开工任务但H区没有提交，拒绝推进检查点"
+                    f"Balanced window {window_id} has urgent tasks but commits none in H; checkpoint advancement refused"
                 )
 
         if not committed.empty:
@@ -5363,7 +5386,7 @@ def _run_balanced_rollout(
         )
 
         next_tau = decision_end
-        # 仍写原 balanced v3 检查点；因此旧窗口与新窗口在同一连续状态链中。
+        # Keep writing balanced v3 checkpoints, maintaining one continuous state chain across old and new windows.
         _write_checkpoint(
             bundle=bundle,
             mode="balanced",
@@ -5377,8 +5400,8 @@ def _run_balanced_rollout(
             lookahead=lookahead,
         )
         logging.info(
-            "均衡窗口%d完成[数学启发式]：tau=%d，活动任务=%d，候选=%d，"
-            "固定=%d，剩余=%d，z=%.6g，耗时=%.1fs，LNS=%s。",
+            "Balanced window %d completed [matheuristic]: tau=%d, active tasks=%d, candidates=%d, "
+            "fixed=%d, remaining=%d, z=%.6g, elapsed=%.1fs, LNS=%s.",
             window_id,
             tau,
             construct_stats["ActiveTaskCount"],
@@ -5398,7 +5421,7 @@ def _run_balanced_rollout(
             profile, metrics = _schedule_profile(bundle, assignments)
             return assignments, pd.DataFrame(window_records), pd.DataFrame(solver_records), metrics
         remaining_ids = [task_id for values in pools.values() for task_id in values]
-        raise RuntimeError(f"均衡滚动结束后仍有{len(remaining_ids)}个任务未固定")
+        raise RuntimeError(f"Balanced rolling ended with {len(remaining_ids)} tasks still unfixed")
 
     _write_checkpoint(
         bundle=bundle,
@@ -5417,7 +5440,7 @@ def _run_balanced_rollout(
 
 
 # =============================================================================
-# 11. 最终独立检验
+# 11. Final independent validation
 # =============================================================================
 
 def _validate_assignments(bundle: InputBundle, assignments: pd.DataFrame, label: str) -> None:
@@ -5425,24 +5448,24 @@ def _validate_assignments(bundle: InputBundle, assignments: pd.DataFrame, label:
     actual = set(assignments["TaskID"].astype(str))
     if expected != actual:
         raise RuntimeError(
-            f"{label}任务覆盖不完整：缺失{len(expected - actual)}，多余{len(actual - expected)}"
+            f"{label} task coverage is incomplete: missing {len(expected - actual)}; extra {len(actual - expected)}"
         )
     if assignments["TaskID"].duplicated().any():
-        raise RuntimeError(f"{label}存在重复 TaskID")
+        raise RuntimeError(f"{label} contains duplicate TaskID values")
     if (
         assignments["StartHour"].astype(float)
         < assignments["ArrivalHour"].astype(float) - FLOAT_EPS
     ).any():
-        raise RuntimeError(f"{label}存在早于 ArrivalHour 启动的任务")
+        raise RuntimeError(f"{label} contains tasks starting before ArrivalHour")
     if (assignments["FinishHour"].astype(float) > TERMINAL_HOUR + FLOAT_EPS).any():
-        raise RuntimeError(f"{label}存在占用第2406小时或更晚的任务")
+        raise RuntimeError(f"{label} contains tasks occupying hour 2406 or later")
 
     real = assignments["TaskType"].eq("RealTimeInference")
     if (
         assignments.loc[real, "StartHour"].astype(float)
         - assignments.loc[real, "ArrivalHour"].astype(float)
     ).abs().max() > FLOAT_EPS:
-        raise RuntimeError(f"{label}存在实时推理未到达即开工")
+        raise RuntimeError(f"{label} contains real-time inference starting before arrival")
 
     task_lookup = bundle.tasks.set_index("TaskID")
     joined = assignments.set_index("TaskID").join(
@@ -5456,19 +5479,19 @@ def _validate_assignments(bundle: InputBundle, assignments: pd.DataFrame, label:
         joined["StartHour"].astype(float)
         < joined["EarliestStartHour"].astype(float) - FLOAT_EPS
     ).any():
-        raise RuntimeError(f"{label}存在早于 EarliestStartHour 启动")
+        raise RuntimeError(f"{label} contains starts before EarliestStartHour")
     if (
         joined["FinishHour"].astype(float)
         > joined["LatestFinishHour"].astype(float) + FLOAT_EPS
     ).any():
-        raise RuntimeError(f"{label}存在超过 LatestFinishHour 完成")
+        raise RuntimeError(f"{label} contains finishes after LatestFinishHour")
     duration_error = (
         joined["FinishHour"].astype(float)
         - joined["StartHour"].astype(float)
         - joined["TaskDuration_h"].astype(float)
     ).abs()
     if len(duration_error) and float(duration_error.max()) > 1e-7:
-        raise RuntimeError(f"{label}任务持续时间与输入不一致")
+        raise RuntimeError(f"{label} task duration differs from input")
 
     candidate_pairs = set(
         zip(
@@ -5482,43 +5505,43 @@ def _validate_assignments(bundle: InputBundle, assignments: pd.DataFrame, label:
         if (str(row.TaskID), str(row.TargetRegion)) not in candidate_pairs
     ]
     if bad_pairs:
-        raise RuntimeError(f"{label}存在非合法候选区域安排，示例：{bad_pairs[:5]}")
+        raise RuntimeError(f"{label} contains invalid candidate-region assignments; examples: {bad_pairs[:5]}")
     if (
         assignments["NetworkLatency_ms"].astype(float)
         > assignments["MaxLatency_ms"].astype(float) + FLOAT_EPS
     ).any():
-        raise RuntimeError(f"{label}存在网络时延超过 MaxLatency")
+        raise RuntimeError(f"{label} contains network latency above MaxLatency")
 
 
 def _validate_profile(profile: pd.DataFrame, label: str) -> None:
     if profile.empty:
-        raise RuntimeError(f"{label}资源剖面为空")
+        raise RuntimeError(f"{label} resource profile is empty")
     checks = {
-        "GPU_Slack": "GPU容量",
-        "IT_Slack_MW": "IT功率",
-        "Facility_Slack_MW": "设施功率",
-        "EffectiveAI_Slack_MW": "有效AI功率容量",
+        "GPU_Slack": "GPU capacity",
+        "IT_Slack_MW": "IT power",
+        "Facility_Slack_MW": "Facility power",
+        "EffectiveAI_Slack_MW": "Effective AI power capacity",
     }
     for column, description in checks.items():
         violation = float(np.maximum(-profile[column].to_numpy(dtype=float), 0.0).max())
         if violation > 1e-6:
-            raise RuntimeError(f"{label}存在{description}违反量：{violation}")
+            raise RuntimeError(f"{label} has {description} violation: {violation}")
     grid_violation = float(profile["GridPurchaseViolation_MW"].max())
     if grid_violation > 1e-6:
-        raise RuntimeError(f"{label}存在购电上限违反量：{grid_violation}")
+        raise RuntimeError(f"{label} has a grid-purchase limit violation: {grid_violation}")
     balance_residual = float(profile["EnergyBalanceResidual_MW"].abs().max())
     if balance_residual > 1e-6:
-        raise RuntimeError(f"{label}能源平衡残差过大：{balance_residual}")
+        raise RuntimeError(f"{label} energy-balance residual is too large: {balance_residual}")
     if (profile["RenewableExport_MW"] < -1e-8).any() or (
         profile["RenewableExport_MW"] - profile["ExportLimit_MW"] > 1e-6
     ).any():
-        raise RuntimeError(f"{label}新能源外送边界违反")
+        raise RuntimeError(f"{label} violates renewable export boundaries")
     if (profile["RenewableCurtailment_MW"] < -1e-8).any():
-        raise RuntimeError(f"{label}存在负弃电量")
+        raise RuntimeError(f"{label} contains negative curtailment")
 
 
 # =============================================================================
-# 12. 输出
+# 12. Outputs
 # =============================================================================
 
 def _comparison_table(
@@ -5572,14 +5595,14 @@ def _write_final_outputs(
     max_time_limit: float,
 ) -> None:
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
-    _validate_assignments(bundle, baseline_assignments, "纯算力基准")
-    _validate_assignments(bundle, balanced_assignments, "Q2均衡方案")
+    _validate_assignments(bundle, baseline_assignments, "Compute-only baseline")
+    _validate_assignments(bundle, balanced_assignments, "Q2 balanced solution")
     baseline_profile, baseline_metrics_recomputed = _schedule_profile(bundle, baseline_assignments)
     balanced_profile, balanced_metrics_recomputed = _schedule_profile(bundle, balanced_assignments)
-    _validate_profile(baseline_profile, "纯算力基准")
-    _validate_profile(balanced_profile, "Q2均衡方案")
+    _validate_profile(baseline_profile, "Compute-only baseline")
+    _validate_profile(balanced_profile, "Q2 balanced solution")
 
-    # 最终指标以独立复算为准。
+    # Use independently recomputed final metrics.
     baseline_metrics = baseline_metrics_recomputed
     balanced_metrics = balanced_metrics_recomputed
 
@@ -5692,12 +5715,12 @@ def _write_final_outputs(
 
 
 # =============================================================================
-# 13. 主程序
+# 13. Main program
 # =============================================================================
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Q2最终版：精确聚合+全局连续定标+滚动数学启发式多目标调度"
+        description="Q2: exact aggregation, global continuous calibration, and rolling multiobjective matheuristics"
     )
     parser.add_argument("--decision-window", type=int, default=DEFAULT_DECISION_WINDOW)
     parser.add_argument("--lookahead", type=int, default=DEFAULT_LOOKAHEAD)
@@ -5708,22 +5731,22 @@ def main(argv: list[str] | None = None) -> int:
         "--lp-time-limit",
         type=float,
         default=0.0,
-        help="全局连续理想点单个LP限时；0表示不设限，且必须status=0才接受",
+        help="Time limit per global continuous ideal-point LP; 0 means unlimited; accept only status=0",
     )
     parser.add_argument("--progress-interval", type=float, default=DEFAULT_PROGRESS_INTERVAL)
     parser.add_argument(
         "--resume",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="是否从新版检查点恢复；默认开启，使用--no-resume才从头运行",
+        help="Resume compatible checkpoints by default; use --no-resume to start over",
     )
-    parser.add_argument("--force-recalibrate", action="store_true", help="忽略全局定标缓存并重算4个LP")
-    parser.add_argument("--audit-only", action="store_true", help="只输出精确聚合规模审计，不求解")
+    parser.add_argument("--force-recalibrate", action="store_true", help="Ignore global calibration cache and recompute four LPs")
+    parser.add_argument("--audit-only", action="store_true", help="Write the exact aggregation size audit only, without solving")
     parser.add_argument(
         "--max-windows",
         type=int,
         default=None,
-        help="调试：只运行前若干窗口；不会写正式完整结果",
+        help="Debug: run only the first specified windows; do not write complete official results",
     )
     parser.add_argument(
         "--log-level",
@@ -5733,33 +5756,33 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.decision_window <= 0 or args.lookahead < 0:
-        raise SystemExit("--decision-window必须>0，--lookahead必须>=0")
+        raise SystemExit("--decision-window must be > 0 and --lookahead must be >= 0")
     if not math.isfinite(args.mip_rel_gap) or args.mip_rel_gap < 0:
-        raise SystemExit("--mip-rel-gap必须为非负有限数")
+        raise SystemExit("--mip-rel-gap must be finite and nonnegative")
     if not math.isfinite(args.solver_time_limit) or args.solver_time_limit <= 0:
-        raise SystemExit("--solver-time-limit必须为正有限数")
+        raise SystemExit("--solver-time-limit must be finite and positive")
     if not math.isfinite(args.max_solver_time_limit) or args.max_solver_time_limit < args.solver_time_limit:
-        raise SystemExit("--max-solver-time-limit必须>=--solver-time-limit")
+        raise SystemExit("--max-solver-time-limit must be >= --solver-time-limit")
     if not math.isfinite(args.lp_time_limit) or args.lp_time_limit < 0:
-        raise SystemExit("--lp-time-limit必须>=0")
+        raise SystemExit("--lp-time-limit must be >= 0")
     if not math.isfinite(args.progress_interval) or args.progress_interval < 0:
-        raise SystemExit("--progress-interval必须>=0")
+        raise SystemExit("--progress-interval must be >= 0")
     if args.max_windows is not None and args.max_windows <= 0:
-        raise SystemExit("--max-windows必须为正")
+        raise SystemExit("--max-windows must be positive")
 
     _configure_logging(args.log_level)
     total_started = time.perf_counter()
     logging.info(
-        "Q2最终版启动：H=%d，K=%d，MIP gap=%.4g，MILP限时=%.0f→%.0fs，LP限时=%s。",
+        "Q2 started: H=%d, K=%d, MIP gap=%.4g, MILP limit=%.0f->%.0fs, LP limit=%s.",
         args.decision_window,
         args.lookahead,
         args.mip_rel_gap,
         args.solver_time_limit,
         args.max_solver_time_limit,
-        "无限" if args.lp_time_limit <= 0 else f"{args.lp_time_limit:.0f}s",
+        "unlimited" if args.lp_time_limit <= 0 else f"{args.lp_time_limit:.0f}s",
     )
     logging.info(
-        "检查点恢复策略：resume=%s；无参数启动默认续算；如需从头运行请显式使用--no-resume。",
+        "Checkpoint strategy: resume=%s; default startup resumes; explicitly use --no-resume to start over.",
         args.resume,
     )
 
@@ -5768,7 +5791,7 @@ def main(argv: list[str] | None = None) -> int:
     class_lookup = {task_class.class_id: task_class for task_class in classes}
     audit = _build_aggregation_audit(classes)
     logging.info(
-        "精确聚合：50000级任务=%d → 同质类=%d，任务压缩=%.2fx；候选理论减少=%.2f%%。",
+        "Exact aggregation: tasks=%d -> homogeneous classes=%d, compression=%.2fx; theoretical candidate reduction=%.2f%%.",
         audit.original_task_count,
         audit.exact_class_count,
         audit.task_compression_ratio,
@@ -5776,10 +5799,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     _write_table(_audit_frame(audit), "q2_aggregation_audit.csv")
     if args.audit_only:
-        logging.info("--audit-only 完成。")
+        logging.info("--audit-only completed.")
         return 0
 
-    logging.info("阶段2：求解一次全时域纯算力基准（滚动、聚合、字典序）。")
+    logging.info("Stage 2: solve the full-horizon compute-only baseline once with rolling aggregation and lexicographic objectives.")
     baseline_assignments, baseline_windows, baseline_solver, baseline_metrics = _run_baseline_rollout(
         bundle=bundle,
         classes=classes,
@@ -5794,11 +5817,11 @@ def main(argv: list[str] | None = None) -> int:
         max_windows=args.max_windows,
     )
     if args.max_windows is not None:
-        logging.info("调试模式：基准完成指定窗口，停止，不执行全局定标和正式输出。")
+        logging.info("Debug mode: requested baseline windows completed; stopping without global calibration or official output.")
         return 0
-    _validate_assignments(bundle, baseline_assignments, "纯算力基准")
+    _validate_assignments(bundle, baseline_assignments, "Compute-only baseline")
     baseline_profile, baseline_metrics = _schedule_profile(bundle, baseline_assignments)
-    _validate_profile(baseline_profile, "纯算力基准")
+    _validate_profile(baseline_profile, "Compute-only baseline")
 
     calibration, calibration_table = _compute_or_load_calibration(
         bundle=bundle,
@@ -5813,8 +5836,8 @@ def main(argv: list[str] | None = None) -> int:
     _write_table(calibration_table, "q2_global_ideal_points.csv")
 
     logging.info(
-        "阶段4：滚动数学启发式；恢复并保留 balanced v%d 已完成窗口；"
-        "后续采用多目标边际贪心 + 容量局部修复 + 关键任务LNS-MILP精修。",
+        "Stage 4: rolling matheuristics; restore and retain completed balanced v%d windows; "
+        "then use multiobjective marginal greedy construction, local capacity repair, and key-task LNS-MILP refinement.",
         CHECKPOINT_SCHEMA_VERSION,
     )
     balanced_assignments, balanced_windows, balanced_solver, balanced_metrics = _run_balanced_rollout(
@@ -5834,7 +5857,7 @@ def main(argv: list[str] | None = None) -> int:
         max_windows=None,
     )
 
-    logging.info("阶段5：独立复算、约束核验与正式输出。")
+    logging.info("Stage 5: independent recomputation, constraint checks, and official output.")
     _write_final_outputs(
         bundle=bundle,
         audit=audit,
@@ -5856,14 +5879,14 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     logging.info(
-        "Q2最终版完成：Cost=%.8g，Carbon=%.8g，Latency=%.8g，UnusedRate=%.8g，总耗时=%.1fs。",
+        "Q2 completed: Cost=%.8g, Carbon=%.8g, Latency=%.8g, UnusedRate=%.8g, total elapsed=%.1fs.",
         balanced_metrics.get("Cost", np.nan),
         balanced_metrics.get("Carbon", np.nan),
         balanced_metrics.get("MeanLatency", np.nan),
         balanced_metrics.get("RenewableUnusedRate", np.nan),
         time.perf_counter() - total_started,
     )
-    logging.info("结果目录：%s；日志：%s", TABLES_DIR, MODEL_LOG_PATH)
+    logging.info("Results: %s; log: %s", TABLES_DIR, MODEL_LOG_PATH)
     return 0
 
 

@@ -1,5 +1,5 @@
 {
-  "description": "Original-to-English repository filenames. Original path values are historical metadata. Contents and archive-internal names are preserved.",
+  "description": "Original-to-English repository paths. Historical original-path metadata uses Unicode escapes. Frozen file contents and ZIP/RAR internal names remain unchanged. Active text files marked content_revised were translated.",
   "files": [
     {
       "original": "archive/submission-copies/CCM2601033\u6539.pdf",
@@ -1440,6 +1440,132 @@
       "original": "code/question/question_04/outputs/matheuristic_v3_doccompliant/validation/Q4_\u6587\u6863_\u5b9e\u65f6\u6027_\u4e8b\u5b9e\u6027\u590d\u6838\u62a5\u544a.md",
       "english": "code/question/question_04/outputs/matheuristic_v3_doccompliant/validation/q4-document-timeliness-and-factuality-report.md",
       "sha256": "03dee2dc63b88abc3ee03fc2ece08e65b8ce1ae486e34a2ddfda4526b20307f9"
+    },
+    {
+      "original": "code/.run/Q4_00A_\u6587\u6863\u7ea7\u5ba1\u8ba1_V3_\u53ea\u8bfb.run.xml",
+      "english": "code/.run/Q4_00A_document_audit_V3_read_only.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.run/Q4_00_\u6587\u6863\u5408\u89c4\u57fa\u51c6_V3_\u81ea\u52a8\u7eed\u8dd1.run.xml",
+      "english": "code/.run/Q4_00_document_compliant_baseline_V3_auto_resume.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.run/Q4_01_\u4f4e\u78b3\u53c2\u8003_\u81ea\u52a8\u7eed\u8dd1.run.xml",
+      "english": "code/.run/Q4_01_low_carbon_reference_auto_resume.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.run/Q4_02_\u78b3\u7ea6\u675f_lambda_0_25_\u81ea\u52a8\u7eed\u8dd1.run.xml",
+      "english": "code/.run/Q4_02_carbon_constraint_lambda_0_25_auto_resume.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.run/Q4_03_\u78b3\u7ea6\u675f_lambda_0_50_\u81ea\u52a8\u7eed\u8dd1.run.xml",
+      "english": "code/.run/Q4_03_carbon_constraint_lambda_0_50_auto_resume.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.run/Q4_05_\u78b3\u7ea6\u675f_lambda_1_00_\u81ea\u52a8\u7eed\u8dd1.run.xml",
+      "english": "code/.run/Q4_05_carbon_constraint_lambda_1_00_auto_resume.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.run/Q4_06_\u5e73\u4ef7\u7535\u4ef7_\u81ea\u52a8\u7eed\u8dd1.run.xml",
+      "english": "code/.run/Q4_06_flat_electricity_price_auto_resume.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.run/Q4_07_\u65b0\u80fd\u6e90\u5e73\u6ed1_gamma_0_25_\u81ea\u52a8\u7eed\u8dd1.run.xml",
+      "english": "code/.run/Q4_07_renewable_smoothing_gamma_0_25_auto_resume.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.run/Q4_08_\u65b0\u80fd\u6e90\u5e73\u6ed1_gamma_0_50_\u81ea\u52a8\u7eed\u8dd1.run.xml",
+      "english": "code/.run/Q4_08_renewable_smoothing_gamma_0_50_auto_resume.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.run/Q4_10_\u65b0\u80fd\u6e90\u5e73\u6ed1_gamma_1_00_\u81ea\u52a8\u7eed\u8dd1.run.xml",
+      "english": "code/.run/Q4_10_renewable_smoothing_gamma_1_00_auto_resume.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.run/Q4_11_\u60c5\u666f\u6bd4\u8f83_\u53ea\u8bfb.run.xml",
+      "english": "code/.run/Q4_11_scenario_comparison_read_only.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.idea/runConfigurations/Q2_\u9a8c\u8bc1_\u51c6\u5907_K24.xml",
+      "english": "code/.run/Q2_validation_prepare_K24.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.idea/runConfigurations/Q2_\u9a8c\u8bc1_\u51c6\u5907_K72.xml",
+      "english": "code/.run/Q2_validation_prepare_K72.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.idea/runConfigurations/Q2_\u9a8c\u8bc1_\u5f52\u6863_K24.xml",
+      "english": "code/.run/Q2_validation_collect_K24.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.idea/runConfigurations/Q2_\u9a8c\u8bc1_\u5f52\u6863_K72.xml",
+      "english": "code/.run/Q2_validation_collect_K72.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.idea/runConfigurations/Q2_\u9a8c\u8bc1_\u6700\u7ec8\u68c0\u9a8c.xml",
+      "english": "code/.run/Q2_validation_final_audit.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.idea/runConfigurations/Q2_\u9a8c\u8bc1_\u7a97\u53e39\u542f\u53d1\u5f0f\u91cd\u7b97.xml",
+      "english": "code/.run/Q2_validation_window9_heuristic_recompute.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.idea/runConfigurations/Q2_\u9a8c\u8bc1_\u7cbe\u786e\u540c\u7a97\u5bf9\u7167.xml",
+      "english": "code/.run/Q2_validation_exact_same_window_comparison.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.idea/runConfigurations/Q2_\u9a8c\u8bc1_\u7eed\u7b97_K24.xml",
+      "english": "code/.run/Q2_validation_resume_K24.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.idea/runConfigurations/Q2_\u9a8c\u8bc1_\u7eed\u7b97_K72.xml",
+      "english": "code/.run/Q2_validation_resume_K72.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.idea/runConfigurations/Q2_\u9a8c\u8bc1_\u8fd0\u884c_K24.xml",
+      "english": "code/.run/Q2_validation_run_K24.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "code/.idea/runConfigurations/Q2_\u9a8c\u8bc1_\u8fd0\u884c_K72.xml",
+      "english": "code/.run/Q2_validation_run_K72.run.xml",
+      "content_revised": true
+    },
+    {
+      "original": "docs/2026\u534e\u6570\u676f\u8d5b\u524d\u4e0e\u8d5b\u4e2d\u6267\u884c\u6e05\u5355.md",
+      "english": "docs/competition-checklist.md",
+      "content_revised": true
+    },
+    {
+      "original": "code/question/question_04/Q4_\u534f\u540c\u4ea4\u4ed8_\u4e32\u884c\u8fd0\u884c\u4e0e\u7ed3\u679c\u6c47\u5165\u6e05\u5355.md",
+      "english": "code/question/question_04/q4-runbook.md",
+      "content_revised": true
+    },
+    {
+      "original": "paper/figures/\u534e\u6570\u676f\u6d41\u7a0b\u56fe.pdf",
+      "english": "paper/figures/workflow.pdf",
+      "content_revised": false,
+      "sha256": "653d79e942869964f131aa168f13844c6f778afec4914ec6030941ffad92b15e"
     }
   ]
 }

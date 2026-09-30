@@ -1,14 +1,17 @@
-"""问题3独立检验：约束闭合、附件基准复现和多目标结构复核。
+"""Independent Question 3 validation: constraint closure, attachment-baseline reproduction, and multiobjective checks.
 
-本脚本不重新求解MILP，也不把模型自带的约束审计当作唯一证据，而是从
-``q3_balanced_region_hour.csv``、附件基准状态和Q3输入重新计算：
+Do not resolve MILP or rely solely on model-provided constraint audits. Recompute
+from ``q3_balanced_region_hour.csv``, attachment baseline states, and Q3 inputs:
 
-1. 新能源平衡、负荷/储能能量平衡、SOC递推、终端SOC和各硬边界；
-2. Balanced、BaselineReference、NoStorage三类方案的Cost、Carbon、Peak、Ramp、Throughput；
-3. 附件基准逐时状态与模型统一输出的复现误差；
-4. 四个单目标锚点、三级均衡阶段的最优性/同值择优关系和支配关系。
+1. Renewable balance, load/storage energy balance, SOC recurrence, terminal SOC,
+   and all hard boundaries.
+2. Cost, Carbon, Peak, Ramp, and Throughput for Balanced, BaselineReference,
+   and NoStorage solutions.
+3. Reproduction errors between hourly attachment states and unified model output.
+4. Optimality, lexicographic ties, and dominance of four anchors and three balanced stages.
 
-验证结果写入本题 ``outputs/tables``。本脚本只使用现有项目依赖，不新增第三方包。
+Write validation results to this question-specific ``outputs/tables``. Use only
+existing dependencies; add no third-party packages.
 """
 
 from __future__ import annotations
@@ -97,7 +100,7 @@ PROFILE_COLUMNS = (
 def _configure_logging(level_name: str) -> None:
     level = getattr(logging, level_name.upper(), None)
     if not isinstance(level, int):
-        raise ValueError(f"不支持的日志级别：{level_name}")
+        raise ValueError(f"Unsupported log level: {level_name}")
     LOGS_DIR.mkdir(parents=True, exist_ok=True)
     formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
     stream_handler = logging.StreamHandler()
@@ -113,11 +116,11 @@ def _configure_logging(level_name: str) -> None:
 
 def _read_csv(path: Path, required_columns: Iterable[str]) -> pd.DataFrame:
     if not path.is_file():
-        raise FileNotFoundError(f"缺少检验输入文件：{path}")
+        raise FileNotFoundError(f"Validation input file is missing: {path}")
     frame = pd.read_csv(path, encoding="utf-8-sig")
     missing = [column for column in required_columns if column not in frame.columns]
     if missing:
-        raise ValueError(f"{path.name}缺少字段：{missing}")
+        raise ValueError(f"{path.name} is missing columns: {missing}")
     return frame
 
 
@@ -127,21 +130,21 @@ def _to_numeric(frame: pd.DataFrame, columns: Iterable[str], source_name: str) -
         result[column] = pd.to_numeric(result[column], errors="coerce")
         values = result[column].to_numpy(dtype=float)
         if result[column].isna().any() or not np.isfinite(values).all():
-            raise ValueError(f"{source_name}的{column}存在无效数值")
+            raise ValueError(f"{source_name} column {column} contains invalid numeric values")
     return result
 
 
 def _validate_keys(frame: pd.DataFrame, source_name: str) -> pd.DataFrame:
     result = frame.copy()
     if result[["Hour", "Region"]].isna().any().any():
-        raise ValueError(f"{source_name}的Hour或Region存在缺失值")
+        raise ValueError(f"{source_name} contains missing Hour or Region values")
     result["Hour"] = pd.to_numeric(result["Hour"], errors="coerce")
     if result["Hour"].isna().any() or not result["Hour"].eq(result["Hour"].round()).all():
-        raise ValueError(f"{source_name}的Hour不是有效整数")
+        raise ValueError(f"{source_name} Hour values are not valid integers")
     result["Hour"] = result["Hour"].astype(int)
     result["Region"] = result["Region"].astype(str)
     if result.duplicated(["Hour", "Region"]).any():
-        raise ValueError(f"{source_name}存在重复的Hour×Region记录")
+        raise ValueError(f"{source_name} contains duplicate Hour x Region records")
     return result
 
 
@@ -151,7 +154,7 @@ def _complete_grid(frame: pd.DataFrame, keys: set[tuple[int, str]], source_name:
     extra = actual - keys
     if missing or extra:
         raise ValueError(
-            f"{source_name}的Hour×Region网格不一致；缺失示例={sorted(missing)[:5]}，多余示例={sorted(extra)[:5]}"
+            f"{source_name} Hour x Region grid differs; missing examples={sorted(missing)[:5]}; extra examples={sorted(extra)[:5]}"
         )
 
 
@@ -190,7 +193,7 @@ def _load_context() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, tuple[str
     storage["Region"] = storage["Region"].astype(str)
     storage = _to_numeric(storage, STORAGE_COLUMNS[1:], "storage_params.csv")
     if storage["Region"].duplicated().any() or set(storage["Region"]) != set(regions):
-        raise ValueError("storage_params.csv的区域集合与Q3输入不一致")
+        raise ValueError("storage_params.csv region set differs from Q3 inputs")
     storage = storage.sort_values("Region", kind="stable").reset_index(drop=True)
 
     baseline = _read_csv(SHARED_DIR / "baseline_reference_region_hour.csv", BASELINE_COLUMNS)
@@ -221,15 +224,15 @@ def _load_profile(scheme: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     operating = profile.loc[~terminal_flag].copy()
     terminal = profile.loc[terminal_flag].copy()
     if operating.empty or terminal.empty:
-        raise ValueError(f"{filename}必须同时包含运行时段和终端状态行")
+        raise ValueError(f"{filename} must include both operating intervals and terminal-state rows")
     if operating["Scheme"].astype(str).nunique() != 1 or operating["Scheme"].iloc[0] != scheme:
-        raise ValueError(f"{filename}的Scheme字段与文件用途不一致")
+        raise ValueError(f"{filename} Scheme field disagrees with its file purpose")
     if terminal["Scheme"].astype(str).nunique() != 1 or terminal["Scheme"].iloc[0] != scheme:
-        raise ValueError(f"{filename}的终端Scheme字段不一致")
+        raise ValueError(f"{filename} terminal Scheme field is inconsistent")
     operating = operating.sort_values(["Hour", "Region"], kind="stable").reset_index(drop=True)
     terminal = terminal.sort_values(["Hour", "Region"], kind="stable").reset_index(drop=True)
     if terminal["Hour"].nunique() != 1 or terminal["Hour"].iloc[0] != int(operating["Hour"].max()) + 1:
-        raise ValueError(f"{filename}的终端小时不是运行时段最后小时+1")
+        raise ValueError(f"{filename} terminal hour is not the last operating hour plus one")
     return operating, terminal
 
 
@@ -243,7 +246,7 @@ def _merge_energy(profile: pd.DataFrame, energy: pd.DataFrame) -> pd.DataFrame:
         suffixes=("", "_input"),
     )
     if result[["Fixed_Facility_Load_MW", "AvailableRenewable_MW"]].isna().any().any():
-        raise ValueError("模型逐时结果无法被Q3输入完整覆盖")
+        raise ValueError("Hourly model results are not fully covered by Q3 inputs")
     return result
 
 
@@ -261,7 +264,7 @@ def _check_profile(
     region_count = len(regions)
     time_count = profile["Hour"].nunique()
     if len(profile) != region_count * time_count:
-        raise ValueError(f"{scheme}逐时运行结果不是完整Hour×Region网格")
+        raise ValueError(f"{scheme} hourly results do not form a complete Hour x Region grid")
 
     def values(column: str) -> np.ndarray:
         return profile[column].to_numpy(dtype=float).reshape(time_count, region_count)
@@ -426,7 +429,7 @@ def _metric_recompute_checks(
     for scheme in SCHEMES:
         summary_row = summary.loc[summary["Solution"] == scheme]
         if len(summary_row) != 1:
-            raise ValueError(f"q3_objective_summary.csv缺少唯一的{scheme}行")
+            raise ValueError(f"q3_objective_summary.csv is missing a unique {scheme} row")
         recomputed = _recompute_metrics(profiles[scheme][0], energy)
         for metric, value in recomputed.items():
             reported = float(summary_row.iloc[0][metric])
@@ -459,7 +462,7 @@ def _baseline_reconciliation(
         suffixes=("_out", "_source"),
     )
     if op[["UsedRenewable_MW", "GridPurchase_MW_source"]].isna().any().any():
-        raise ValueError("模型输出的附件基准方案无法被附件基准状态完整覆盖")
+        raise ValueError("Attachment baseline states do not fully cover the baseline solution in model output")
     mapping = {
         "RenewableDirectUse_MW": "UsedRenewable_MW",
         "RenewableCharge_MW": "RenewableCharge_MW",
@@ -481,7 +484,7 @@ def _baseline_reconciliation(
             else source_column
         )
         if output_name not in op.columns or source_name not in op.columns:
-            raise ValueError(f"基准复现字段不存在：{output_column} / {source_column}")
+            raise ValueError(f"Baseline reproduction field does not exist: {output_column} / {source_column}")
         difference = np.abs(
             op[output_name].to_numpy(dtype=float) - op[source_name].to_numpy(dtype=float)
         )
@@ -501,7 +504,7 @@ def _baseline_reconciliation(
     ].sort_values("Region", kind="stable")
     output_terminal = terminal.sort_values("Region", kind="stable")
     if len(source_terminal) != len(output_terminal):
-        raise ValueError("基准终端状态的区域行数不一致")
+        raise ValueError("Baseline terminal-state regional row counts disagree")
     terminal_difference = np.abs(
         output_terminal["SOC_MWh"].to_numpy(dtype=float)
         - source_terminal["SOC_MWh"].to_numpy(dtype=float)
@@ -528,7 +531,7 @@ def _multiobjective_checks() -> tuple[pd.DataFrame, pd.DataFrame]:
     summary = _read_csv(TABLES_DIR / "q3_objective_summary.csv", ("Solution",))
     balanced = summary.loc[summary["Solution"] == "Balanced"]
     if len(balanced) != 1:
-        raise ValueError("q3_objective_summary.csv缺少唯一Balanced行")
+        raise ValueError("q3_objective_summary.csv is missing a unique Balanced row")
     balanced_row = balanced.iloc[0]
     rows: list[dict[str, object]] = []
     best: dict[str, float] = {}
@@ -537,12 +540,12 @@ def _multiobjective_checks() -> tuple[pd.DataFrame, pd.DataFrame]:
         best_column = f"{name}Best"
         reference_column = f"{name}Reference"
         if best_column not in balanced or reference_column not in balanced:
-            raise ValueError(f"q3_objective_summary.csv缺少{best_column}/{reference_column}")
+            raise ValueError(f"q3_objective_summary.csv is missing {best_column}/{reference_column}")
         best[name] = float(balanced_row[best_column])
         reference[name] = float(balanced_row[reference_column])
         anchor_row = anchors.loc[anchors["AnchorObjective"] == name]
         if len(anchor_row) != 1:
-            raise ValueError(f"q3_anchor_metrics.csv缺少唯一{name}锚点")
+            raise ValueError(f"q3_anchor_metrics.csv is missing a unique {name} anchor")
         anchor_value = float(anchor_row.iloc[0][name])
         all_values = anchors[name].to_numpy(dtype=float)
         minimum = float(np.min(all_values))
@@ -626,7 +629,7 @@ def _multiobjective_checks() -> tuple[pd.DataFrame, pd.DataFrame]:
         "balanced_stage_3_min_throughput",
     )
     if not all(stage in stage_frames for stage in required_stages):
-        raise ValueError("q3_solver_log.csv缺少三级均衡阶段")
+        raise ValueError("q3_solver_log.csv is missing the three balanced stages")
     stage_one = stage_frames[required_stages[0]]
     stage_two = stage_frames[required_stages[1]]
     stage_three = stage_frames[required_stages[2]]
@@ -693,30 +696,30 @@ def _write_report(
 ) -> None:
     counts = summary["Status"].value_counts().to_dict()
     lines = [
-        "Q3独立检验报告",
+        "Q3 independent validation report",
         "",
-        f"总体状态：{summary.attrs.get('OverallStatus', 'UNKNOWN')}",
-        f"检查计数：{counts}",
+        f"Overall status: {summary.attrs.get('OverallStatus', 'UNKNOWN')}",
+        f"Check counts: {counts}",
         "",
-        "检验边界：从模型逐时结果、Q3固定能源输入、共享储能参数和附件基准状态独立复算；不重新求解MILP。",
-        f"约束检查：{len(profile_checks)}项；指标重算：{len(metric_checks)}项；基准复现：{len(baseline_checks)}项；多目标：{len(multiobjective_checks)}项；求解阶段：{len(solver_checks)}项。",
+        "Validation scope: independently recompute hourly model results, fixed Q3 energy inputs, shared storage parameters, and attachment baseline states; do not resolve MILP.",
+        f"Constraint checks: {len(profile_checks)}; metric recomputation: {len(metric_checks)}; baseline reproduction: {len(baseline_checks)}; multiobjective checks: {len(multiobjective_checks)}; solver stages: {len(solver_checks)}.",
         "",
-        "若存在FAIL，不能直接将Q3优化结论写入论文；若仅存在WARN，需在论文或交接记录中说明求解最优性边界。",
+        "With FAIL results, do not directly use Q3 optimization conclusions in the paper. With WARN only, explain solver optimality limits in the paper or handoff record.",
     ]
     (TABLES_DIR / "q3_validation_report.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="问题3独立检验")
+    parser = argparse.ArgumentParser(description="Independent Question 3 validation")
     parser.add_argument(
         "--log-level",
         choices=("DEBUG", "INFO", "WARNING", "ERROR"),
         default="INFO",
-        help="控制台和文件日志级别，默认INFO",
+        help="Console/file log level, default INFO",
     )
     args = parser.parse_args(argv)
     _configure_logging(args.log_level)
-    logging.info("问题3独立检验启动：结果目录=%s。", TABLES_DIR)
+    logging.info("Independent Q3 validation started: result directory=%s.", TABLES_DIR)
 
     energy, storage, baseline, _ = _load_context()
     profiles = {scheme: _load_profile(scheme) for scheme in SCHEMES}
@@ -728,17 +731,17 @@ def main(argv: list[str] | None = None) -> int:
     _complete_grid(
         energy.loc[energy["Hour"] <= terminal_hour],
         expected_energy_keys,
-        "Q3输入",
+        "Q3 inputs",
     )
     for scheme, (operating, terminal) in profiles.items():
         expected_operating = operating_keys
         actual_operating = set(zip(operating["Hour"], operating["Region"]))
         if actual_operating != expected_operating:
-            raise ValueError(f"{scheme}与Balanced的运行Hour×Region网格不一致")
+            raise ValueError(f"{scheme} operating Hour x Region grid differs from Balanced")
         if set(zip(terminal["Hour"], terminal["Region"])) != set(
             zip(profiles["Balanced"][1]["Hour"], profiles["Balanced"][1]["Region"])
         ):
-            raise ValueError(f"{scheme}与Balanced的终端Hour×Region网格不一致")
+            raise ValueError(f"{scheme} terminal Hour x Region grid differs from Balanced")
 
     profile_checks = pd.concat(
         [
@@ -810,17 +813,17 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     logging.info(
-        "Q3独立检验完成：overall=%s，PASS=%d，WARN=%d，FAIL=%d。",
+        "Independent Q3 validation completed: overall=%s, PASS=%d, WARN=%d, FAIL=%d.",
         overall,
         int((summary["Status"] == "PASS").sum()),
         int((summary["Status"] == "WARN").sum()),
         int((summary["Status"] == "FAIL").sum()),
     )
     if has_fail:
-        logging.error("存在FAIL，详见q3_validation_summary.csv。")
+        logging.error("FAIL results exist; see q3_validation_summary.csv.")
         return 1
     if has_warn:
-        logging.warning("检验通过但存在求解器或证据边界警告，详见q3_validation_solver_checks.csv。")
+        logging.warning("Validation passed with solver/evidence-limit warnings; see q3_validation_solver_checks.csv.")
     return 0
 
 

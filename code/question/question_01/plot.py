@@ -1,14 +1,15 @@
-"""问题1的三组论文图。
+"""Three groups of Question 1 paper figures.
 
-本文件只读取已经生成的输入/结果CSV，不重新拟合预测模型，也不重新求解调度模型。
-运行后只输出三份静态PDF：
+Read existing input/result CSV files without refitting forecasts or solving
+schedules. Produce three static PDFs:
 
-1. 区域—任务类型GPU需求结构图；
-2. 预测—调度—区域GPU利用率综合图；
-3. 滚动预测检验—分层恢复—压力边界检验图。
+1. Regional/task-type GPU demand structure.
+2. Forecasts, schedules, and regional GPU utilization.
+3. Rolling forecast validation, hierarchical reconciliation, and stress bounds.
 
-配色全部来自《绘图颜色搭配.docx》中的彩色系列和蓝色梯度系列；本文件不使用灰色或黑色
-作为数据、文字、坐标轴、网格、参考线或边框颜色。
+Colors use the supplied plotting palette document, including its colorful and
+blue-gradient series. Gray and black are excluded from data, text, axes, grids,
+reference lines, and borders.
 """
 
 from __future__ import annotations
@@ -46,15 +47,15 @@ TERMINAL_HOUR = 2406
 
 TASK_TYPE_ORDER = ["RealTimeInference", "BatchInference", "AITraining"]
 TASK_TYPE_LABELS = {
-    "RealTimeInference": "实时推理",
-    "BatchInference": "批量推理",
-    "AITraining": "AI训练",
+    "RealTimeInference": "Real-time inference",
+    "BatchInference": "Batch inference",
+    "AITraining": "AI training",
 }
 REGION_ORDER = ["RegionA", "RegionB", "RegionC", "RegionD", "RegionE", "RegionF"]
 
-# 所有色值均取自用户提供的《绘图颜色搭配.docx》。
-# 其中前六个彩色值来自文档中的“7种颜色系列”第3套，深蓝与浅色背景来自文档中的
-# “6种颜色系列”和“3个颜色系列”。灰色、黑色及其近似色不参与本文件绘图。
+# All colors come from the user-supplied plotting palette document.
+# The first six colors use palette 3 of the seven-color series; dark blue and light backgrounds use
+# the six-color and three-color series. Gray, black, and near-gray colors are excluded.
 PALETTE = {
     "red": "#D43F3A",
     "gold": "#EEA236",
@@ -145,12 +146,12 @@ def _configure_style() -> None:
 
 def _read_csv(path: Path, required: tuple[str, ...] = ()) -> pd.DataFrame | None:
     if not path.is_file():
-        logging.warning("图表输入缺失，跳过：%s", path)
+        logging.warning("Missing plot input; skipping: %s", path)
         return None
     frame = pd.read_csv(path, encoding="utf-8-sig")
     missing = [column for column in required if column not in frame.columns]
     if missing:
-        logging.warning("图表输入字段缺失，跳过%s：%s", path.name, missing)
+        logging.warning("Missing plot columns; skipping %s: %s", path.name, missing)
         return None
     return frame
 
@@ -216,7 +217,7 @@ def _panel_caption(
     fontsize: float = 9.2,
     linespacing: float = 1.15,
 ) -> None:
-    """将(a)(b)(c)...子图名称统一放到坐标轴下方。"""
+    """Place subplot captions (a), (b), (c), etc. consistently below the axes."""
     axis.text(
         0.5,
         y,
@@ -236,7 +237,7 @@ def _save(figure: plt.Figure, stem: str) -> None:
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     figure.savefig(FIGURES_DIR / f"{stem}.pdf", format="pdf", bbox_inches="tight", pad_inches=0.03)
     plt.close(figure)
-    logging.info("已生成：%s.pdf", stem)
+    logging.info("Generated: %s.pdf", stem)
 
 
 def _shade_forecast_axis(axis: plt.Axes) -> None:
@@ -266,7 +267,7 @@ def _set_phase_labels(axis: plt.Axes, *, y: float = 0.90, fontsize: float = 8.0)
     axis.text(
         (VALIDATION_START_HOUR + VALIDATION_END_HOUR) / 2,
         y,
-        "验证期",
+        "Validation",
         transform=axis.get_xaxis_transform(),
         ha="center",
         va="top",
@@ -276,7 +277,7 @@ def _set_phase_labels(axis: plt.Axes, *, y: float = 0.90, fontsize: float = 8.0)
     axis.text(
         (TEST_START_HOUR + TEST_END_HOUR) / 2,
         y,
-        "测试期",
+        "Test",
         transform=axis.get_xaxis_transform(),
         ha="center",
         va="top",
@@ -286,7 +287,7 @@ def _set_phase_labels(axis: plt.Axes, *, y: float = 0.90, fontsize: float = 8.0)
 
 
 def plot_group1_demand_structure() -> bool:
-    """第一组：需求热力图、累计矩阵与验证期—测试期预测曲线。"""
+    """Group 1: demand heatmap, cumulative matrix, and validation/test forecast curves."""
     panel = _read_csv(
         Q1_DIR / "hourly_demand_panel.csv",
         ("Hour", "SourceRegion", "TaskType", "GPU_Demand_Arrival"),
@@ -323,7 +324,7 @@ def plot_group1_demand_structure() -> bool:
         .fillna(0.0)
     )
 
-    # 约17.5cm宽，适合A4正文版心直接插图。
+    # Approximately 17.5 cm wide for direct insertion into the A4 text area.
     figure = plt.figure(figsize=(6.9, 7.75))
     grid = figure.add_gridspec(
         3,
@@ -348,12 +349,12 @@ def plot_group1_demand_structure() -> bool:
     axes[0].set_yticks(np.arange(len(labels)))
     axes[0].set_yticklabels(labels, fontsize=7.0)
     axes[0].set_xticks([0, 600, 1200, 1800, 2399])
-    axes[0].set_xlabel("小时")
-    axes[0].set_ylabel("区域－任务类型")
-    _panel_caption(axes[0], "(a) 18类逐时GPU需求热力图", y=-0.25, fontsize=9.4)
+    axes[0].set_xlabel("Hour")
+    axes[0].set_ylabel("Region / task type")
+    _panel_caption(axes[0], "(a) Hourly GPU demand for 18 categories", y=-0.25, fontsize=9.4)
     _style_axis(axes[0], grid_axis="none")
     colorbar = figure.colorbar(image, ax=axes[0], fraction=0.026, pad=0.02)
-    _style_colorbar(colorbar, "GPU需求绝对量")
+    _style_colorbar(colorbar, "Absolute GPU demand")
 
     cumulative_image = axes[1].imshow(
         cumulative.to_numpy(dtype=float),
@@ -365,9 +366,9 @@ def plot_group1_demand_structure() -> bool:
     axes[1].set_xticklabels([_task_label(task) for task in task_types], rotation=14, ha="right", fontsize=7.0)
     axes[1].set_yticks(np.arange(len(regions)))
     axes[1].set_yticklabels(regions)
-    axes[1].set_xlabel("任务类型")
-    axes[1].set_ylabel("区域")
-    _panel_caption(axes[1], "(b) 6×3累计GPU需求矩阵", y=-0.36, fontsize=9.4)
+    axes[1].set_xlabel("Task type")
+    axes[1].set_ylabel("Region")
+    _panel_caption(axes[1], "(b) 6 x 3 cumulative GPU demand matrix", y=-0.36, fontsize=9.4)
     maximum = float(np.nanmax(cumulative.to_numpy(dtype=float))) if cumulative.size else 0.0
     threshold = maximum * 0.52
     for row_index, region in enumerate(regions):
@@ -384,7 +385,7 @@ def plot_group1_demand_structure() -> bool:
             )
     _style_axis(axes[1], grid_axis="none")
     colorbar = figure.colorbar(cumulative_image, ax=axes[1], fraction=0.046, pad=0.04)
-    _style_colorbar(colorbar, "累计GPU需求")
+    _style_colorbar(colorbar, "Cumulative GPU demand")
 
     _plot_forecast_panel(axes[2])
     _save(figure, "q1_group1_demand_structure")
@@ -430,7 +431,7 @@ def _forecast_total_series() -> tuple[pd.DataFrame, pd.DataFrame] | None:
 def _plot_forecast_panel(axis: plt.Axes) -> bool:
     series = _forecast_total_series()
     if series is None:
-        axis.text(0.5, 0.5, "缺少测试期预测结果", ha="center", va="center", color=TEXT_COLOR)
+        axis.text(0.5, 0.5, "Test forecasts unavailable", ha="center", va="center", color=TEXT_COLOR)
         axis.set_axis_off()
         return False
     actual, model_totals = series
@@ -445,7 +446,7 @@ def _plot_forecast_panel(axis: plt.Axes) -> bool:
         markersize=3.2,
         markerfacecolor=MODEL_COLORS["actual"],
         markeredgecolor=MODEL_COLORS["actual"],
-        label="真实值",
+        label="Actual",
         zorder=4,
     )
     for model in ("HierarchicalLocalMean", "SameHour24Baseline"):
@@ -458,16 +459,16 @@ def _plot_forecast_panel(axis: plt.Axes) -> bool:
             color=MODEL_COLORS[model],
             linewidth=1.8 if model == "HierarchicalLocalMean" else 1.35,
             linestyle="-" if model == "HierarchicalLocalMean" else "--",
-            label="分层局部均值" if model == "HierarchicalLocalMean" else "24小时同刻基线",
+            label="Hierarchical local mean" if model == "HierarchicalLocalMean" else "24-hour same-hour baseline",
             zorder=3,
         )
     axis.set_xlim(TEST_START_HOUR - 0.5, TEST_END_HOUR + 0.5)
     axis.set_xticks([2352, 2364, 2376, 2388, 2399])
-    axis.set_xlabel("小时")
-    axis.set_ylabel("全系统GPU需求")
+    axis.set_xlabel("Hour")
+    axis.set_ylabel("System GPU demand")
     _panel_caption(
         axis,
-        "(c) 2352—2399全系统GPU需求预测（验证期→测试期）",
+        "(c) System GPU forecasts, hours 2352--2399 (validation to test)",
         y=-0.27,
         fontsize=9.0,
     )
@@ -487,9 +488,9 @@ def _plot_forecast_panel(axis: plt.Axes) -> bool:
         baseline = "SameHour24Baseline"
         if all((split, model) in values for split in ("validation", "test") for model in (main_model, baseline)):
             metric_text = (
-                "WAPE（分层/24h基线）\n"
-                f"验证 {values[('validation', main_model)]:.4f}/{values[('validation', baseline)]:.4f}\n"
-                f"测试 {values[('test', main_model)]:.4f}/{values[('test', baseline)]:.4f}"
+                "WAPE (hierarchical / 24-hour baseline)\n"
+                f"Validation {values[('validation', main_model)]:.4f}/{values[('validation', baseline)]:.4f}\n"
+                f"Test {values[('test', main_model)]:.4f}/{values[('test', baseline)]:.4f}"
             )
             axis.text(
                 0.985,
@@ -526,7 +527,7 @@ def _plot_gantt_panel(axis: plt.Axes) -> bool:
         ),
     )
     if assignments is None:
-        axis.text(0.5, 0.5, "缺少任务调度结果", ha="center", va="center", color=TEXT_COLOR)
+        axis.text(0.5, 0.5, "Task schedules unavailable", ha="center", va="center", color=TEXT_COLOR)
         axis.set_axis_off()
         return False
     assignments = _numeric(
@@ -537,11 +538,11 @@ def _plot_gantt_panel(axis: plt.Axes) -> bool:
     assignments["Workload_GPUh"] = assignments["GPU_Demand"] * assignments["Duration_h"]
     assignments = assignments.dropna(subset=["StartHour", "FinishHour", "Workload_GPUh"])
     if assignments.empty:
-        axis.text(0.5, 0.5, "没有可绘制的调度任务", ha="center", va="center", color=TEXT_COLOR)
+        axis.text(0.5, 0.5, "No scheduled tasks to plot", ha="center", va="center", color=TEXT_COLOR)
         axis.set_axis_off()
         return False
-    # 按任务类型分层抽取代表任务，保留三类任务的时间弹性信息，
-    # 同时让AI训练仍占主要比例。每一层内部按GPU·h优先，再按GPU规模排序。
+    # Sample representative tasks by type, retaining the temporal flexibility of all three types.
+    # AI training remains the largest group. Rank each type by GPU-hours, then GPU demand.
     quotas = {"RealTimeInference": 6, "BatchInference": 6, "AITraining": 24}
     selected_parts: list[pd.DataFrame] = []
     for task_type in TASK_TYPE_ORDER:
@@ -590,17 +591,17 @@ def _plot_gantt_panel(axis: plt.Axes) -> bool:
         fontsize=6.0,
     )
     axis.invert_yaxis()
-    # 在图内底部预留一条窄带专门放图例，避免图例挤在子图之间。
+    # Reserve a narrow bottom strip for the legend to avoid crowding between subplots.
     axis.set_ylim(len(display) + 2.6, -0.8)
     axis.set_xlim(TEST_START_HOUR, TERMINAL_HOUR + 0.2)
     axis.set_xticks([2376, 2384, 2392, 2400, 2406])
-    axis.set_xlabel("小时")
-    axis.set_ylabel("代表任务（按类型分层抽取36个）", fontsize=8)
-    _panel_caption(axis, "(a) 2376—2406分层代表任务甘特图", y=-0.24, fontsize=9.3)
+    axis.set_xlabel("Hour")
+    axis.set_ylabel("Representative tasks (36 sampled by type)", fontsize=8)
+    _panel_caption(axis, "(a) Representative task Gantt chart, hours 2376--2406", y=-0.24, fontsize=9.3)
     axis.axvline(2400, color=PALETTE["gold"], linestyle=":", linewidth=1.0)
     axis.axvline(TERMINAL_HOUR, color=PALETTE["red"], linestyle="--", linewidth=1.0)
-    axis.text(2400.15, 1.01, "收尾", transform=axis.get_xaxis_transform(), color=PALETTE["gold"], fontsize=8)
-    axis.text(TERMINAL_HOUR - 0.1, 1.01, "2406边界", transform=axis.get_xaxis_transform(), ha="right", color=PALETTE["red"], fontsize=8)
+    axis.text(2400.15, 1.01, "Tail", transform=axis.get_xaxis_transform(), color=PALETTE["gold"], fontsize=8)
+    axis.text(TERMINAL_HOUR - 0.1, 1.01, "Hour 2406 boundary", transform=axis.get_xaxis_transform(), ha="right", color=PALETTE["red"], fontsize=8)
     handles = [
         Patch(facecolor=TASK_COLORS[task], edgecolor=TASK_COLORS[task], label=_task_label(task))
         for task in TASK_TYPE_ORDER
@@ -611,7 +612,7 @@ def _plot_gantt_panel(axis: plt.Axes) -> bool:
         axis.text(
             0.745,
             0.965,
-            f"F2*= {f2:.0f} h\n全本地可行",
+            f"F2*= {f2:.0f} h\nAll-local feasible",
             transform=axis.transAxes,
             ha="left",
             va="top",
@@ -687,7 +688,7 @@ def _plot_utilization_panels(figure: plt.Figure, spec) -> bool:
         axis.set_xticks([2376, 2400, 2405])
         if row == 2:
             axis.set_xticklabels(["2376", "2400", "2405"], fontsize=6.1)
-            axis.set_xlabel("小时", fontsize=7.4)
+            axis.set_xlabel("Hour", fontsize=7.4)
         else:
             axis.set_xticklabels([])
             axis.set_xlabel("")
@@ -702,7 +703,7 @@ def _plot_utilization_panels(figure: plt.Figure, spec) -> bool:
     caption_axis.text(
         0.5,
         0.56,
-        "(c) 六区域逐时GPU利用率",
+        "(c) Hourly GPU utilization in six regions",
         ha="center",
         va="top",
         fontsize=9.3,
@@ -725,7 +726,7 @@ def _plot_execution_matrix_panel(axis: plt.Axes) -> bool:
         ),
     )
     if assignments is None:
-        axis.text(0.5, 0.5, "缺少区域执行结果", ha="center", va="center", color=TEXT_COLOR)
+        axis.text(0.5, 0.5, "Regional execution results unavailable", ha="center", va="center", color=TEXT_COLOR)
         axis.set_axis_off()
         return False
     assignments = _numeric(assignments, ("StartHour", "FinishHour", "GPU_Demand"))
@@ -734,7 +735,7 @@ def _plot_execution_matrix_panel(axis: plt.Axes) -> bool:
     )
     assignments = assignments.dropna(subset=["Workload_GPUh"])
     if assignments.empty:
-        axis.text(0.5, 0.5, "没有可绘制的区域执行结果", ha="center", va="center", color=TEXT_COLOR)
+        axis.text(0.5, 0.5, "No regional execution results to plot", ha="center", va="center", color=TEXT_COLOR)
         axis.set_axis_off()
         return False
     regions = [region for region in REGION_ORDER if region in set(assignments["SourceRegion"].astype(str)) | set(assignments["TargetRegion"].astype(str))]
@@ -756,8 +757,8 @@ def _plot_execution_matrix_panel(axis: plt.Axes) -> bool:
     axis.set_xticklabels(regions, rotation=28, ha="right")
     axis.set_yticks(np.arange(len(regions)))
     axis.set_yticklabels(regions)
-    axis.set_xlabel("执行区域")
-    axis.set_ylabel("来源区域")
+    axis.set_xlabel("Execution region")
+    axis.set_ylabel("Source region")
     maximum = float(np.nanmax(matrix.to_numpy(dtype=float))) if matrix.size else 0.0
     for row_index, source in enumerate(regions):
         for column_index, target in enumerate(regions):
@@ -783,8 +784,8 @@ def _plot_execution_matrix_panel(axis: plt.Axes) -> bool:
         local_ratio = float((assignments["SourceRegion"].astype(str) == assignments["TargetRegion"].astype(str)).mean())
     _panel_caption(
         axis,
-        f"(b) 来源区域—执行区域GPU工作量矩阵\n"
-        f"F1*= {f1:.0f} GPU·h；本地执行率= {local_ratio:.0%}",
+        f"(b) Source-to-execution GPU workload matrix\n"
+        f"F1*= {f1:.0f} GPU-hours; local execution share= {local_ratio:.0%}",
         y=-0.34,
         fontsize=8.5,
         linespacing=1.15,
@@ -811,7 +812,7 @@ def _plot_peak_resource_panel(axis: plt.Axes) -> bool:
         ),
     )
     if profile is None:
-        axis.text(0.5, 0.5, "缺少资源剖面结果", ha="center", va="center", color=TEXT_COLOR)
+        axis.text(0.5, 0.5, "Resource profiles unavailable", ha="center", va="center", color=TEXT_COLOR)
         axis.set_axis_off()
         return False
     profile = _numeric(
@@ -851,7 +852,7 @@ def _plot_peak_resource_panel(axis: plt.Axes) -> bool:
     y = np.arange(len(regions), dtype=float)
     offsets = {"GPU": -0.18, "AI_IT": 0.0, "Facility": 0.18}
     resource_colors = {"GPU": PALETTE["blue"], "AI_IT": PALETTE["gold"], "Facility": PALETTE["purple"]}
-    resource_labels = {"GPU": "GPU", "AI_IT": "AI类IT容量", "Facility": "设施功率"}
+    resource_labels = {"GPU": "GPU", "AI_IT": "AI IT capacity", "Facility": "Facility power"}
     for resource in ("GPU", "AI_IT", "Facility"):
         values = summary[resource].to_numpy(dtype=float) * 100.0
         axis.scatter(
@@ -870,15 +871,15 @@ def _plot_peak_resource_panel(axis: plt.Axes) -> bool:
     axis.set_yticks(y)
     axis.set_yticklabels(regions)
     axis.invert_yaxis()
-    axis.set_xlabel("峰值利用率/%")
-    _panel_caption(axis, "(d) 区域峰值三资源利用率", y=-0.24, fontsize=9.2)
+    axis.set_xlabel("Peak utilization / %")
+    _panel_caption(axis, "(d) Regional peak utilization of three resources", y=-0.24, fontsize=9.2)
     _legend(axis, loc="upper left", bbox_to_anchor=(0.01, 0.99), fontsize=6.2, handletextpad=0.45, labelspacing=0.35)
     _style_axis(axis)
     return True
 
 
 def plot_group2_core_results() -> bool:
-    """第二组：代表任务甘特图、执行矩阵、GPU利用率和峰值资源状态。"""
+    """Group 2: task Gantt chart, execution matrix, GPU utilization, and peak resource usage."""
     figure = plt.figure(figsize=(6.9, 8.45))
     grid = figure.add_gridspec(
         3,
@@ -906,7 +907,7 @@ def _plot_wape_delta(axis: plt.Axes, paired: pd.DataFrame, summary: pd.DataFrame
         ("WindowID", "Delta_HierarchicalMinusBaseline"),
     ).dropna(subset=["Delta_HierarchicalMinusBaseline"])
     if paired.empty:
-        axis.text(0.5, 0.5, "缺少滚动WAPE差值结果", ha="center", va="center", color=TEXT_COLOR)
+        axis.text(0.5, 0.5, "Rolling WAPE differences unavailable", ha="center", va="center", color=TEXT_COLOR)
         axis.set_axis_off()
         return False
     paired = paired.sort_values("WindowID", kind="stable")
@@ -924,8 +925,8 @@ def _plot_wape_delta(axis: plt.Axes, paired: pd.DataFrame, summary: pd.DataFrame
         zorder=3,
     )
     axis.set_xlim(float(x.min()) - 1, float(x.max()) + 1)
-    axis.set_xlabel("滚动窗口编号", labelpad=2)
-    axis.set_ylabel("WAPE差值\n（分层模型−24小时基线）")
+    axis.set_xlabel("Rolling window index", labelpad=2)
+    axis.set_ylabel("WAPE difference\n(hierarchical model - 24-hour baseline)")
     n = len(paired)
     negative_count = int(np.sum(delta < 0.0))
     p_value = None
@@ -964,7 +965,7 @@ def _plot_hierarchy_scatter(
         subset=["HierarchicalWAPE", "DirectWAPE"]
     ).copy()
     if paired.empty:
-        axis.text(0.5, 0.5, "缺少分层恢复对比结果", ha="center", va="center", color=TEXT_COLOR)
+        axis.text(0.5, 0.5, "Hierarchical reconciliation comparisons unavailable", ha="center", va="center", color=TEXT_COLOR)
         axis.set_axis_off()
         return False
     x = paired["DirectWAPE"].to_numpy(dtype=float)
@@ -983,15 +984,15 @@ def _plot_hierarchy_scatter(
         edgecolors=PALETTE["blue"],
         linewidths=0.35,
         alpha=0.72,
-        label="滚动窗口",
+        label="Rolling window",
     )
     axis.set_xlim(lower, upper)
     axis.set_ylim(lower, upper)
-    # 统一x、y取值范围并保持等比例，避免y=x被视觉拉伸。
+    # Use equal x/y ranges and aspect ratio to avoid visually distorting y=x.
     axis.set_aspect("equal", adjustable="box")
-    axis.set_xlabel("直接预测WAPE")
-    axis.set_ylabel("分层恢复WAPE")
-    _panel_caption(axis, "(b) 分层恢复与直接预测", y=-0.25, fontsize=8.9)
+    axis.set_xlabel("Direct forecast WAPE")
+    axis.set_ylabel("Reconciled forecast WAPE")
+    _panel_caption(axis, "(b) Hierarchical reconciliation versus direct forecasting", y=-0.25, fontsize=8.9)
     delta = float(np.median(y - x))
     p_value = None
     if comparison is not None and not comparison.empty:
@@ -1016,19 +1017,19 @@ def _plot_hierarchy_scatter(
             if match is not None:
                 bottom_region_error = float(match.group(1))
                 break
-    annotation_lines = [f"中位差={delta:.2e}"]
+    annotation_lines = [f"Median difference={delta:.2e}"]
     if p_value is not None and np.isfinite(p_value):
         annotation_lines.append(f"p={p_value:.3f}")
     if region_error is not None and task_error is not None:
         annotation_lines.extend(
             [
-                "最大闭合误差",
-                f"区域={region_error:.2e}",
-                f"类型={task_error:.2e}",
+                "Maximum closure error",
+                f"Region={region_error:.2e}",
+                f"Type={task_error:.2e}",
             ]
         )
     if bottom_region_error is not None:
-        annotation_lines.append(f"18类汇总={bottom_region_error:.2e}")
+        annotation_lines.append(f"18-category sum={bottom_region_error:.2e}")
     axis.text(
         0.04,
         0.96,
@@ -1047,15 +1048,15 @@ def _plot_hierarchy_scatter(
 
 def _plot_pressure_interval(axis: plt.Axes, critical: pd.DataFrame | None) -> bool:
     if critical is None or critical.empty:
-        axis.text(0.5, 0.5, "缺少压力边界结果", ha="center", va="center", color=TEXT_COLOR)
+        axis.text(0.5, 0.5, "Stress bounds unavailable", ha="center", va="center", color=TEXT_COLOR)
         axis.set_axis_off()
         return False
     critical = _numeric(critical, ("AlphaLower", "AlphaUpper"))
     row_specs = [
-        ("1h", "alpha_local", "1 h－全本地"),
-        ("1h", "alpha_feas", "1 h－系统可行"),
-        ("0.5h", "alpha_local", "0.5 h－全本地"),
-        ("0.5h", "alpha_feas", "0.5 h－系统可行"),
+        ("1h", "alpha_local", "1 h - all-local"),
+        ("1h", "alpha_feas", "1 h - system feasible"),
+        ("0.5h", "alpha_local", "0.5 h - all-local"),
+        ("0.5h", "alpha_feas", "0.5 h - system feasible"),
     ]
     colors = {"1h": PALETTE["blue"], "0.5h": PALETTE["purple"]}
     y_values = np.arange(len(row_specs), dtype=float)
@@ -1098,14 +1099,14 @@ def _plot_pressure_interval(axis: plt.Axes, critical: pd.DataFrame | None) -> bo
         axis.text(upper, y - 0.22, f"{upper:.4f}", ha="center", va="top", fontsize=7, color=color)
 
     if not plotted:
-        axis.text(0.5, 0.5, "压力边界表中没有可绘制区间", ha="center", va="center", color=TEXT_COLOR)
+        axis.text(0.5, 0.5, "No stress-bound intervals to plot", ha="center", va="center", color=TEXT_COLOR)
         axis.set_axis_off()
         return False
     axis.axvline(1.0, color=PALETTE["red"], linestyle=":", linewidth=1.0)
     axis.text(
         1.02,
         0.04,
-        "当前负载 α=1",
+        "Current load alpha=1",
         transform=axis.get_xaxis_transform(),
         ha="left",
         va="bottom",
@@ -1117,12 +1118,12 @@ def _plot_pressure_interval(axis: plt.Axes, critical: pd.DataFrame | None) -> bo
     axis.set_yticks(y_values)
     axis.set_yticklabels([label for _, _, label in row_specs])
     axis.invert_yaxis()
-    axis.set_xlabel("负载倍数 α")
-    _panel_caption(axis, "(c) 压力边界检验", y=-0.24, fontsize=8.9)
+    axis.set_xlabel("Load multiplier alpha")
+    _panel_caption(axis, "(c) Stress-bound validation", y=-0.24, fontsize=8.9)
     legend_handles = [
-        Line2D([0], [0], marker="o", color=PALETTE["blue"], markerfacecolor=PALETTE["blue"], markeredgecolor=PALETTE["blue"], linestyle="None", label="实心：已验证下界"),
-        Line2D([0], [0], marker="o", color=PALETTE["blue"], markerfacecolor=PALETTE["white"], markeredgecolor=PALETTE["blue"], linestyle="None", label="空心：容量上界"),
-        Line2D([0], [0], color=PALETTE["lighter_blue"], linewidth=1.35, label="区间：下界至容量上界"),
+        Line2D([0], [0], marker="o", color=PALETTE["blue"], markerfacecolor=PALETTE["blue"], markeredgecolor=PALETTE["blue"], linestyle="None", label="Filled: verified lower bound"),
+        Line2D([0], [0], marker="o", color=PALETTE["blue"], markerfacecolor=PALETTE["white"], markeredgecolor=PALETTE["blue"], linestyle="None", label="Hollow: capacity upper bound"),
+        Line2D([0], [0], color=PALETTE["lighter_blue"], linewidth=1.35, label="Interval: lower to capacity upper bound"),
     ]
     _legend(axis, handles=legend_handles, loc="upper center", bbox_to_anchor=(0.72, 0.995), ncol=1, fontsize=5.2, labelspacing=0.20, handlelength=1.6)
     _style_axis(axis)
@@ -1130,7 +1131,7 @@ def _plot_pressure_interval(axis: plt.Axes, critical: pd.DataFrame | None) -> bo
 
 
 def plot_group3_validation_robustness() -> bool:
-    """第三组：84窗口泛化、分层恢复一致性与压力区间。"""
+    """Group 3: 84-window generalization, reconciliation consistency, and stress intervals."""
     paired = _read_table(
         "validation_paired_differences.csv",
         ("WindowID", "HierarchicalWAPE", "DirectWAPE", "Delta_HierarchicalMinusBaseline"),
@@ -1166,13 +1167,13 @@ def plot_group3_validation_robustness() -> bool:
         figure.add_subplot(grid[2, 3:5]),
     ]
 
-    # 子图(a)的图题独立占一行，避免与“滚动窗口编号”发生视觉重叠。
+    # Place subplot (a) caption on its own line to avoid overlap with the rolling window label.
     caption_a = figure.add_subplot(grid[1, :])
     caption_a.axis("off")
     caption_a.text(
         0.5,
         0.48,
-        "(a) 84个滚动窗口的WAPE差值",
+        "(a) WAPE differences across 84 rolling windows",
         ha="center",
         va="center",
         fontsize=9.2,
@@ -1198,7 +1199,7 @@ def main() -> int:
         force=True,
     )
     if not TABLES_DIR.is_dir() or not Q1_DIR.is_dir():
-        logging.info("缺少本题图表输入目录，跳过绘图。")
+        logging.info("Question-specific plot input directory is missing; skipping plotting.")
         return 0
     figure_functions = [
         plot_group1_demand_structure,
@@ -1207,10 +1208,10 @@ def main() -> int:
     ]
     generated = 0
     for function in figure_functions:
-        logging.info("开始绘制：%s", function.__name__)
+        logging.info("Plotting started: %s", function.__name__)
         if function():
             generated += 1
-    logging.info("Q1三组图绘制完成：生成%d/3组图，输出目录：%s", generated, FIGURES_DIR)
+    logging.info("Q1 plotting completed: %d/3 figure groups generated in %s", generated, FIGURES_DIR)
     return 0 if generated == 3 else 1
 
 

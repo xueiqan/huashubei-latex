@@ -1,7 +1,7 @@
-"""问题4预处理：读取问题1共享层并形成联合模型的逐时区域接口。
+"""Q4 preprocessing: construct hourly regional inputs from the Q1 shared interface.
 
-任务、候选区域、储能参数和基准参考均保持在第一问的shared目录中；本题不复制
-它们，也不提前生成场景、服务质量或多目标结果表。
+Tasks, candidate regions, storage parameters, and baseline references remain in
+the Q1 shared directory; no copies or scenario, QoS, or multiobjective results are generated in advance.
 """
 
 from __future__ import annotations
@@ -54,26 +54,26 @@ def _read_shared(filename: str, required_columns: tuple[str, ...]) -> pd.DataFra
     path = SHARED_DIR / filename
     if not path.is_file():
         raise FileNotFoundError(
-            f"缺少问题1共享输入：{path}；请先运行 question_01/preprocess.py"
+            f"Missing Q1 shared input: {path}; run question_01/preprocess.py first"
         )
     frame = pd.read_csv(path, encoding="utf-8-sig")
     missing = [column for column in required_columns if column not in frame.columns]
     if missing:
-        raise ValueError(f"共享文件{filename}缺少字段：{missing}")
+        raise ValueError(f"Shared file {filename} is missing columns: {missing}")
     return frame
 
 
 def _validate_hour_region(frame: pd.DataFrame, source_name: str) -> None:
     if frame[["Hour", "Region"]].isna().any().any():
-        raise ValueError(f"{source_name}的Hour或Region存在缺失值")
+        raise ValueError(f"{source_name} contains missing Hour or Region values")
     frame["Hour"] = pd.to_numeric(frame["Hour"], errors="coerce")
     if frame["Hour"].isna().any() or not frame["Hour"].eq(frame["Hour"].round()).all():
-        raise ValueError(f"{source_name}的Hour不是有效整数")
+        raise ValueError(f"{source_name} contains invalid integer Hour values")
     frame["Hour"] = frame["Hour"].astype("int64")
     if not frame["Hour"].between(0, 2406).all():
-        raise ValueError(f"{source_name}的Hour必须位于0--2406")
+        raise ValueError(f"{source_name}: Hour must lie within 0--2406")
     if frame.duplicated(["Hour", "Region"]).any():
-        raise ValueError(f"{source_name}存在重复的Hour×Region记录")
+        raise ValueError(f"{source_name} contains duplicate Hour x Region records")
 
 
 def _time_role(hour: int) -> str:
@@ -92,10 +92,10 @@ def _build_region_hour_input(
     static = region_static_compute.loc[:, list(STATIC_COLUMNS)].copy()
     _validate_hour_region(exogenous, "region_hour_exogenous")
     if static["Region"].duplicated().any():
-        raise ValueError("region_static_compute的Region必须唯一")
+        raise ValueError("region_static_compute requires unique Region values")
     result = exogenous.merge(static, how="left", on="Region", validate="many_to_one")
     if result[list(STATIC_COLUMNS[1:])].isna().any().any():
-        raise ValueError("region_static_compute无法覆盖所有逐时区域记录")
+        raise ValueError("region_static_compute does not cover all hourly regional records")
     result["TimeRole"] = result["Hour"].map(_time_role)
     output_columns = [
         "Hour",
@@ -128,11 +128,11 @@ def _check_shared_objects() -> None:
     )
     _read_shared("baseline_reference_region_hour.csv", ("Hour", "Region"))
     if tasks["TaskID"].duplicated().any():
-        raise ValueError("共享tasks_clean的TaskID必须唯一")
+        raise ValueError("Shared tasks_clean requires unique TaskID values")
     if not candidates["TaskID"].isin(tasks["TaskID"]).all():
-        raise ValueError("共享task_candidate_regions包含不存在的TaskID")
+        raise ValueError("Shared task_candidate_regions contains unknown TaskID values")
     if storage["Region"].duplicated().any():
-        raise ValueError("共享storage_params的Region必须唯一")
+        raise ValueError("Shared storage_params requires unique Region values")
 
 
 def main() -> int:

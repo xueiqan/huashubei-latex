@@ -25,7 +25,7 @@ The active code contains 24 Python files. Each question provides preprocessing, 
 | [archive/](archive/) | Frozen submissions, historical results, and source backups |
 | [docs/](docs/) | [Repository layout](docs/structure.md) and the [historical competition checklist](docs/competition-checklist.md) |
 
-The current paper source is [paper/main.tex](paper/main.tex). Build it to read the English revision in `paper/build/main.pdf`. The preserved [paper/main.pdf](paper/main.pdf) predates the English translation. See the [original archive guide](archive/2026%E5%8D%8E%E6%95%B0%E6%9D%AF_C%E9%A2%98_CCM2601033_20260818/00_%E5%BD%92%E6%A1%A3%E8%AF%B4%E6%98%8E/README_%E5%BD%92%E6%A1%A3%E8%AF%B4%E6%98%8E.md) for the distinction between the competition submission and later revisions.
+The current paper source is [paper/main.tex](paper/main.tex). The English revision compiles to 36 pages at `paper/build/main.pdf`. Rebuild it using the paper guide. The preserved [paper/main.pdf](paper/main.pdf) predates the English translation. See the [archive guide](docs/archive-guide.md) for the distinction between the competition submission and later revisions.
 
 ```text
 huashubei-latex/
@@ -136,7 +136,7 @@ Each question's `outputs/` contains tables, figures, logs, reports, and historic
 - Validated heuristic results establish feasibility under the stated data, parameters, and boundaries; they do not establish global optimality.
 - A complete fresh-environment reproduction has not been performed.
 
-Active documentation, editable paper text, source comments, command help, and display messages are maintained in English. Original organizer files, input data, historical outputs, frozen archives, and their required filenames remain unchanged. Existing figure assets can still contain Chinese labels; translated plotting source applies to future figure generation.
+Active documentation, editable paper text, source comments, command help, and display messages are maintained in English. Original organizer files, input data, historical outputs, frozen archives, and archive-internal names remain unchanged; repository filenames are English. Existing figure assets can still contain Chinese labels; translated plotting source applies to future figure generation.
 
 The paper uses XeLaTeX with Windows font settings, Times New Roman, and Consolas. See its build guide for prerequisites. This is a project paper, not an official competition template; replace the team number, title, and content when reusing its layout.
 

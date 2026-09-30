@@ -1,16 +1,20 @@
-"""问题3：基于储能时移的多目标能源协同优化模型。
+"""Question 3: multiobjective energy coordination through storage time shifting.
 
-模型口径与《q3模型.docx》保持一致：
+Conventions follow the Q3 modeling document:
 
-* 0--2405小时为可调度运行时段，2406小时只作为终端状态结算；
-* IT负荷固定为 ``Baseline_AI_IT_Load_MW + NonAI_IT_Load_MW``，不再优化任务迁移；
-* 新能源分为直接消纳、储能充电、外送和弃用；电网购电可以直接供负荷或给储能充电；
-* 储能按区域独立运行，SOC、充放电功率和充放电互斥约束形成MILP；
-* 先分别求解成本、碳排放、峰值净购电和净购电爬坡量四个单目标锚点，
-  再进行最小最大偏离、偏离和、储能吞吐量三级均衡择优；
-* 结果写入本题 ``outputs/tables``，不读取其他题目的模型结果。
+* Hours 0--2405 are operating intervals; hour 2406 settles terminal state only.
+* IT load is fixed at ``Baseline_AI_IT_Load_MW + NonAI_IT_Load_MW``; task
+  migration is no longer optimized.
+* Renewable energy is consumed directly, stored, exported, or curtailed. Grid
+  purchases may serve loads directly or charge storage.
+* Storage operates independently by region. SOC, power, and mutually exclusive
+  charging/discharging constraints form a MILP.
+* Solve cost, carbon, peak net imports, and net-import ramp anchors, then select
+  a balanced solution lexicographically by maximum normalized deviation, sum
+  of deviations, and storage throughput.
+* Write this question-specific ``outputs/tables`` without reading other model results.
 
-求解器使用项目已有的 ``scipy.optimize.milp``，本文件不新增第三方依赖。
+Use the existing ``scipy.optimize.milp`` dependency; add no third-party packages.
 """
 
 from __future__ import annotations
@@ -86,7 +90,7 @@ BASELINE_COLUMNS = (
 
 @dataclass(frozen=True)
 class Q3Data:
-    """已经对齐到Hour×Region键的Q3运行数据。"""
+    """Q3 operating data aligned by Hour x Region keys."""
 
     operating: pd.DataFrame
     terminal: pd.DataFrame
@@ -154,7 +158,7 @@ class DispatchArrays:
 def _configure_logging(level_name: str) -> None:
     level = getattr(logging, level_name.upper(), None)
     if not isinstance(level, int):
-        raise ValueError(f"不支持的日志级别：{level_name}")
+        raise ValueError(f"Unsupported log level: {level_name}")
     LOGS_DIR.mkdir(parents=True, exist_ok=True)
     formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
     stream_handler = logging.StreamHandler()
@@ -170,11 +174,11 @@ def _configure_logging(level_name: str) -> None:
 
 def _read_csv(path: Path, required_columns: Iterable[str]) -> pd.DataFrame:
     if not path.is_file():
-        raise FileNotFoundError(f"缺少模型输入文件：{path}")
+        raise FileNotFoundError(f"Model input file is missing: {path}")
     frame = pd.read_csv(path, encoding="utf-8-sig")
     missing = [column for column in required_columns if column not in frame.columns]
     if missing:
-        raise ValueError(f"{path.name}缺少字段：{missing}")
+        raise ValueError(f"{path.name} is missing columns: {missing}")
     return frame
 
 
@@ -183,21 +187,21 @@ def _to_numeric(frame: pd.DataFrame, columns: Iterable[str], source_name: str) -
     for column in columns:
         result[column] = pd.to_numeric(result[column], errors="coerce")
         if result[column].isna().any() or not np.isfinite(result[column].to_numpy(dtype=float)).all():
-            raise ValueError(f"{source_name}的{column}存在无效数值")
+            raise ValueError(f"{source_name} column {column} contains invalid numeric values")
     return result
 
 
 def _validate_hour_region(frame: pd.DataFrame, source_name: str) -> pd.DataFrame:
     result = frame.copy()
     if result[["Hour", "Region"]].isna().any().any():
-        raise ValueError(f"{source_name}的Hour或Region存在缺失值")
+        raise ValueError(f"{source_name} contains missing Hour or Region values")
     result["Hour"] = pd.to_numeric(result["Hour"], errors="coerce")
     if result["Hour"].isna().any() or not result["Hour"].eq(result["Hour"].round()).all():
-        raise ValueError(f"{source_name}的Hour不是有效整数")
+        raise ValueError(f"{source_name} Hour values are not valid integers")
     result["Hour"] = result["Hour"].astype("int64")
     result["Region"] = result["Region"].astype(str)
     if result.duplicated(["Hour", "Region"]).any():
-        raise ValueError(f"{source_name}存在重复的Hour×Region记录")
+        raise ValueError(f"{source_name} contains duplicate Hour x Region records")
     return result
 
 
@@ -216,14 +220,14 @@ def _validate_complete_grid(
         sample_missing = sorted(missing)[:5]
         sample_extra = sorted(extra)[:5]
         raise ValueError(
-            f"{source_name}的Hour×Region网格不完整；缺失示例={sample_missing}，多余示例={sample_extra}"
+            f"{source_name} Hour x Region grid is incomplete; missing examples={sample_missing}; extra examples={sample_extra}"
         )
 
 
 def _merge_storage(frame: pd.DataFrame, storage: pd.DataFrame, source_name: str) -> pd.DataFrame:
     result = frame.merge(storage, how="left", on="Region", validate="many_to_one")
     if result[list(STORAGE_COLUMNS[1:])].isna().any().any():
-        raise ValueError(f"{source_name}无法被storage_params完整覆盖")
+        raise ValueError(f"{source_name} is not fully covered by storage_params")
     return result
 
 
@@ -243,11 +247,11 @@ def _load_data(end_hour: int) -> Q3Data:
         "q3_fixed_energy_input.csv",
     )
     if (q3_input["Fixed_Facility_Load_MW"] < 0).any() or (q3_input["AvailableRenewable_MW"] < 0).any():
-        raise ValueError("Q3固定设施负荷和可用新能源不能为负")
+        raise ValueError("Q3 fixed facility loads and available renewables must be nonnegative")
 
     regions = tuple(sorted(q3_input["Region"].unique().tolist()))
     if not regions:
-        raise ValueError("Q3没有可用区域")
+        raise ValueError("Q3 has no available regions")
     terminal_hour = end_hour + 1
     q3_input = q3_input[q3_input["Hour"] <= terminal_hour].copy()
     _validate_complete_grid(q3_input, regions, MAIN_START_HOUR, terminal_hour, "q3_fixed_energy_input.csv")
@@ -256,25 +260,25 @@ def _load_data(end_hour: int) -> Q3Data:
     storage = _read_csv(SHARED_DIR / "storage_params.csv", STORAGE_COLUMNS)
     storage["Region"] = storage["Region"].astype(str)
     if storage["Region"].duplicated().any() or set(storage["Region"]) != set(regions):
-        raise ValueError("storage_params.csv的区域集合必须与Q3输入一致且唯一")
+        raise ValueError("storage_params.csv must have unique regions matching Q3 inputs")
     storage = _to_numeric(storage, STORAGE_COLUMNS[1:], "storage_params.csv")
     numeric_storage = storage.loc[:, list(STORAGE_COLUMNS[1:])]
     if (numeric_storage < 0).any().any():
-        raise ValueError("storage_params.csv不能包含负的容量、功率或边界")
+        raise ValueError("storage_params.csv must not contain negative capacities, powers, or boundaries")
     if (storage["StorageCapacity_MWh"] < storage["MinSOC_MWh"]).any():
-        raise ValueError("储能最小SOC不能高于容量")
+        raise ValueError("Minimum storage SOC must not exceed capacity")
     if (
         (storage["InitialSOC_MWh"] < storage["MinSOC_MWh"])
         | (storage["InitialSOC_MWh"] > storage["StorageCapacity_MWh"])
     ).any():
-        raise ValueError("初始SOC必须位于储能SOC边界内")
+        raise ValueError("Initial SOC must lie within storage SOC boundaries")
     if (
         (storage["ChargeEfficiency"] <= 0)
         | (storage["ChargeEfficiency"] > 1)
         | (storage["DischargeEfficiency"] <= 0)
         | (storage["DischargeEfficiency"] > 1)
     ).any():
-        raise ValueError("充放电效率必须位于(0,1]")
+        raise ValueError("Charging/discharging efficiencies must be within (0,1]")
     storage = storage.sort_values("Region", kind="stable").reset_index(drop=True)
 
     baseline = _read_csv(SHARED_DIR / "baseline_reference_region_hour.csv", BASELINE_COLUMNS)
@@ -300,15 +304,15 @@ def _load_data(end_hour: int) -> Q3Data:
     operation = _merge_storage(operation, storage, "q3_fixed_energy_input.csv")
     terminal = _merge_storage(terminal, storage, "q3_fixed_energy_input.csv terminal")
 
-    _validate_complete_grid(operation, regions, MAIN_START_HOUR, end_hour, "Q3运行输入")
-    _validate_complete_grid(baseline_operating, regions, MAIN_START_HOUR, end_hour, "Q3基准运行状态")
+    _validate_complete_grid(operation, regions, MAIN_START_HOUR, end_hour, "Q3 operating inputs")
+    _validate_complete_grid(baseline_operating, regions, MAIN_START_HOUR, end_hour, "Q3 baseline operating states")
     operation = operation.sort_values(["Hour", "Region"], kind="stable").reset_index(drop=True)
     terminal = terminal.sort_values(["Hour", "Region"], kind="stable").reset_index(drop=True)
     baseline_operating = baseline_operating.sort_values(["Hour", "Region"], kind="stable").reset_index(drop=True)
     baseline_terminal = baseline_terminal.sort_values(["Hour", "Region"], kind="stable").reset_index(drop=True)
 
     logging.info(
-        "输入读取完成：运行时段=%d--%d，共%d小时；区域=%s；终端小时=%d。",
+        "Inputs loaded: operating hours=%d--%d, count=%d; regions=%s; terminal hour=%d.",
         MAIN_START_HOUR,
         end_hour,
         end_hour - MAIN_START_HOUR + 1,
@@ -388,7 +392,7 @@ def _build_linear_model(data: Q3Data) -> LinearModel:
     time_count = len(data.hours)
     region_count = len(data.regions)
     if len(frame) != time_count * region_count:
-        raise ValueError("Q3运行输入行数与时间×区域网格不一致")
+        raise ValueError("Q3 operating input row count disagrees with the time x region grid")
 
     index = _make_indices(time_count, region_count)
     variable_lower = np.zeros(index.count, dtype=float)
@@ -461,13 +465,13 @@ def _build_linear_model(data: Q3Data) -> LinearModel:
             charge_efficiency = float(arrays["ChargeEfficiency"][r])
             discharge_efficiency = float(arrays["DischargeEfficiency"][r])
 
-            # 可用新能源全部进入直接消纳、储能充电、外送或弃用。
+            # All available renewables enter direct consumption, storage charging, export, or curtailment.
             add_row(
                 {v: 1.0, cr: 1.0, x: 1.0, curtail: 1.0},
                 float(renewable[t, r]),
                 float(renewable[t, r]),
             )
-            # 电网购电包含给储能的电网充电；新能源充电已在新能源平衡中单独结算。
+            # Grid purchases include grid charging; renewable charging is settled separately in renewable balance.
             add_row(
                 {b: 1.0, v: 1.0, d: 1.0, cg: -1.0},
                 float(fixed_load[t, r]),
@@ -489,7 +493,7 @@ def _build_linear_model(data: Q3Data) -> LinearModel:
             add_row({cg: 1.0, b: -1.0}, -np.inf, 0.0)
             add_row({v: 1.0}, -np.inf, float(fixed_load[t, r]))
             add_row({v: 1.0}, -np.inf, float(renewable[t, r]))
-            # 两个外送边界保持为两个独立约束，便于结果审计和论文解释。
+            # Keep both export boundaries as independent constraints for auditing and paper interpretation.
             add_row({x: 1.0}, -np.inf, float(arrays["SellLimit_MW"][r]))
             add_row({x: 1.0}, -np.inf, float(arrays["MaxGridExport_MW"][r]))
             p = int(index.peak[r])
@@ -535,7 +539,7 @@ def _build_linear_model(data: Q3Data) -> LinearModel:
     if not isinstance(matrix, csr_matrix):
         matrix = matrix.tocsr()
     logging.info(
-        "MILP结构建立完成：变量=%d（含二元变量=%d），基础约束=%d，非零元=%d。",
+        "MILP structure built: variables=%d (binary=%d), base constraints=%d, nonzeros=%d.",
         index.count,
         int(integrality.sum()),
         matrix.shape[0],
@@ -599,7 +603,7 @@ def _solve(
     matrix, lower, upper = _append_constraints(model, extra_rows or [])
     progress_interval = max(float(progress_interval), 0.1)
     logging.info(
-        "%s开始：变量=%d，约束=%d（基础%d+额外%d），目标非零项=%d，mip_rel_gap=%g，心跳间隔=%.1fs。",
+        "%s started: variables=%d, constraints=%d (base %d + extra %d), objective nonzeros=%d, mip_rel_gap=%g, heartbeat=%.1fs.",
         stage_name,
         model.index.count,
         matrix.shape[0],
@@ -615,7 +619,7 @@ def _solve(
     def _heartbeat() -> None:
         while not heartbeat_stop.wait(progress_interval):
             logging.info(
-                "%s仍在求解：已耗时%.1fs，变量=%d，约束=%d；等待MILP返回。",
+                "%s still solving: elapsed=%.1fs, variables=%d, constraints=%d; awaiting MILP return.",
                 stage_name,
                 time.perf_counter() - started,
                 model.index.count,
@@ -641,7 +645,7 @@ def _solve(
         heartbeat.join(timeout=1.0)
     elapsed = time.perf_counter() - started
     logging.info(
-        "%s求解器返回：status=%s，success=%s，耗时%.2fs，mip_gap=%s，dual_bound=%s，message=%s。",
+        "%s solver returned: status=%s, success=%s, elapsed=%.2fs, mip_gap=%s, dual_bound=%s, message=%s.",
         stage_name,
         getattr(result, "status", "NA"),
         getattr(result, "success", "NA"),
@@ -653,7 +657,7 @@ def _solve(
     vector = getattr(result, "x", None)
     if vector is None or not np.isfinite(np.asarray(vector, dtype=float)).all():
         raise RuntimeError(
-            f"{stage_name}未返回可行解：status={result.status}，message={result.message}"
+            f"{stage_name} returned no feasible solution: status={result.status}，message={result.message}"
         )
     solution = Solution(
         vector=np.asarray(vector, dtype=float),
@@ -666,13 +670,13 @@ def _solve(
     )
     if solution.status != 0:
         logging.warning(
-            "%s返回可行但未确认最优的结果：status=%d，message=%s。",
+            "%s returned a feasible solution with unproven optimality: status=%d, message=%s.",
             stage_name,
             solution.status,
             solution.message,
         )
     else:
-        logging.info("%s完成：最优，耗时%.2fs。", stage_name, elapsed)
+        logging.info("%s completed: optimal, elapsed=%.2fs.", stage_name, elapsed)
     return solution
 
 
@@ -722,7 +726,7 @@ def _solve_multiobjective(
 
     for objective_name in OBJECTIVE_NAMES:
         stage = f"anchor_{objective_name}"
-        logging.info("开始求解单目标锚点：%s。", objective_name)
+        logging.info("Solving single-objective anchor: %s.", objective_name)
         solution = _solve(
             model,
             model.objective_vectors[objective_name],
@@ -749,7 +753,7 @@ def _solve_multiobjective(
         for name in OBJECTIVE_NAMES
     }
     logging.info(
-        "单目标锚点完成：best=%s，reference=%s。",
+        "Single-objective anchors completed: best=%s, reference=%s.",
         {key: round(value, 8) for key, value in best.items()},
         {key: round(value, 8) for key, value in reference.items()},
     )
@@ -758,7 +762,7 @@ def _solve_multiobjective(
     stage_one_objective[model.index.z] = 1.0
     normalized_rows = _normalized_rows(model, best, scales)
     logging.info(
-        "开始求解均衡阶段1：最小化最大归一化偏离；新增归一化约束=%d。",
+        "Balanced stage 1 started: minimize maximum normalized deviation; added normalization constraints=%d.",
         len(normalized_rows),
     )
     stage_one = _solve(
@@ -776,7 +780,7 @@ def _solve_multiobjective(
     z_upper = z_star + BALANCE_TOLERANCE * max(1.0, abs(z_star))
     z_row = ({model.index.z: 1.0}, -np.inf, z_upper)
     logging.info(
-        "均衡阶段1完成：z*=%.10g；开始阶段2，固定z<=%.10g并最小化归一化偏离和。",
+        "Balanced stage 1 completed: z*=%.10g; stage 2 starts by fixing z<=%.10g and minimizing the deviation sum.",
         z_star,
         z_upper,
     )
@@ -808,7 +812,7 @@ def _solve_multiobjective(
         sum_constant + sum_deviation + BALANCE_TOLERANCE * max(1.0, abs(sum_deviation)),
     )
     logging.info(
-        "均衡阶段2完成：归一化偏离和=%.10g；开始阶段3，固定前两阶段水平并最小化储能吞吐量。",
+        "Balanced stage 2 completed: deviation sum=%.10g; stage 3 fixes the first two levels and minimizes storage throughput.",
         sum_deviation,
     )
 
@@ -824,7 +828,7 @@ def _solve_multiobjective(
     stage_three_metrics = _metric_values(model, stage_three.vector)
     solver_rows.append(_solver_row("balanced_stage_3_min_throughput", stage_three, stage_three_metrics, model))
     logging.info(
-        "均衡方案完成：z*=%.8g，归一化偏离和=%.8g，储能吞吐量=%.8g。",
+        "Balanced solution completed: z*=%.8g, deviation sum=%.8g, storage throughput=%.8g.",
         float(stage_three.vector[model.index.z]),
         sum(
             (stage_three_metrics[name] - best[name]) / scales[name]
@@ -1023,7 +1027,7 @@ def _profile_frame(data: Q3Data, scheme: str, arrays: DispatchArrays) -> pd.Data
             "Region", kind="stable"
         )
         if len(source_terminal) != len(terminal):
-            raise ValueError("附件基准终端状态与Q3终端区域数不一致")
+            raise ValueError("Attachment baseline terminal states disagree with the number of Q3 terminal regions")
         terminal_soc = source_terminal["SOC_MWh"].to_numpy(dtype=float)
     terminal_output = pd.DataFrame(
         {
@@ -1271,57 +1275,57 @@ def _write_outputs(
                 "BaseConstraintCount": model.matrix.shape[0],
                 "AuditTolerance": AUDIT_TOLERANCE,
                 "BalanceTolerance": BALANCE_TOLERANCE,
-                "Note": "2406小时只用于终端SOC状态结算；正式多目标方案为三级均衡择优结果。",
+                "Note": "Hour 2406 settles terminal SOC only; the official multiobjective solution uses three-stage balanced selection.",
             }
         ]
     )
     _write_table(configuration, "q3_model_configuration.csv")
-    logging.info("结果写入完成：%s。", TABLES_DIR)
+    logging.info("Results saved: %s.", TABLES_DIR)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="问题3储能时移多目标能源协同优化模型")
+    parser = argparse.ArgumentParser(description="Question 3 storage time-shifting multiobjective energy coordination model")
     parser.add_argument(
         "--max-hour",
         type=int,
         default=FULL_OPERATIONAL_END_HOUR,
-        help="运行时段最后一个小时，默认2405；仅用于烟测时可设为较小值",
+        help="Last operating hour, default 2405; smaller values are for smoke tests only",
     )
     parser.add_argument(
         "--mip-rel-gap",
         type=float,
         default=1e-5,
-        help="MILP相对最优间隙，默认1e-5；不设置时间上限",
+        help="MILP relative optimality gap, default 1e-5; no time limit",
     )
     parser.add_argument(
         "--progress-interval",
         type=float,
         default=DEFAULT_SOLVER_PROGRESS_INTERVAL,
-        help="MILP求解心跳日志间隔（秒），默认30；设为更小值可获得更密集进度",
+        help="MILP heartbeat interval in seconds, default 30; smaller values report progress more often",
     )
     parser.add_argument(
         "--solver-disp",
         action="store_true",
-        help="同时打开HiGHS原生求解器输出；通常保留默认心跳日志即可",
+        help="Enable native HiGHS output as well; heartbeat logs usually suffice",
     )
     parser.add_argument(
         "--log-level",
         choices=("DEBUG", "INFO", "WARNING", "ERROR"),
         default="INFO",
-        help="控制台和文件日志级别，默认INFO",
+        help="Console/file log level, default INFO",
     )
     args = parser.parse_args(argv)
     if not 0 <= args.max_hour <= FULL_OPERATIONAL_END_HOUR:
-        raise SystemExit("--max-hour必须位于0--2405")
+        raise SystemExit("--max-hour must be within 0--2405")
     if not 0 <= args.mip_rel_gap < 1:
-        raise SystemExit("--mip-rel-gap必须位于[0,1)")
+        raise SystemExit("--mip-rel-gap must be within [0,1)")
     if args.progress_interval <= 0:
-        raise SystemExit("--progress-interval必须为正数")
+        raise SystemExit("--progress-interval must be positive")
 
     _configure_logging(args.log_level)
     started = time.perf_counter()
     logging.info(
-        "问题3模型启动：运行时段0--%d，终端小时%d，MILP相对间隙=%g，心跳间隔=%.1fs，原生输出=%s，无时间上限。",
+        "Q3 model started: operating hours 0--%d, terminal hour %d, MILP relative gap=%g, heartbeat=%.1fs, native output=%s, no time limit.",
         args.max_hour,
         args.max_hour + 1,
         args.mip_rel_gap,
@@ -1340,9 +1344,9 @@ def main(argv: list[str] | None = None) -> int:
     audit = pd.read_csv(TABLES_DIR / "q3_constraint_audit.csv", encoding="utf-8-sig")
     failed_audits = audit.loc[audit["Status"] != "PASS"]
     if not failed_audits.empty:
-        raise RuntimeError(f"Q3均衡方案约束审计未通过：{failed_audits.to_dict(orient='records')}")
+        raise RuntimeError(f"Q3 balanced-solution constraint audit failed: {failed_audits.to_dict(orient='records')}")
     logging.info(
-        "问题3模型完成：Cost=%.8g，Carbon=%.8g，Peak=%.8g，Ramp=%.8g，总耗时%.1fs。",
+        "Q3 model completed: Cost=%.8g, Carbon=%.8g, Peak=%.8g, Ramp=%.8g, total elapsed=%.1fs.",
         _metric_values(model, balanced.vector)["Cost"],
         _metric_values(model, balanced.vector)["Carbon"],
         _metric_values(model, balanced.vector)["Peak"],

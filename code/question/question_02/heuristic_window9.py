@@ -1,9 +1,10 @@
-"""单独重算Q2精确同窗异常窗口的启发式结果。
+"""Recompute the heuristic result for one anomalous Q2 exact-comparison window.
 
-默认目标为WindowID=9（第10个窗口，tau=216）。本入口读取已完成的精确
-同窗对照结果，只固定窗口0--8的精确历史安排，然后调用“边际贪心+LNS
-精修”启发式重算目标窗口；不会调用精确MILP，也不会覆盖正式Q2结果或
-原有exact_vs_heuristic对照文件。
+The default is WindowID=9 (the tenth window, tau=216). Read completed exact
+comparison results, fix only exact assignments from windows 0--8, and recompute
+the target window with marginal greedy construction and LNS refinement. Never
+invoke exact MILP or overwrite official Q2 results or existing exact_vs_heuristic
+comparison files.
 """
 
 from __future__ import annotations
@@ -35,7 +36,7 @@ def _configure_logging(output_root: Path, level_name: str) -> None:
     output_root.mkdir(parents=True, exist_ok=True)
     level = getattr(logging, level_name.upper(), None)
     if not isinstance(level, int):
-        raise ValueError(f"不支持的日志级别：{level_name}")
+        raise ValueError(f"Unsupported log level: {level_name}")
     logging.basicConfig(
         level=level,
         handlers=[
@@ -59,9 +60,9 @@ def _load_exact_history(
     windows_path = history_root / "exact_windows.csv"
     assignments_path = history_root / "exact_assignments.csv"
     if not windows_path.is_file():
-        raise FileNotFoundError(f"缺少精确窗口结果：{windows_path}")
+        raise FileNotFoundError(f"Exact window results are missing: {windows_path}")
     if not assignments_path.is_file():
-        raise FileNotFoundError(f"缺少精确历史任务安排：{assignments_path}")
+        raise FileNotFoundError(f"Exact historical assignments are missing: {assignments_path}")
 
     windows = pd.read_csv(windows_path, encoding="utf-8-sig")
     assignments = pd.read_csv(assignments_path, encoding="utf-8-sig")
@@ -80,9 +81,9 @@ def _load_exact_history(
     missing_windows = sorted(required_windows.difference(windows.columns))
     missing_assignments = sorted(required_assignments.difference(assignments.columns))
     if missing_windows:
-        raise RuntimeError(f"exact_windows.csv缺少字段：{missing_windows}")
+        raise RuntimeError(f"exact_windows.csv is missing columns: {missing_windows}")
     if missing_assignments:
-        raise RuntimeError(f"exact_assignments.csv缺少字段：{missing_assignments}")
+        raise RuntimeError(f"exact_assignments.csv is missing columns: {missing_assignments}")
 
     windows = windows.copy()
     windows["WindowID"] = pd.to_numeric(windows["WindowID"], errors="coerce")
@@ -93,20 +94,20 @@ def _load_exact_history(
     target_rows = windows.loc[windows["WindowID"].eq(window_id)].copy()
     if len(target_rows) != 1:
         raise RuntimeError(
-            f"exact_windows.csv中WindowID={window_id}应恰有1行，实际{len(target_rows)}行"
+            f"exact_windows.csv WindowID={window_id} must have exactly one row; actual {len(target_rows)} rows"
         )
     previous = windows.loc[windows["WindowID"].between(0, window_id - 1)].copy()
     expected_previous = set(range(window_id))
     actual_previous = set(previous["WindowID"].dropna().astype(int))
     if actual_previous != expected_previous:
         raise RuntimeError(
-            f"窗口{window_id}需要完整窗口0--{window_id - 1}历史，"
-            f"实际={sorted(actual_previous)}"
+            f"Window {window_id} requires complete history from windows 0--{window_id - 1}; "
+            f"actual={sorted(actual_previous)}"
         )
     if previous["MIPStatus"].ne(0).any() or target_rows["MIPStatus"].ne(0).any():
-        raise RuntimeError("窗口0--目标窗口必须全部为status=0的精确MILP结果")
+        raise RuntimeError("Windows 0 through the target must all be exact MILP results with status=0")
     if previous["CommittedTaskCount"].isna().any():
-        raise RuntimeError("窗口0--目标窗口存在无效CommittedTaskCount")
+        raise RuntimeError("Windows 0 through the target contain invalid CommittedTaskCount values")
 
     tau = window_id * DECISION_WINDOW
     assignments = assignments.copy()
@@ -114,20 +115,20 @@ def _load_exact_history(
         assignments["StartHour"], errors="coerce"
     )
     if assignments["StartHour"].isna().any():
-        raise RuntimeError("exact_assignments.csv存在无效StartHour")
+        raise RuntimeError("exact_assignments.csv contains invalid StartHour values")
     history = assignments.loc[
         assignments["StartHour"] < float(tau) - q2.FLOAT_EPS
     ].copy()
     expected_count = int(round(float(previous["CommittedTaskCount"].sum())))
     if len(history) != expected_count:
         raise RuntimeError(
-            f"窗口0--{window_id - 1}历史任务数不一致："
-            f"按窗口记录应为{expected_count}，按StartHour<{tau}筛得{len(history)}"
+            f"Windows 0--{window_id - 1} historical task count mismatch: "
+            f"window records imply {expected_count}; StartHour<{tau} selects {len(history)}"
         )
     if history["TaskID"].astype(str).duplicated().any():
-        raise RuntimeError("窗口0--目标窗口历史安排存在重复TaskID")
+        raise RuntimeError("Historical assignments through the target window contain duplicate TaskID values")
     if not history.empty and float(history["StartHour"].max()) >= tau:
-        raise RuntimeError("历史安排包含目标窗口及之后的StartHour")
+        raise RuntimeError("Historical assignments include StartHour values in or after the target window")
     history["TaskID"] = history["TaskID"].astype(str)
     return history.reset_index(drop=True), target_rows.iloc[0], previous
 
@@ -169,8 +170,8 @@ def run(args: argparse.Namespace) -> int:
     plan_end = decision_end + LOOKAHEAD
 
     logging.info(
-        "窗口%d启发式单独重算启动：tau=%d，决策区间=%d--%d，前瞻结束=%d；"
-        "只运行边际贪心+LNS，不运行精确MILP。",
+        "Window %d isolated heuristic recomputation started: tau=%d, decision hours=%d--%d, lookahead end=%d; "
+        "run marginal greedy construction plus LNS only, without exact MILP.",
         window_id,
         tau,
         tau,
@@ -199,10 +200,10 @@ def run(args: argparse.Namespace) -> int:
         plan_end,
     )
     if not active_task_ids:
-        raise RuntimeError(f"窗口{window_id}没有可供启发式重算的活动任务")
+        raise RuntimeError(f"Window {window_id} has no active tasks for heuristic recomputation")
 
     logging.info(
-        "历史状态锁定：窗口0--%d精确任务=%d，活动任务=%d，活动类=%d。",
+        "Historical state locked: exact tasks in windows 0--%d=%d, active tasks=%d, active classes=%d.",
         window_id - 1,
         len(history),
         len(active_task_ids),
@@ -266,8 +267,8 @@ def run(args: argparse.Namespace) -> int:
         metadata=metadata,
     )
     logging.info(
-        "窗口%d启发式单独重算完成：z_exact=%.9g，z_heuristic=%.9g，"
-        "相对偏差=%.4f%%，启发式耗时=%.2fs，输出=%s。",
+        "Window %d isolated heuristic recomputation completed: z_exact=%.9g, z_heuristic=%.9g, "
+        "relative deviation=%.4f%%, heuristic elapsed=%.2fs, output=%s.",
         window_id,
         z_exact,
         z_heuristic,
@@ -280,20 +281,20 @@ def run(args: argparse.Namespace) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="只重算Q2精确同窗异常窗口的启发式+LNS结果"
+        description="Recompute only heuristic plus LNS results for one anomalous Q2 exact-comparison window"
     )
     parser.add_argument("--window-id", type=int, default=DEFAULT_WINDOW_ID)
     parser.add_argument(
         "--history-root",
         type=Path,
         default=DEFAULT_HISTORY_ROOT,
-        help="已完成精确同窗结果目录",
+        help="Directory of completed exact same-window results",
     )
     parser.add_argument(
         "--output-root",
         type=Path,
         default=DEFAULT_OUTPUT_ROOT,
-        help="单独输出目录，不覆盖正式对照结果",
+        help="Separate output directory; never overwrite official comparison results",
     )
     parser.add_argument("--progress-interval", type=float, default=30.0)
     parser.add_argument(
@@ -303,9 +304,9 @@ def main() -> int:
     )
     args = parser.parse_args()
     if not 0 <= args.window_id <= 9:
-        raise SystemExit("--window-id当前必须在0--9之间")
+        raise SystemExit("--window-id must currently be within 0--9")
     if not math.isfinite(args.progress_interval) or args.progress_interval < 0:
-        raise SystemExit("--progress-interval必须为非负有限数")
+        raise SystemExit("--progress-interval must be finite and nonnegative")
     return run(args)
 
 

@@ -1,14 +1,13 @@
-\section{符号说明}
+\section{Notation}
 
-文中主要符号及含义如表\ref{tab:symbols}所示，
-各问题中特有的参数和辅助变量在相应模型中另行说明。
+Table~\ref{tab:symbols} defines the main symbols.
+Problem-specific parameters and auxiliary variables are defined in the corresponding models.
 
 \begin{table}[H]
 	\centering
-	\caption{主要符号说明}
+    \caption{Main symbols and definitions}
 	\label{tab:symbols}
 	
-	% 压缩表格字体和行距
 	\small
 	\renewcommand{\arraystretch}{0.85}
 	
@@ -17,74 +16,73 @@
 			>{\raggedright\arraybackslash}X
 			>{\centering\arraybackslash}p{0.15\textwidth}}
 		\toprule
-		\textbf{符号} & \multicolumn{1}{c}{\textbf{含义}} & \textbf{单位} \\
+        \textbf{Symbol} & \multicolumn{1}{c}{\textbf{Definition}} & \textbf{Unit} \\
 		\midrule
 		
 		$i,r,t,s$
-		& 任务、区域、时段及候选开工时刻索引
+        & Indices of jobs, regions, periods, and candidate start times
 		& -- \\
 		
 		$a_i,e_i,o_i,d_i$
-		& 到达、最早开工、最晚完成时刻及持续时间
+        & Arrival time, earliest start, latest completion, and duration
 		& h \\
 		
 		$g_i$
-		& 任务$i$的GPU需求量
+        & GPU demand of job $i$
 		& GPU \\
 		
 		$p_i$
-		& 任务$i$的AI IT功率
+        & AI IT power of job $i$
 		& MW \\
 		
 		$l_{ir},\,l_i^{\max}$
-		& 执行时延及最大允许时延
+        & Execution latency and maximum permitted latency
 		& ms \\
 		
 		$x_{irs}$
-		& 任务$i$是否在区域$r$、时刻$s$开工
+        & Whether job $i$ starts in region $r$ at time $s$
 		& $\{0,1\}$ \\
 		
 		$\rho_{ist}$
-		& 任务$i$在时段$t$内的运行占比
+        & Fraction of period $t$ occupied by job $i$
 		& -- \\
 		
 		$P^{AI}_{rt},\,P^{NonAI}_{rt}$
-		& AI IT负荷与非AI IT负荷
+        & AI and non-AI IT loads
 		& MW \\
 		
 		$F_{rt}$
-		& 区域$r$的设施侧总负荷
+        & Total facility load in region $r$
 		& MW \\
 		
 		$G^{ava}_{rt}$
-		& 区域$r$的可用GPU容量
+        & Available GPU capacity in region $r$
 		& GPU \\
 		
 		$PUE_r$
-		& 区域$r$的PUE
+        & PUE of region $r$
 		& -- \\
 		
 		$P^{RE}_{rt}$
-		& 区域$r$的可用新能源功率
+        & Available renewable power in region $r$
 		& MW \\
 		
 		$\pi_{rt},\,\sigma_{rt}$
-		& 购电价格与售电价格
-		& 元/MWh \\
+        & Electricity purchase and sale prices
+        & CNY/MWh \\
 		
 		$\kappa_{rt}$
-		& 电网碳强度
+        & Grid carbon intensity
 		& tCO$_2$/MWh \\
 		
 		$B_{rt},\,X_{rt},\,R_{rt}$
-		& 电网购电、新能源外送及弃用功率
+        & Grid purchase, renewable export, and curtailed power
 		& MW \\
 		
 		$S_{rt}$
-		& 时段$t$开始时的储能电量
+        & Stored energy at the start of period $t$
 		& MWh \\
 		
 		\bottomrule
 	\end{tabularx}
 \end{table}
-

@@ -1,17 +1,17 @@
-\section{问题三的模型建立与求解}
+\section{Model Formulation and Solution for Problem 3}
 
-\subsection{模型建立}
+\subsection{Model Formulation}
 
-问题三固定题目给定的AI与非AI IT负荷，不调整任务区域和开工时刻，仅优化新能源分配、储能充放电及购售电，以识别储能的能源侧作用。
+Problem 3 fixes the specified AI and non-AI IT loads without altering job regions or start times. Only renewable allocation, storage charging and discharging, and grid transactions are optimized, isolating the energy-side contribution of storage.
 
-设区域$r$在时段$t$的设施负荷为$F_{rt}$，
-可用新能源功率为$P^{RE}_{rt}$，
-电网购电功率为$B_{rt}$；
-新能源直接供能、新能源充电、电网充电、储能放电、
-新能源外送和弃用功率分别记为
-$V_{rt}$、$C^{RE}_{rt}$、$C^G_{rt}$、
-$D_{rt}$、$X_{rt}$和$R_{rt}$。
-设施负荷与逐时能源平衡满足
+Let $F_{rt}$ denote the facility load in region $r$ during period $t$,
+$P^{RE}_{rt}$ the available renewable power,
+and $B_{rt}$ the grid purchase power.
+Direct renewable supply, renewable charging, grid charging, storage discharge,
+renewable exports, and curtailment are denoted by
+$V_{rt}$, $C^{RE}_{rt}$, $C^G_{rt}$,
+$D_{rt}$, $X_{rt}$, and $R_{rt}$, respectively.
+Facility loads and hourly energy balances satisfy
 \begin{equation}
 	\begin{aligned}
 		F_{rt}
@@ -30,11 +30,11 @@ $D_{rt}$、$X_{rt}$和$R_{rt}$。
 	\label{eq:q3_energy_balance}
 \end{equation}
 
-其中$F_{rt}$已知，且$0\leq V_{rt}\leq F_{rt}$、$0\leq C^G_{rt}\leq B_{rt}$。
+Here $F_{rt}$ is known, with $0\leq V_{rt}\leq F_{rt}$ and $0\leq C^G_{rt}\leq B_{rt}$.
 
-设$S_{rt}$为时段$t$开始时的储能电量。数据中心储能调度通常依据SOC递推和功率边界实现跨时调节\cite{ref10}；本文进一步加入充放电互斥、购售电边界和终端SOC约束，进行全时域求解。
-时间步长为1 h，充、放电效率分别为$\eta_r^c$和$\eta_r^d$，
-则SOC递推为
+Let $S_{rt}$ denote stored energy at the start of period $t$. Data-center storage scheduling typically uses SOC dynamics and power limits for intertemporal regulation\cite{ref10}. We additionally impose mutually exclusive charging and discharging, grid transaction limits, and terminal SOC constraints in a full-horizon optimization.
+The time step is 1 h, with charging and discharging efficiencies $\eta_r^c$ and $\eta_r^d$,
+giving the SOC recursion
 \begin{equation}
 	S_{r,t+1}
 	=
@@ -49,14 +49,14 @@ $D_{rt}$、$X_{rt}$和$R_{rt}$。
 	\label{eq:q3_soc}
 \end{equation}
 
-储能满足容量、功率及$S_{r,2406}\geq S_{r0}$；引入$y_{rt}\in\{0,1\}$排除同时充放电：
-$C^{RE}_{rt}+C^G_{rt}\leq y_{rt}P_r^{ch,\max}$、
-$D_{rt}\leq(1-y_{rt})P_r^{dis,\max}$。
-购电满足$0\leq B_{rt}\leq P_r^{Grid,\max}$；新能源外送满足$0\leq X_{rt}\leq\bar X_r$及$X_{rt}\leq P_r^{Grid,\mathrm{out},\max}$。
+Storage satisfies capacity and power limits and $S_{r,2406}\geq S_{r0}$. Introduce $y_{rt}\in\{0,1\}$ to exclude simultaneous charging and discharging:
+$C^{RE}_{rt}+C^G_{rt}\leq y_{rt}P_r^{ch,\max}$,
+$D_{rt}\leq(1-y_{rt})P_r^{dis,\max}$.
+Purchases satisfy $0\leq B_{rt}\leq P_r^{Grid,\max}$; renewable exports satisfy $0\leq X_{rt}\leq\bar X_r$ and $X_{rt}\leq P_r^{Grid,\mathrm{out},\max}$.
 
-沿用问题二的成本和碳排放口径，并增加峰值净购电与净购电波动指标。
-定义区域净购电功率$N_{rt}=B_{rt}-X_{rt}$，
-则
+Cost and emissions follow Problem 2, with additional metrics for peak net grid purchases and net purchase fluctuations.
+Define regional net purchase power as $N_{rt}=B_{rt}-X_{rt}$.
+Then
 \begin{equation}
 	\begin{aligned}
 		C&=
@@ -79,10 +79,10 @@ $D_{rt}\leq(1-y_{rt})P_r^{dis,\max}$。
 	\label{eq:q3_objectives}
 \end{equation}
 
-其中$t=0,\ldots,2405$，$T=2406$；$W_{rt}\geq\pm(N_{r,t+1}-N_{rt})$，故$W$为相邻小时净购电的平均绝对变化量，$P_r^{\max}\geq0$避免将净外送解释为负峰值。
+Here $t=0,\ldots,2405$ and $T=2406$, with $W_{rt}\geq\pm(N_{r,t+1}-N_{rt})$. Thus $W$ is the mean absolute change in net purchases between adjacent hours. The constraint $P_r^{\max}\geq0$ prevents net exports from being interpreted as negative peaks.
 
-四项指标量纲不同且无给定权重，先求单目标理想值$f_m^{best}$，再将各单目标方案$x^{(j)}$代入全部指标，取$f_m^{ref}=\max_j f_m(x^{(j)})$。
-对于存在有效权衡关系的指标，定义
+The four metrics have different units and no prescribed weights. First compute the single-objective ideal values $f_m^{best}$, evaluate each single-objective schedule $x^{(j)}$ on all metrics, and set $f_m^{ref}=\max_j f_m(x^{(j)})$.
+For metrics with an effective trade-off range, define
 \begin{equation}
 	\bar f_m
 	=
@@ -91,16 +91,16 @@ $D_{rt}\leq(1-y_{rt})P_r^{dis,\max}$。
 	\label{eq:q3_normalization}
 \end{equation}
 
-若$f_m^{ref}=f_m^{best}$，该指标仅用于评价；其余指标采用三级择优：
+If $f_m^{ref}=f_m^{best}$, the metric is used only for evaluation. Remaining metrics enter three-level selection:
 \begin{equation}
 	\begin{aligned}
-		&\text{第一级：}\quad
+        &\text{Level 1:}\quad
 		\min z,
 		\qquad
 		\bar f_m\leq z;\\
-		&\text{第二级：}\quad
+        &\text{Level 2:}\quad
 		\min \Phi=\sum_m\bar f_m;\\
-		&\text{第三级：}\quad
+        &\text{Level 3:}\quad
 		\min G=
 		\sum_r\sum_t
 		\left(
@@ -110,93 +110,93 @@ $D_{rt}\leq(1-y_{rt})P_r^{dis,\max}$。
 	\label{eq:q3_multilevel}
 \end{equation}
 
-前两级控制最大偏离和总偏离，第三级在近等价方案中减少无意义循环。除充放电互斥外均为线性约束，故直接求解第0--2405小时混合整数线性规划，并在2406检查终端SOC。
+The first two levels control maximum and total deviations. The third reduces unnecessary cycling among nearly equivalent schedules. All constraints except charge--discharge exclusivity are linear; the mixed-integer linear program is solved over hours 0--2405, with terminal SOC checked at 2406.
 
 
-\subsection{求解结果与模型检验}
+\subsection{Results and Model Validation}
 
-六区域统一求解结果见图\ref{fig:q3_storage}：RegionA--RegionC基本不充放电，调节集中于RegionD--RegionF。
-RegionD的SOC约为$90.0\sim712.4$ MWh，
-RegionE和RegionF分别约为
-$82.0\sim820.0$ MWh和$85.0\sim850.0$ MWh，
-SOC变化与式(\ref{eq:q3_soc})中的充放电状态保持一致。
+Figure~\ref{fig:q3_storage} gives the unified six-region solution: RegionA--RegionC show almost no charging or discharging, while regulation is concentrated in RegionD--RegionF.
+SOC in RegionD ranges approximately from $90.0\sim712.4$ MWh,
+and the corresponding ranges in RegionE and RegionF are
+$82.0\sim820.0$ MWh and $85.0\sim850.0$ MWh,
+consistent with the charge and discharge dynamics in Equation~(\ref{eq:q3_soc}).
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.92\textwidth]
 	{figures/q3_group1_storage_mechanism.pdf}
-	\caption{六区域储能功率时序与活跃区域SOC演化特征}
+    \caption{Storage power in six regions and SOC evolution in active regions}
 	\label{fig:q3_storage}
 \end{figure}
 
-储能由此集中配置于调节需求较强的区域，而非各区域均匀调用。
+Storage is thus used mainly in regions with stronger regulation demand, rather than uniformly across regions.
 
-题目附件状态仅作实际运行对照，不作为满足本文终端SOC条件的同可行域优化基准；无储能方案用于同模型口径消融。
-优化后运行成本为
-$C=-4.5906\times10^{8}$，
-碳排放$E=0$，
-六区域峰值净购电之和$P=0$，
-平均净购电波动$W=0.0113$ MW。
-四项指标均优于附件对照；负成本表示外送收益超过购电支出。
+The states supplied in the problem attachments are an operating reference only, not an optimization baseline in the same feasible set satisfying our terminal SOC condition. The no-storage schedule provides a model-consistent ablation.
+The optimized operating cost is
+$C=-4.5906\times10^{8}$,
+with carbon emissions $E=0$,
+the sum of six regional peak net purchases $P=0$,
+and mean net purchase fluctuation $W=0.0113$ MW.
+All four metrics improve on the attachment reference. Negative cost means export revenue exceeds purchase expenditure.
 
-碳排放和峰值净购电均为0，并不表示数据中心没有电力负荷。按照题目给定口径，碳排放仅由电网购电量计算，峰值指标取净购电功率的正部；在当前确定性数据和允许新能源外送的边界下，优化方案利用新能源和储能满足负荷，并将富余新能源外送，因而购电碳排放和正向净购电峰值均降至0。该结论依赖当前新能源、电价、储能和购售电边界，不代表其他参数情景下仍能保持为0。
+Zero emissions and peak net purchases do not imply zero data-center electricity load. Under the specified accounting rules, emissions arise only from grid purchases and the peak metric uses the positive part of net purchase power. For the present deterministic data and permitted renewable exports, renewables and storage supply the loads while surplus renewables are exported, reducing purchase-related emissions and positive net purchase peaks to zero. This depends on the current renewable, price, storage, and grid transaction conditions; zero values are not guaranteed under other parameter scenarios.
 
 \begin{figure}[H]
 	\centering
 \includegraphics[width=0.86\textwidth]
 {figures/q3_group2_optimization_effect.pdf}
-\caption{储能协同优化的净运行结算绝对变化、三项指标改善率与区域差异}
+\caption{Absolute net settlement changes, improvements in three metrics, and regional differences under storage coordination}
 	\label{fig:q3_effect}
 \end{figure}
 
-图\ref{fig:q3_effect}以万元表示净运行结算绝对变化，以相对改善率表示其余指标，避免成本跨零时的比例歧义。六区域峰值均下降，RegionD--RegionF波动改善更大，与储能活跃区域一致。
+Figure~\ref{fig:q3_effect} expresses absolute net settlement changes in CNY $10^4$ and the other metrics as relative improvements, avoiding ambiguous cost percentages when costs cross zero. All regional peaks fall; larger fluctuation improvements in RegionD--RegionF match the regions with active storage.
 
-令$C^{RE}_{rt}=C^G_{rt}=D_{rt}=0$构造无储能反事实方案。
-其运行成本为$-4.1969\times10^{8}$，
-碳排放为$8.8506$，
-峰值净购电为$31.5979$ MW，
-平均净购电波动为$5.3981$ MW。
-与其相比，优化方案的净运行成本降低3936.19万元，碳排放、峰值和波动也下降。
+Set $C^{RE}_{rt}=C^G_{rt}=D_{rt}=0$ to construct a no-storage counterfactual.
+Its operating cost is $-4.1969\times10^{8}$,
+carbon emissions are $8.8506$,
+peak net purchases are $31.5979$ MW,
+and mean net purchase fluctuation is $5.3981$ MW.
+Compared with this counterfactual, optimization reduces net operating cost by 3936.19 units of CNY $10^4$, as well as emissions, peaks, and fluctuations.
 
-独立复核表明，优化方案与无储能方案均满足能源平衡、SOC、容量、互斥、购售电及终端约束。
-附件运行对照的新能源平衡和负荷平衡最大残差分别约为
-$2.0\times10^{-4}$ MW和$1.504\times10^{-4}$ MW，
-处于原始数据精度量级；
-但SOC递推最大偏差约为$0.9999$ MWh，
-终端SOC缺口约为$193.3$ MWh。
-故附件状态可作题设运行对照，但不属于本文约束下的可行优化解。
+Independent verification confirms that both the optimized and no-storage schedules satisfy energy balance, SOC, capacity, exclusivity, grid transaction, and terminal constraints.
+Maximum renewable and load balance residuals in the attachment operating reference are approximately
+$2.0\times10^{-4}$ MW and $1.504\times10^{-4}$ MW,
+consistent with the precision of the original data.
+However, the maximum SOC recursion deviation is about $0.9999$ MWh,
+and the terminal SOC deficit is approximately $193.3$ MWh.
+The attachment states therefore serve as an operating reference, but are not a feasible optimization solution under our constraints.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.91\textwidth]
 	{figures/q3_group3_validation_credibility.pdf}
-	\caption{附件运行对照口径诊断与多目标三级择优检验}
+    \caption{Attachment-reference diagnostics and three-level multiobjective selection tests}
 	\label{fig:q3_validation}
 \end{figure}
 
-图\ref{fig:q3_validation}中，第三级使$z$和$\Phi$相对前一级的变化均约$1.0\times10^{-6}$，储能吞吐量减少900.16 MWh，即在保持前两级结果时减少无效循环。
+In Figure~\ref{fig:q3_validation}, the third level changes $z$ and $\Phi$ by approximately $1.0\times10^{-6}$ relative to the preceding level while reducing storage throughput by 900.16 MWh. It reduces unnecessary cycling while retaining the first two levels' results.
 
-问题三在固定负荷下量化储能的跨时调节作用，并为问题四提供能源侧基准。
+Problem 3 quantifies intertemporal storage regulation under fixed loads and provides an energy-side baseline for Problem 4.
 
 
 
-\section{问题四的模型建立与求解}
+\section{Model Formulation and Solution for Problem 4}
 
-\subsection{模型建立}
+\subsection{Model Formulation}
 
-问题四联合优化任务区域、开工时刻、新能源、储能及购售电。以问题二可行任务方案为初始方案，沿用问题三能源机理；任务迁移和错峰经PUE映射影响新能源消纳、SOC和电网交换，因而建立算--储--电联合模型。
+Problem 4 jointly optimizes job regions, start times, renewables, storage, and grid transactions. It initializes jobs with the feasible Problem 2 schedule and retains the energy mechanisms of Problem 3. Migration and time shifting affect renewable utilization, SOC, and grid exchanges through the PUE mapping, yielding a joint computing--storage--electricity model.
 
-负荷空间迁移与时间调整可同储能及电力决策联动\cite{ref9}。本文保留任务时限、网络时延、资源容量和能源边界，并设置终端SOC与滚动可恢复约束。
+Spatial and temporal load shifting can coordinate with storage and electricity decisions\cite{ref9}. We retain deadlines, network latency, resource capacities, and energy limits, adding terminal SOC and rolling recoverability constraints.
 
-任务侧沿用问题一可行域。由$x_{irs}$和式(\ref{eq:q1_overlap})得到AI IT负荷
-$P_{rt}^{AI}=\sum_i\sum_{s\in S_i}p_i\rho_{ist}x_{irs}$，
-设施侧负荷为
-$F_{rt}=PUE_r(P_{rt}^{AI}+P_{rt}^{NonAI})$。
-任务唯一执行，实时任务立即启动，弹性任务满足时窗、时延、GPU、功率及2406边界。
+The job-side feasible set follows Problem 1. Variables $x_{irs}$ and Equation~(\ref{eq:q1_overlap}) determine the AI IT load
+$P_{rt}^{AI}=\sum_i\sum_{s\in S_i}p_i\rho_{ist}x_{irs}$,
+and the facility load is
+$F_{rt}=PUE_r(P_{rt}^{AI}+P_{rt}^{NonAI})$.
+Each job executes exactly once. Real-time jobs start immediately; flexible jobs satisfy time windows, latency, GPU and power capacities, and the boundary at 2406.
 
-能源侧沿用式(\ref{eq:q3_energy_balance})和式(\ref{eq:q3_soc})及其容量、互斥、购售电与外送约束，并要求$S_{r,2406}\geq S_{r0}$。
+The energy side retains Equations~(\ref{eq:q3_energy_balance}) and (\ref{eq:q3_soc}), their capacity, exclusivity, grid transaction, and export constraints, and $S_{r,2406}\geq S_{r0}$.
 
-为防止滚动求解在前期过度放电，还在每个决策窗口末端加入SOC可恢复条件：
+To prevent excessive early discharge in rolling optimization, an SOC recoverability condition is imposed at the end of each decision window:
 \begin{equation}
 	S_{r,\tau+H}
 	\geq
@@ -208,9 +208,9 @@ $F_{rt}=PUE_r(P_{rt}^{AI}+P_{rt}^{NonAI})$。
 	\label{eq:q4_soc_recovery}
 \end{equation}
 
-式(\ref{eq:q4_soc_recovery})保证剩余时域仍有恢复初始SOC的理论能力，并在终点衔接终端约束。
+Equation~(\ref{eq:q4_soc_recovery}) preserves the theoretical ability to restore initial SOC within the remaining horizon and connects to the terminal constraint.
 
-六项评价指标为净运行结算$C$、碳排放$E$、网络时延$L$、等待损失$J$、新能源未利用率$Q$和峰值净购电$P$。前三项口径沿用问题二、三；设弹性任务合法开工边界为$\underline{s}_i,\overline{s}_i$，时延敏感权重为$\omega_i$，则
+The six metrics are net operating settlement $C$, carbon emissions $E$, network latency $L$, waiting loss $J$, renewable nonutilization $Q$, and peak net purchases $P$. The first three follow Problems 2 and 3. Let $\underline{s}_i,\overline{s}_i$ denote valid start-time bounds for flexible jobs and $\omega_i$ latency-sensitive weights. Then
 \begin{equation}
 	\begin{aligned}
 		J&=
@@ -233,8 +233,8 @@ $F_{rt}=PUE_r(P_{rt}^{AI}+P_{rt}^{NonAI})$。
 	\label{eq:q4_metrics}
 \end{equation}
 
-滚动求解前固定全局中心$a_m$和尺度$R_m$，各窗口和情景不再改变；非退化主动指标集合为$\mathcal M_{\mathrm{act}}=\{L,J,Q\}$。
-第$\tau$个窗口的标准化偏离和增广极小极大准则为
+Global centers $a_m$ and scales $R_m$ are fixed before rolling optimization and remain unchanged across windows and scenarios. The nondegenerate active metric set is $\mathcal M_{\mathrm{act}}=\{L,J,Q\}$.
+Normalized deviations and the augmented minimax criterion for window $\tau$ are
 \begin{equation}
 	\begin{aligned}
 		d_{m,\tau}
@@ -255,48 +255,47 @@ $F_{rt}=PUE_r(P_{rt}^{AI}+P_{rt}^{NonAI})$。
 	\label{eq:q4_minmax}
 \end{equation}
 
-式(\ref{eq:q4_minmax})仅对$\mathcal M_{\mathrm{act}}$计算；$C,E,P$独立复算，用于评价和情景比较。六项指标构成统一评价体系，但并非同等强度的主动优化目标。
+Equation~(\ref{eq:q4_minmax}) applies only to $\mathcal M_{\mathrm{act}}$. Metrics $C,E,P$ are independently recomputed for evaluation and scenario comparisons. All six form a common evaluation system, but they are not equally active optimization objectives.
 
-全时域联合整数变量规模过大，故采用问题二初始方案驱动的滚动数学启发式：$H=24$ h、$K=48$ h、内部推进4 h，前瞻区只提供未来信息。流程见表\ref{tab:q4_algorithm}。
+The full-horizon joint integer model is too large. We use a rolling matheuristic initialized by the Problem 2 schedule, with $H=24$ h, $K=48$ h, and an internal advancement of 4 h. The look-ahead interval supplies future information only. Table~\ref{tab:q4_algorithm} summarizes the procedure.
 
-% ==================== Q4：滚动求解流程 ====================
 \begin{table}[H]
 	\centering
-	\caption{问题四滚动算--储--电联合求解流程}
+    \caption{Rolling joint computing--storage--electricity optimization for Problem 4}
 	\label{tab:q4_algorithm}
-	
+
 	\fontsize{10.5pt}{12pt}\selectfont
 	\renewcommand{\arraystretch}{0.88}
-	
+
 	\begin{tabular}{
 			>{\centering\arraybackslash}p{0.08\textwidth}
 			>{\raggedright\arraybackslash}p{0.86\textwidth}}
 		\toprule
-		\textbf{步骤} & \multicolumn{1}{c}{\textbf{主要操作}}\\
+        \textbf{Step} & \multicolumn{1}{c}{\textbf{Operation}}\\
 		\midrule
-		
-		1 & 读取问题二任务种子及当前SOC、历史峰值和剩余任务状态。\\
-		
-		2 & 在$H=24$ h决策区和$K=48$ h前瞻区内重新求解储能与购售电响应。\\
-		
-	3 & 利用边际线性规划评价弹性任务迁移、错峰对联合目标的潜在影响。\\
-		
-	4 & 对产生资源冲突的局部调整调用小规模混合整数线性规划模型进行可行性修复。\\
-		
-	5 & 选取关键任务组成大邻域，同时开放任务与能源变量进行联合大邻域搜索精修。\\
-		
-		6 & 提交当前$H$小时可行结果，并更新SOC、历史峰值、累计碳排放及剩余任务。\\
-		
+
+        1 & Read the Problem 2 seed schedule, current SOC, historical peaks, and remaining-job states.\\
+
+        2 & Reoptimize storage and grid responses over the $H=24$ h decision window and $K=48$ h look-ahead interval.\\
+
+        3 & Use marginal linear programs to assess the potential joint-objective effects of migrating or shifting flexible jobs.\\
+
+        4 & Use small mixed-integer linear programs to repair local adjustments that create resource conflicts.\\
+
+        5 & Form a large neighborhood of key jobs and jointly release job and energy variables for refinement.\\
+
+        6 & Commit feasible decisions for the current $H$ hours; update SOC, historical peaks, cumulative emissions, and remaining jobs.\\
+
 		\bottomrule
 	\end{tabular}
 \end{table}
 
 
-联合大邻域同时开放任务区域、开工时刻和能源变量，仅接受满足全部硬约束且使式(\ref{eq:q4_minmax})目标值改善的方案。所得结果为严格满足硬约束且计算效率较高的可行方案，不宣称获得全局最优解。
+The joint large neighborhood releases execution regions, start times, and energy variables together. It accepts only schedules satisfying every hard constraint and improving Equation~(\ref{eq:q4_minmax}). The result is a computationally efficient feasible schedule satisfying all hard constraints; global optimality is not claimed.
 
-顺序基准固定问题二任务方案，再按问题三能源模型优化储能和购售电；两方案采用相同六项指标。
+The sequential baseline fixes the Problem 2 job schedule and then optimizes storage and grid transactions using the Problem 3 energy model. Both schedules use the same six evaluation metrics.
 
-保持任务、网络、容量和储能参数不变，分别改变碳约束、电价机制和新能源波动。设基准碳排放为$E^0$、低碳参考为$E^{LC}$，新能源平滑参数为$\gamma$，三类情景定义为
+Job, network, capacity, and storage parameters remain fixed while carbon constraints, pricing mechanisms, and renewable fluctuations vary. Let $E^0$ denote baseline emissions, $E^{LC}$ a low-carbon reference, and $\gamma$ a renewable smoothing parameter. The three scenario families are
 \begin{equation}
 	\begin{aligned}
 		E
@@ -317,113 +316,109 @@ $F_{rt}=PUE_r(P_{rt}^{AI}+P_{rt}^{NonAI})$。
 	\label{eq:q4_scenarios}
 \end{equation}
 
-新能源平滑仅作用于原非零时段并保持每日总量，所有情景沿用固定定标尺度。
+Renewable smoothing applies only to originally nonzero periods and preserves daily total energy. All scenarios retain the fixed normalization scales.
 
-最终由任务表和完整SOC轨迹重构第0--2405小时剖面，统一复算六项指标及全部硬约束。
+Finally, the job table and complete SOC trajectories reconstruct profiles for hours 0--2405, allowing consistent recomputation of all six metrics and hard constraints.
 
-\subsection{求解结果与模型检验}
+\subsection{Results and Model Validation}
 
-采用$H=24$ h、$K=48$ h对50000个任务完成101个滚动窗口，仅提交满足全部硬约束的决策区结果，并在全时域统一复算。
+With $H=24$ h and $K=48$ h, 50000 jobs are processed through 101 rolling windows. Only decision-window results satisfying all hard constraints are committed, followed by full-horizon recomputation.
 
-旧顺序能源解因报告型指标退化而形成了物理意义较弱的比较基准。为消除该影响，本文固定问题二顺序任务方案和既有联合任务方案，均按相同的能源响应规则重新优化储能与购售电。该步骤仅统一复算两套任务方案的能源轨迹，不等同于重新执行完整联合搜索。结果见表\ref{tab:q4_result}。
+Degenerate reporting metrics in the earlier sequential energy solution produced a comparison baseline with limited physical meaning. To remove that effect, we fix both the Problem 2 sequential job schedule and the existing joint job schedule, then reoptimize storage and grid transactions using identical energy-response rules. This step consistently recomputes the two schedules' energy trajectories; it is not a rerun of the complete joint search. Table~\ref{tab:q4_result} gives the results.
 
-% ==================== Q4：联合方案结果 ====================
 \begin{table}[H]
 	\centering
-	\caption{统一能源口径下联合任务方案与顺序任务方案对比}
+    \caption{Joint and sequential job schedules under consistent energy accounting}
 	\label{tab:q4_result}
-	
+
 	\fontsize{10.5pt}{12pt}\selectfont
 	\renewcommand{\arraystretch}{0.90}
-	
+
 	\begin{tabular}{lrr}
 		\toprule
-		\multicolumn{1}{c}{\textbf{评价指标}}
-		& \multicolumn{1}{c}{\textbf{顺序任务方案}}
-	& \multicolumn{1}{c}{\textbf{联合任务方案}}\\
+        \multicolumn{1}{c}{\textbf{Metric}}
+        & \multicolumn{1}{c}{\textbf{Sequential jobs}}
+        & \multicolumn{1}{c}{\textbf{Joint jobs}}\\
 		\midrule
-		
-		净运行结算/元
+
+        Net settlement/CNY
 		& $-4.532307\times10^8$
 		& $-4.538873\times10^8$\\
-		
-		碳排放/tCO$_2$
+
+        Emissions/tCO$_2$
 		& 30.1233
 		& 71.2005\\
-		
-		平均网络时延/ms
+
+        Mean network latency/ms
 		& 12.9468
 		& 9.9618\\
-		
-		QoS损失
+
+        QoS loss
 		& 0.083659
 		& 0.079281\\
-		
-		新能源未利用率
+
+        Renewable nonutilization
 		& 29.8615\%
 		& 29.8357\%\\
-		
-		峰值净购电/MW
+
+        Peak net purchases/MW
 		& 66.5709
 		& 97.1828\\
-		
+
 		\bottomrule
 	\end{tabular}
 \end{table}
 
 
-表\ref{tab:q4_result}中，联合任务方案的净运行结算降低$6.5665\times10^5$元，时延下降2.9851 ms，QoS损失下降0.004378，新能源未利用率降低0.0258个百分点；碳排放增加41.0772 tCO$_2$，峰值净购电增加30.6119 MW。负结算表示外送收益超过购电支出。结果表明，联合任务调整主要改善服务质量并小幅降低净结算和弃新能源，但未使六项评价指标同时改善。
+In Table~\ref{tab:q4_result}, the joint job schedule lowers net settlement by $6.5665\times10^5$ CNY, latency by 2.9851 ms, QoS loss by 0.004378, and renewable nonutilization by 0.0258 percentage points. Emissions increase by 41.0772 tCO$_2$ and peak net purchases by 30.6119 MW. Negative settlement means export revenue exceeds purchase expenditure. Joint job adjustments mainly improve service quality and slightly reduce net settlement and curtailment; they do not improve all six metrics simultaneously.
 
-因此，两类方案不存在脱离决策偏好的统一优劣关系。若调度者优先改善网络时延、等待损失和新能源消纳，并能接受相应的碳排放与峰值净购电增量，则可采用联合任务方案；若碳排放或峰值净购电属于严格控制指标，则应采用相应约束情景下的方案。本文据此将结果解释为不同运行偏好下的可行策略集合，而不指定脱离应用条件的唯一最优方案。
+The two schedules therefore cannot be ranked independently of decision preferences. A scheduler prioritizing latency, waiting loss, and renewable utilization while accepting increased emissions and peak purchases may choose the joint schedule. If emissions or peak purchases are strictly controlled, a schedule from the corresponding constrained scenario should be used. We interpret the results as feasible strategies for different operating preferences, rather than a unique optimum independent of application conditions.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.88\textwidth]
 	{figures/q4_group1_joint_optimization_results.pdf}
-	\caption{统一能源口径下两类任务方案的有效指标与新能源--储能结构对比}
+    \caption{Active metrics and renewable--storage structures of two job schedules under consistent energy accounting}
 	\label{fig:q4_joint_result}
 \end{figure}
 
-图\ref{fig:q4_joint_result}中，联合任务方案相较顺序任务方案的新能源直接消纳减少$10.54\times10^3$ MWh，储能充入和外送分别增加$10.63\times10^3$、$2.89\times10^3$ MWh，弃新能源减少$2.97\times10^3$ MWh，储能吞吐量增加$19.75\times10^3$ MWh。图中$L,J,Q$为既有联合搜索实际采用的非退化主动指标；$C,E,P$按统一能源口径独立复算，用于报告任务方案的能源侧代价，不将其追溯表述为联合搜索目标。
+In Figure~\ref{fig:q4_joint_result}, relative to sequential jobs, joint jobs reduce direct renewable use by $10.54\times10^3$ MWh, increase storage charging and exports by $10.63\times10^3$ and $2.89\times10^3$ MWh, reduce curtailment by $2.97\times10^3$ MWh, and increase storage throughput by $19.75\times10^3$ MWh. Metrics $L,J,Q$ are the nondegenerate active metrics actually used in the existing joint search. Metrics $C,E,P$ are independently recomputed with consistent energy accounting to report energy-side costs; they are not retrospectively described as joint-search objectives.
 
-按式(\ref{eq:q4_scenarios})构造碳约束、平价电价和新能源平滑情景，相对联合基准的变化见图\ref{fig:q4_scenario}。该图沿用已完成情景组及其同版本联合基准，仅比较组内相对响应；表\ref{tab:q4_result}与图\ref{fig:q4_joint_result}的定点能源复算专用于纠正顺序--联合方案比较，两类结果不交叉拼接绝对量。
+Equation~(\ref{eq:q4_scenarios}) defines carbon-constrained, fixed-price, and renewable-smoothing scenarios. Figure~\ref{fig:q4_scenario} shows changes relative to the joint baseline. It retains the completed scenario group and the joint baseline of that same version, comparing only within-group relative responses. Fixed-job energy recomputation in Table~\ref{tab:q4_result} and Figure~\ref{fig:q4_joint_result} specifically corrects the sequential--joint comparison. Absolute quantities from these two result groups are not combined.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.86\textwidth]
 	{figures/q4_group2_scenario_response.pdf}
-	\caption{不同机制情景相对问题四基准的指标响应}
+    \caption{Scenario responses relative to the Problem 4 baseline}
 	\label{fig:q4_scenario}
 \end{figure}
 
-图\ref{fig:q4_scenario}中，$\lambda$由0.25增至0.50时，碳排放由297.36降至209.97 tCO$_2$，峰值约95.54 MW，时延由9.0144变为8.9945 ms。
-当$\lambda=1$时，碳排放和峰值净购电接近0，
-但新能源未利用率升至43.5710\%，
-即继续压缩购电会牺牲新能源利用，并非各指标同步改善。
+In Figure~\ref{fig:q4_scenario}, increasing $\lambda$ from 0.25 to 0.50 lowers emissions from 297.36 to 209.97 tCO$_2$, with peaks around 95.54 MW and latency changing from 9.0144 to 8.9945 ms.
+At $\lambda=1$, emissions and peak net purchases approach zero,
+but renewable nonutilization rises to 43.5710\%.
+Further restricting purchases therefore sacrifices renewable utilization rather than improving all metrics simultaneously.
 
-平价电价下碳排放449.37 tCO$_2$、峰值升至368.71 MW。新能源平滑情景中，
-当$\gamma=0.25,0.50,1.00$时，
-碳排放分别约为242.89、158.01和50.85 tCO$_2$，
-峰值净购电分别约为55.73、13.18和0 MW，
-时延均为9.77--9.81 ms，表明平滑主要改变能源侧状态。
+Fixed electricity prices yield emissions of 449.37 tCO$_2$ and a peak of 368.71 MW. In renewable-smoothing scenarios,
+for $\gamma=0.25,0.50,1.00$,
+emissions are approximately 242.89, 158.01, and 50.85 tCO$_2$,
+peak net purchases are approximately 55.73, 13.18, and 0 MW,
+and latency remains within 9.77--9.81 ms. Smoothing mainly changes energy-side states.
 
-采用全时域独立复算和代表窗口完整混合整数线性规划检验。顺序任务方案与联合任务方案各67项任务、容量、时延、能源、SOC及购售电复核均通过，最大硬约束违反量为
-$2.3842\times10^{-7}$，低于$10^{-6}$的检验容差；
-六项指标独立复算后与汇总结果的最大差异亦不超过该量级。
+Validation combines independent full-horizon recomputation with complete mixed-integer linear programs for representative windows. Both sequential and joint job schedules pass all 67 checks of jobs, capacity, latency, energy, SOC, and grid transactions. The largest hard-constraint violation is
+$2.3842\times10^{-7}$, below the $10^{-6}$ verification tolerance.
+The largest discrepancy between independently recomputed metrics and summary results is no greater than this order of magnitude.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.88\textwidth]
 	{figures/q4_group3_model_validation.pdf}
-	\caption{问题四代表窗口完整混合整数线性规划与六区域储能状态的独立检验结果}
+    \caption{Independent checks of complete representative-window mixed-integer models and six-region storage states}
 	\label{fig:q4_validation}
 \end{figure}
 
-图\ref{fig:q4_validation}(a)对1512和2232窗口作完整联合混合整数线性规划对照：前者在600 s内得到相对间隙20.49\%的可行参考解，后者达到最优，二者约束复核均通过。该检验只提供局部可行性与有限解质量参照，不能证明全时域近优或全局最优。
+Figure~\ref{fig:q4_validation}(a) compares complete joint mixed-integer linear programs for windows 1512 and 2232. The former obtains a feasible reference with a 20.49\% relative gap within 600 s; the latter reaches optimality. Both pass constraint checks. This provides local feasibility and limited solution-quality references, not proof of full-horizon near-optimality or global optimality.
 
-图\ref{fig:q4_validation}(b)给出联合任务方案按统一能源核算口径复算后的SOC轨迹。SOC始终位于上下界内，且$S_{r,2406}\geq S_{r0}$，未通过透支初始储能获取收益。
+Figure~\ref{fig:q4_validation}(b) shows SOC trajectories for the joint job schedule after consistent energy recomputation. SOC stays within its bounds and satisfies $S_{r,2406}\geq S_{r0}$; benefits are not obtained by depleting initial stored energy.
 
-问题四的联合任务方案在当前数据下改善网络时延、等待损失和新能源未利用率，同时使碳排放与峰值净购电增加，说明联合决策产生的是指标权衡而非六项同步占优。两套任务方案均满足任务、算力、能源和储能硬约束；其结论限于严格满足硬约束且计算效率较高的可行方案，不宣称获得全局最优解，也不将能源定点复算等同于完整联合搜索。
-
-
-
+Under the current data, the joint job schedule improves latency, waiting loss, and renewable nonutilization while increasing emissions and peak net purchases. Joint decisions therefore produce trade-offs rather than simultaneous superiority in all six metrics. Both schedules satisfy all job, computing, energy, and storage hard constraints. The conclusions concern computationally efficient feasible solutions; global optimality is not claimed, and fixed-job energy recomputation is not equated with complete joint search.

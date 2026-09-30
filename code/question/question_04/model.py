@@ -1,4 +1,4 @@
-"""问题4：决策区精确优化与压缩前瞻的算—储—电联合滚动MILP。"""
+"""Q4: rolling compute-storage-grid MILP with exact decisions and compressed lookahead."""
 
 from __future__ import annotations
 
@@ -63,7 +63,7 @@ SOLVER_STATUS_NAMES = {
 
 
 def _progress(message: str) -> None:
-    print(f"[Q4进度] {message}", flush=True)
+    print(f"[Q4 progress] {message}", flush=True)
 
 
 def _checkpoint_header(path: Path) -> dict[str, object] | None:
@@ -76,7 +76,7 @@ def _checkpoint_header(path: Path) -> dict[str, object] | None:
 
 
 def _select_auto_resume_checkpoint(signature: str) -> tuple[Path, int] | None:
-    """选择签名匹配且推进最远的正式/修复分支断点。"""
+    """Select the furthest advanced matching formal or repair-branch checkpoint."""
 
     candidates: list[tuple[int, float, Path]] = []
     for path in TABLES_DIR.glob(".q4_progress_checkpoint*.pkl"):
@@ -99,7 +99,7 @@ def _select_auto_resume_checkpoint(signature: str) -> tuple[Path, int] | None:
 
 
 def _activate_progress_namespace(checkpoint: Path) -> None:
-    """恢复分支继续写回自己的进度文件，避免覆盖原始断点。"""
+    """Resume into the branch's own progress files without overwriting the original checkpoint."""
 
     global CHECKPOINT_PATH
     global PROGRESS_ASSIGNMENTS_PATH, PROGRESS_DISPATCH_PATH, PROGRESS_SOLVER_PATH
@@ -125,7 +125,7 @@ def _activate_progress_namespace(checkpoint: Path) -> None:
 
 
 def _atomic_replace_bytes(path: Path, payload: bytes) -> None:
-    """先完整写入同目录临时文件，再原子替换目标文件。"""
+    """Write a complete temporary file in the same directory, then atomically replace the target."""
 
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
@@ -166,7 +166,7 @@ def _atomic_write_csv(frame: pd.DataFrame, path: Path) -> None:
 
 
 def _result_float(result: object, field: str) -> float:
-    """将求解器可选的数值字段安全转换为float；连续松弛阶段可能返回None。"""
+    """Convert optional solver fields to float; continuous relaxations may return None."""
 
     value = getattr(result, field, np.nan)
     if value is None:
@@ -224,7 +224,7 @@ def _qos_weight_map(config: ModelConfig | None = None) -> dict[str, float]:
         "Low": float(config.qos_low_weight),
     }
     if not (weights["High"] >= weights["Medium"] >= weights["Low"] > 0.0):
-        raise ValueError("QoS权重必须满足High>=Medium>=Low>0")
+        raise ValueError("QoS weights must satisfy High>=Medium>=Low>0")
     return weights
 
 
@@ -307,11 +307,11 @@ class WindowSolution:
 
 def _read_csv(path: Path, required: Iterable[str]) -> pd.DataFrame:
     if not path.is_file():
-        raise FileNotFoundError(f"缺少模型输入：{path}")
+        raise FileNotFoundError(f"Missing model input: {path}")
     frame = pd.read_csv(path, encoding="utf-8-sig")
     missing = [column for column in required if column not in frame.columns]
     if missing:
-        raise ValueError(f"{path.name}缺少字段：{missing}")
+        raise ValueError(f"{path.name} is missing columns: {missing}")
     return frame
 
 
@@ -321,7 +321,7 @@ def _numeric(frame: pd.DataFrame, columns: Iterable[str], source: str) -> pd.Dat
     for column in columns:
         result[column] = pd.to_numeric(result[column], errors="coerce")
     if result[list(columns)].isna().any().any():
-        raise ValueError(f"{source}存在无法解析的数值")
+        raise ValueError(f"{source} contains invalid numeric values")
     return result
 
 
@@ -338,21 +338,21 @@ def _validate_task_time_and_latency_inputs(
 
     if tasks["TaskID"].duplicated().any():
         sample = tasks.loc[tasks["TaskID"].duplicated(keep=False), "TaskID"].astype(str).head(5).tolist()
-        raise ValueError(f"tasks_clean.csv存在重复TaskID，示例：{sample}")
+        raise ValueError(f"tasks_clean.csv contains duplicate TaskID values; examples: {sample}")
     supported_types = {"RealTimeInference", "BatchInference", "AITraining"}
     unknown_types = sorted(set(tasks["TaskType"]) - supported_types)
     if unknown_types:
-        raise ValueError(f"tasks_clean.csv存在未知TaskType：{unknown_types}")
+        raise ValueError(f"tasks_clean.csv contains unknown TaskType values: {unknown_types}")
     arrival = tasks["ArrivalHour"].to_numpy(dtype=float)
     arrival_integer = np.rint(arrival).astype(int)
     if np.abs(arrival - arrival_integer).max(initial=0.0) > EPS:
-        raise ValueError("tasks_clean.csv的ArrivalHour必须为整数小时")
+        raise ValueError("tasks_clean.csv requires integer ArrivalHour values")
     if ((arrival < -EPS) | (arrival >= float(MAIN_END) - EPS)).any():
-        raise ValueError("tasks_clean.csv的任务到达时刻必须位于0--2399小时")
+        raise ValueError("tasks_clean.csv requires arrival times within hours 0--2399")
     if (tasks["Duration_h"].to_numpy(dtype=float) <= EPS).any():
-        raise ValueError("tasks_clean.csv存在非正任务时长")
+        raise ValueError("tasks_clean.csv contains nonpositive task durations")
     if (tasks["MaxLatency_ms"].to_numpy(dtype=float) < -EPS).any():
-        raise ValueError("tasks_clean.csv存在负的最大网络时延")
+        raise ValueError("tasks_clean.csv contains negative maximum network latencies")
 
     earliest = np.maximum(
         arrival_integer,
@@ -364,7 +364,7 @@ def _validate_task_time_and_latency_inputs(
     ).astype(int)
     infeasible = tasks.loc[earliest > latest, "TaskID"].astype(str).head(5).tolist()
     if infeasible:
-        raise ValueError(f"tasks_clean.csv存在无合法整数开工时刻的任务，示例：{infeasible}")
+        raise ValueError(f"tasks_clean.csv contains tasks without a feasible integer start time; examples: {infeasible}")
     real_time = tasks["TaskType"].eq("RealTimeInference").to_numpy()
     bad_realtime = tasks.loc[
         real_time & ((earliest != arrival_integer) | (arrival_integer > latest)),
@@ -372,8 +372,8 @@ def _validate_task_time_and_latency_inputs(
     ].astype(str).head(5).tolist()
     if bad_realtime:
         raise ValueError(
-            "tasks_clean.csv存在无法在到达时刻立即启动的实时任务，"
-            f"示例：{bad_realtime}"
+            "tasks_clean.csv contains realtime tasks that cannot start immediately on arrival; "
+            f"examples: {bad_realtime}"
         )
 
     if candidates.duplicated(["TaskID", "TargetRegion"]).any():
@@ -381,7 +381,7 @@ def _validate_task_time_and_latency_inputs(
             candidates.duplicated(["TaskID", "TargetRegion"], keep=False),
             ["TaskID", "TargetRegion"],
         ].head(5).to_dict("records")
-        raise ValueError(f"task_candidate_regions.csv存在重复TaskID—TargetRegion：{sample}")
+        raise ValueError(f"task_candidate_regions.csv contains duplicate TaskID--TargetRegion pairs: {sample}")
     bounds = candidates.merge(
         tasks[["TaskID", "MaxLatency_ms"]].rename(
             columns={"MaxLatency_ms": "TaskMaxLatency_ms"}
@@ -395,23 +395,23 @@ def _validate_task_time_and_latency_inputs(
     ].astype(str).head(5).tolist()
     if unknown_candidate_task:
         raise ValueError(
-            "task_candidate_regions.csv存在原始任务表之外的TaskID，"
-            f"示例：{unknown_candidate_task}"
+            "task_candidate_regions.csv contains TaskID values absent from the original task table; "
+            f"examples: {unknown_candidate_task}"
         )
     if (bounds["NetworkLatency_ms"].to_numpy(dtype=float) < -EPS).any():
-        raise ValueError("task_candidate_regions.csv存在负的网络时延")
+        raise ValueError("task_candidate_regions.csv contains negative network latencies")
     max_mismatch = np.abs(
         bounds["MaxLatency_ms"].to_numpy(dtype=float)
         - bounds["TaskMaxLatency_ms"].to_numpy(dtype=float)
     )
     if max_mismatch.max(initial=0.0) > EPS:
-        raise ValueError("任务候选区域表的MaxLatency_ms与任务表不一致")
+        raise ValueError("Candidate-region MaxLatency_ms values differ from the task table")
     over_latency = (
         bounds["NetworkLatency_ms"].to_numpy(dtype=float)
         - bounds["TaskMaxLatency_ms"].to_numpy(dtype=float)
     )
     if over_latency.max(initial=0.0) > EPS:
-        raise ValueError("task_candidate_regions.csv存在超过任务最大时延的候选区域")
+        raise ValueError("task_candidate_regions.csv contains candidates exceeding the task latency limit")
     return {
         "TaskCount": int(len(tasks)),
         "RealTimeTaskCount": int(np.count_nonzero(real_time)),
@@ -479,7 +479,7 @@ def load_data() -> InputData:
     tasks["DelaySensitivity"] = tasks["DelaySensitivity"].astype(str).str.strip()
     unknown_sensitivity = sorted(set(tasks["DelaySensitivity"]) - set(QOS_WEIGHTS))
     if unknown_sensitivity:
-        raise ValueError(f"tasks_clean.csv存在未知DelaySensitivity：{unknown_sensitivity}")
+        raise ValueError(f"tasks_clean.csv contains unknown DelaySensitivity values: {unknown_sensitivity}")
     candidates["TaskID"] = candidates["TaskID"].astype(str)
     candidates["TargetRegion"] = candidates["TargetRegion"].astype(str)
     _validate_task_time_and_latency_inputs(tasks, candidates)
@@ -487,12 +487,12 @@ def load_data() -> InputData:
     regions = tuple(storage["Region"])
     region_index = {region: index for index, region in enumerate(regions)}
     if len(region_index) != len(regions):
-        raise ValueError("storage_params.csv的Region必须唯一")
+        raise ValueError("storage_params.csv requires unique Region values")
     expected_hours = set(range(OPERATION_END + 1))
     for region in regions:
         actual = set(region_hour.loc[region_hour["Region"].eq(region), "Hour"])
         if actual != expected_hours:
-            raise ValueError(f"{region}没有完整覆盖0--2406小时")
+            raise ValueError(f"{region} does not fully cover hours 0--2406")
     region_hour = region_hour.sort_values(["Hour", "Region"], kind="stable").reset_index(drop=True)
     candidate_map: dict[str, tuple[CandidateRegion, ...]] = {}
     for task_id, group in candidates.groupby("TaskID", sort=False):
@@ -500,14 +500,14 @@ def load_data() -> InputData:
         for row in group.itertuples(index=False):
             region = str(row.TargetRegion)
             if region not in region_index:
-                raise ValueError(f"任务{task_id}的候选区域{region}不在储能区域集合中")
+                raise ValueError(f"Task {task_id}: candidate region {region} is absent from the storage region set")
             if float(row.NetworkLatency_ms) > float(row.MaxLatency_ms) + EPS:
-                raise ValueError(f"任务{task_id}存在超时延候选区域")
+                raise ValueError(f"Task {task_id} has a candidate exceeding its latency limit")
             rows.append(CandidateRegion(region, region_index[region], float(row.NetworkLatency_ms), float(row.MaxLatency_ms)))
         candidate_map[str(task_id)] = tuple(rows)
     missing = set(tasks["TaskID"]) - set(candidate_map)
     if missing:
-        raise ValueError(f"任务缺少候选区域，示例：{sorted(missing)[:10]}")
+        raise ValueError(f"Tasks lack candidate regions; examples: {sorted(missing)[:10]}")
     task_lookup = tasks.set_index("TaskID", drop=False)
     return InputData(region_hour, tasks, candidates, storage, regions, region_index, candidate_map, task_lookup)
 
@@ -553,7 +553,7 @@ def _fixed_task_loads(
     for row in assignments.itertuples(index=False):
         region = str(row.TargetRegion)
         if region not in region_index:
-            raise ValueError(f"既有任务{row.TaskID}的区域{region}无效")
+            raise ValueError(f"Existing task {row.TaskID} has invalid region {region}")
         r = region_index[region]
         for hour, overlap in _hour_overlaps(float(row.StartHour), float(row.Duration_h), lower, upper):
             gpu[hour - lower, r] += float(row.GPU_Demand) * overlap
@@ -566,7 +566,7 @@ def _float_key(value: object) -> float:
 
 
 def _exact_task_group_key(data: InputData, task: pd.Series) -> tuple[object, ...]:
-    """只合并对可行域、负荷和目标完全等价的任务。"""
+    """Aggregate only tasks with identical feasible sets, loads, and objectives."""
 
     task_id = str(task.TaskID)
     candidate_signature = tuple(sorted(
@@ -652,11 +652,11 @@ def _make_task_options(
             str(task.TaskType) == "RealTimeInference" and int(task.ArrivalHour) < plan_end
         ) or _latest_integer_start(task) < plan_end
         if str(task.TaskType) == "RealTimeInference" and int(task.ArrivalHour) < tau and not calibration:
-            raise RuntimeError(f"实时任务组{task_ids[:3]}在到达窗口未被执行")
+            raise RuntimeError(f"Realtime task group {task_ids[:3]} was not executed in its arrival window")
         if must_commit and not h_starts:
-            raise RuntimeError(f"任务组{task_ids[:3]}已到最晚开工窗口但没有H区合法开工时刻")
+            raise RuntimeError(f"Task group {task_ids[:3]} reached its latest start window without a valid H-region start")
         if must_plan and not (h_starts or k_starts):
-            raise RuntimeError(f"任务组{task_ids[:3]}已到H+K最晚规划窗口但没有合法开工时刻")
+            raise RuntimeError(f"Task group {task_ids[:3]} reached its latest H+K planning window without a valid start")
         for candidate in candidates:
             for start in h_starts:
                 x_options.append(TaskOption(
@@ -735,7 +735,7 @@ def _linear_constraint_components(
     lower: np.ndarray,
     upper: np.ndarray,
 ) -> tuple[object | None, np.ndarray | None, object | None, np.ndarray | None]:
-    """将SciPy LinearConstraint边界拆成linprog可用的等式/不等式矩阵。"""
+    """Split SciPy LinearConstraint bounds into linprog equality and inequality matrices."""
 
     from scipy.sparse import csr_matrix, vstack
 
@@ -798,7 +798,7 @@ def build_window_problem(
     t_count = plan_end - tau
     r_count = len(data.regions)
     if h_count <= 0 or t_count <= 0:
-        raise ValueError("滚动窗口长度必须为正")
+        raise ValueError("Rolling window length must be positive")
     block_hours = int(block_hours or config.block_hours)
     x_options, u_options, task_rules, task_groups = _make_task_options(
         data, tau, decision_end, plan_end, assignments, block_hours, calibration
@@ -865,7 +865,7 @@ def build_window_problem(
     frame["Region"] = pd.Categorical(frame["Region"], categories=data.regions, ordered=True)
     frame = frame.sort_values(["Hour", "Region"], kind="stable")
     if len(frame) != t_count * r_count:
-        raise ValueError(f"窗口{tau}的逐时区域数据不完整")
+        raise ValueError(f"Window {tau} has incomplete hourly regional data")
     arrays = {
         column: frame[column].to_numpy(dtype=float).reshape(t_count, r_count)
         for column in (
@@ -921,7 +921,7 @@ def build_window_problem(
                 group_size,
             )
         else:
-            raise RuntimeError(f"任务组{task_id}没有H区、K区或延期通道")
+            raise RuntimeError(f"Task group {task_id} has no H-region, K-region, or deferral option")
 
     gpu_rows = [[{} for _ in range(r_count)] for _ in range(t_count)]
     ai_rows = [[{} for _ in range(r_count)] for _ in range(t_count)]
@@ -963,7 +963,7 @@ def build_window_problem(
         )
         tail_frame = tail_frame.sort_values(["Hour", "Region"], kind="stable")
         if len(tail_frame) != tail_count * r_count:
-            raise ValueError(f"K区跨plan_end资源保护缺少{plan_end}--{k_tail_end - 1}数据")
+            raise ValueError(f"K-region resource protection beyond plan_end lacks data for {plan_end}--{k_tail_end - 1}")
         tail_gpu_limit = tail_frame["Available_GPU"].to_numpy(dtype=float).reshape(
             tail_count, r_count
         )
@@ -1040,7 +1040,7 @@ def build_window_problem(
             tail_frame = tail_frame.sort_values(["Hour", "Region"], kind="stable")
             if len(tail_frame) != tail_count * r_count:
                 raise ValueError(
-                    f"H区尾部容量保护缺少{decision_end}--{tail_protection_end - 1}小时数据"
+                    f"H-region tail capacity protection lacks hourly data for {decision_end}--{tail_protection_end - 1}"
                 )
             tail_available_gpu = tail_frame["Available_GPU"].to_numpy(dtype=float).reshape(
                 tail_count, r_count
@@ -1151,7 +1151,7 @@ def build_window_problem(
         }, -np.inf, float(historical_peak[r]))
     if carbon_budget_remaining is not None:
         if not np.isfinite(carbon_budget_remaining) or carbon_budget_remaining < -EPS:
-            raise ValueError("滚动剩余碳预算必须是非负有限数")
+            raise ValueError("Remaining rolling carbon budget must be finite and nonnegative")
         carbon_row = {
             int(indices["grid_purchase"][t, r]): float(arrays["CarbonIntensity_tCO2_per_MWh"][t, r])
             for t in range(h_count)
@@ -1286,7 +1286,7 @@ def _heuristic_incumbent(
     warm_hints: Mapping[str, tuple[str, float]],
     tolerance: float,
 ) -> np.ndarray | None:
-    """构造任务EDF可行解和逐时能源可行解，作为主MILP的可行上界。"""
+    """Construct feasible EDF task and hourly energy schedules as an upper bound for the main MILP."""
 
     tau = problem.tau
     h_count = problem.decision_end - tau
@@ -1522,7 +1522,7 @@ def _k_capacity_violation(
     vector: np.ndarray,
     assignments: pd.DataFrame,
 ) -> float:
-    """复核K区块平均GPU、IT和设施容量，用于触发4h到2h局部细化。"""
+    """Audit block-average K-region GPU, IT, and facility capacity to trigger local 4h-to-2h refinement."""
 
     h_count = problem.decision_end - problem.tau
     t_count = problem.plan_end - problem.tau
@@ -1569,7 +1569,7 @@ def _k_capacity_violation(
 
 
 def _next_warm_hints(problem: WindowProblem, vector: np.ndarray) -> dict[str, tuple[str, float]]:
-    """保留上一窗口K区权重最大的区域—时间块，供下一窗口启发式使用。"""
+    """Retain the highest-weight K-region time blocks for the next window's heuristic."""
 
     best: dict[str, tuple[float, str, float]] = {}
     for index, option in enumerate(problem.u_options):
@@ -1596,10 +1596,10 @@ def _solve(
     from scipy.optimize import Bounds, LinearConstraint, linprog, milp
     from scipy.sparse import csr_matrix
 
-    stage = f"窗口{problem.tau} {'连续松弛' if relax else 'MILP'}"
+    stage = f"Window {problem.tau} {'continuous relaxation' if relax else 'MILP'}"
     _progress(
-        f"{stage}开始：变量={objective.size}，约束={problem.matrix.shape[0]}，"
-        f"时间上限={time_limit:.0f}s，mip_rel_gap={mip_gap:g}。"
+        f"{stage} started: variables={objective.size}, constraints={problem.matrix.shape[0]}, "
+        f"time limit={time_limit:.0f}s, mip_rel_gap={mip_gap:g}."
     )
     integrality = np.zeros_like(problem.integrality) if relax else problem.integrality
     constraints: list[LinearConstraint] = [
@@ -1608,7 +1608,7 @@ def _solve(
     if incumbent is not None:
         incumbent = np.asarray(incumbent, dtype=float)
         if incumbent.shape != objective.shape:
-            raise ValueError("启发式初始解与窗口变量维度不一致")
+            raise ValueError("Heuristic initial solution dimension differs from the window variable dimension")
         cutoff = float(np.dot(objective, incumbent))
         constraints.append(LinearConstraint(
             csr_matrix(np.asarray(objective, dtype=float).reshape(1, -1)),
@@ -1621,8 +1621,8 @@ def _solve(
     def _heartbeat() -> None:
         while not heartbeat_stop.wait(SOLVER_PROGRESS_INTERVAL_SECONDS):
             _progress(
-                f"{stage}仍在求解：已耗时{time.perf_counter() - started:.1f}s，"
-                f"变量={objective.size}，约束={problem.matrix.shape[0]}。"
+                f"{stage} still solving: elapsed={time.perf_counter() - started:.1f}s, "
+                f"variables={objective.size}, constraints={problem.matrix.shape[0]}."
             )
 
     heartbeat = threading.Thread(
@@ -1667,18 +1667,18 @@ def _solve(
     elapsed = time.perf_counter() - started
     mip_gap = _result_float(result, "mip_gap")
     _progress(
-        f"{stage}完成：status={getattr(result, 'status', 'NA')}，"
-        f"耗时{elapsed:.2f}s，mip_gap={mip_gap}。"
+        f"{stage} finished: status={getattr(result, 'status', 'NA')}, "
+        f"elapsed={elapsed:.2f}s, mip_gap={mip_gap}."
     )
     vector = getattr(result, "x", None)
     if vector is None or not np.all(np.isfinite(vector)):
-        raise RuntimeError(f"窗口{problem.tau}没有得到可行解：{getattr(result, 'message', '')}")
+        raise RuntimeError(f"Window {problem.tau} has no feasible solution: {getattr(result, 'message', '')}")
     activity = problem.matrix @ vector
     lower_violation = np.maximum(problem.constraint_lower - activity, 0.0)
     upper_violation = np.maximum(activity - problem.constraint_upper, 0.0)
     max_violation = float(max(lower_violation.max(initial=0.0), upper_violation.max(initial=0.0)))
     if max_violation > 1e-5:
-        raise RuntimeError(f"窗口{problem.tau}求解向量最大约束违反为{max_violation:.3g}")
+        raise RuntimeError(f"Window {problem.tau}: maximum solution constraint violation is {max_violation:.3g}")
     return WindowSolution(
         vector=np.asarray(vector, dtype=float),
         status=int(getattr(result, "status", -1)),
@@ -1739,7 +1739,7 @@ def _certified_box_lower_bound(
     problem: WindowProblem,
     metric: str,
 ) -> tuple[float, bool, str]:
-    """由当前指标自身的变量边界给出可证明安全的线性目标下界。"""
+    """Derive a provably safe linear objective lower bound from each metric's variable bounds."""
 
     coefficients = problem.metric_vectors[metric]
     value = float(problem.metric_constants[metric])
@@ -1776,7 +1776,7 @@ def _physical_metric_scale_floors(
     expected_rows = (OPERATION_END - 1) * len(data.regions)
     if len(frame) != expected_rows:
         raise ValueError(
-            "物理尺度代理的逐时区域记录不完整："
+            "Physical-scale proxy has incomplete hourly regional records: "
             f"{len(frame)} != {expected_rows}"
         )
     arrays = {
@@ -1838,13 +1838,13 @@ def _calibrate(
     physical_scale_floors = _physical_metric_scale_floors(data, reference_schedule)
     representative_windows = _representative_windows(data, config)
     _progress(
-        f"参数校准开始：共{len(representative_windows)}个代表窗口，"
-        f"每个窗口{len(METRICS)}个连续下界和1个整数参考解。"
+        f"Calibration started: {len(representative_windows)} representative windows, "
+        f"{len(METRICS)} continuous lower bounds and one integer reference per window."
     )
     for window_index, tau in enumerate(representative_windows, start=1):
         _progress(
-            f"参数校准进度：{window_index}/{len(representative_windows)}，"
-            f"窗口起点={tau}。"
+            f"Calibration progress: {window_index}/{len(representative_windows)}, "
+            f"window start={tau}."
         )
         lookahead = min(config.lookahead_hours, OPERATION_END - (tau + config.decision_hours))
         problem = build_window_problem(
@@ -1854,8 +1854,8 @@ def _calibrate(
         lower_values: dict[str, float] = {}
         for metric_index, metric in enumerate(METRICS, start=1):
             _progress(
-                f"参数校准窗口{tau}：连续下界{metric_index}/{len(METRICS)}，"
-                f"指标={metric}。"
+                f"Calibration window {tau}: continuous lower bound {metric_index}/{len(METRICS)}, "
+                f"metric={metric}."
             )
             stage_name = "ContinuousLowerBound"
             status: int | str
@@ -1888,13 +1888,13 @@ def _calibrate(
                 solve_message = str(exc)
             if not certified_safe or not np.isfinite(value):
                 raise RuntimeError(
-                    f"参数校准窗口{tau}指标{metric}没有得到可证明安全下界；"
+                    f"Calibration window {tau}, metric {metric}: no provably safe lower bound; "
                     f"BoundSource={bound_source}"
                 )
             if not exact_ideal:
                 _progress(
-                    f"参数校准窗口{tau}指标={metric}未得到精确连续理想点，"
-                    f"改用该指标自身的{bound_source}={value:.6g}。"
+                    f"Calibration window {tau}, metric={metric}: no exact continuous ideal point; "
+                    f"using the metric's own {bound_source}={value:.6g}."
                 )
             lower_values[metric] = value
             lower_by_metric[metric].append(value)
@@ -1918,7 +1918,7 @@ def _calibrate(
             # reused only after task-side validation, then a new V4 energy
             # response is solved under the corrected physical constraints.
             try:
-                _progress(f"参数校准窗口{tau}：复用已审计任务种子，重算V4能源可行参考。")
+                _progress(f"Calibration window {tau}: reusing audited task seed and recomputing a feasible V4 energy reference.")
                 _, reference_ai, _, _ = _shadow_profiles(
                     data, reference_schedule, tau, problem.plan_end
                 )
@@ -1949,7 +1949,7 @@ def _calibrate(
             except RuntimeError as exc:
                 reference_message = f"Reused task seed unavailable: {exc}"
         if values is None:
-            _progress(f"参数校准窗口{tau}：开始求解整数参考解。")
+            _progress(f"Calibration window {tau}: solving the integer reference.")
             reference_objective = np.zeros(problem.lower.size, dtype=float)
             for metric in METRICS:
                 denominator = max(abs(lower_values[metric]), 1.0)
@@ -1972,7 +1972,7 @@ def _calibrate(
                 )
                 if heuristic is None:
                     raise RuntimeError(
-                        f"参数校准窗口{tau}既没有求解器可行参考解，也没有启发式可行参考解：{exc}"
+                        f"Calibration window {tau} has neither a solver-feasible nor a heuristic-feasible reference: {exc}"
                     ) from exc
                 reference = WindowSolution(
                     vector=heuristic,
@@ -2041,7 +2041,7 @@ def _calibrate(
         records_frame["DegenerateWindowRange"] = records_frame["Metric"].map(
             lambda metric: scale_metadata[str(metric)]["DegenerateWindowRange"]
         )
-    _progress("参数校准完成。")
+    _progress("Calibration completed.")
     return scaling, records_frame
 
 
@@ -2062,15 +2062,15 @@ def _selected_assignments(data: InputData, problem: WindowProblem, vector: np.nd
         count = int(round(raw_count))
         if abs(raw_count - count) > 1e-5:
             raise RuntimeError(
-                f"H区聚合变量{option.task_id}/{option.region}/{option.start_hour}"
-                f"不是整数：{raw_count}"
+                f"H-region aggregate variable {option.task_id}/{option.region}/{option.start_hour} "
+                f"is not integer: {raw_count}"
             )
         if count <= 0:
             continue
         cursor = group_cursor[option.task_id]
         members = problem.task_groups[option.task_id][cursor:cursor + count]
         if len(members) != count:
-            raise RuntimeError(f"任务组{option.task_id}的整数计数超过组内任务数量")
+            raise RuntimeError(f"Task group {option.task_id}: integer count exceeds group size")
         group_cursor[option.task_id] += count
         for member_id in members:
             task = data.task_lookup.loc[member_id]
@@ -2206,7 +2206,7 @@ def _qos_details(
         task_fields, on="TaskID", how="left", validate="one_to_one",
     )
     if joined[["TaskType", "DelaySensitivity"]].isna().any().any():
-        raise ValueError("服务质量复算发现实际任务表中存在未知TaskID")
+        raise ValueError("QoS recomputation found unknown TaskID values in the actual task table")
     joined["EffectiveEarliestStart"] = np.maximum(
         joined["ArrivalHour"], joined["EarliestStartHour"]
     )
@@ -2233,7 +2233,7 @@ def _qos_details(
     joined["TaskWeight"] = joined["DelaySensitivity"].map(weight_map)
     if joined["TaskWeight"].isna().any():
         unknown = sorted(joined.loc[joined["TaskWeight"].isna(), "DelaySensitivity"].unique())
-        raise ValueError(f"服务质量复算存在未知DelaySensitivity：{unknown}")
+        raise ValueError(f"QoS recomputation found unknown DelaySensitivity values: {unknown}")
     task_weight = joined["TaskWeight"].to_numpy(dtype=float)
     contribution = np.zeros(len(joined), dtype=float)
     contribution[flexible_mask] = (
@@ -2319,7 +2319,7 @@ def _simple_validation(
     dispatch: pd.DataFrame,
     tolerance: float,
 ) -> pd.DataFrame:
-    """对最终实际轨迹做最小硬约束自检，不执行额外模型或敏感性分析。"""
+    """Run minimal hard-constraint checks on final actual trajectories without additional modeling or sensitivity analysis."""
 
     # The rolling result starts from empty, schema-only DataFrames and grows
     # through concatenation. Pandas can therefore retain ``object`` dtype for
@@ -2651,13 +2651,13 @@ def _validate_resume_state(
     stored_soc: np.ndarray | None,
     stored_peak: np.ndarray | None,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """严格复核断点确实对应0至resume_from-1的完整实际轨迹。"""
+    """Require the checkpoint to contain the complete actual trajectory for 0 through resume_from-1."""
 
     if resume_from < 0 or resume_from > OPERATION_END:
-        raise ValueError(f"恢复时刻{resume_from}不在0--{OPERATION_END}范围内")
+        raise ValueError(f"Resume time {resume_from} is outside 0--{OPERATION_END}")
     valid_starts = set(range(0, MAIN_END, config.decision_hours)) | {MAIN_END, OPERATION_END}
     if resume_from not in valid_starts:
-        raise ValueError(f"恢复时刻{resume_from}不是合法滚动窗口边界")
+        raise ValueError(f"Resume time {resume_from} is not a valid rolling window boundary")
 
     assignments = assignments.copy()
     dispatch = dispatch.copy()
@@ -2666,19 +2666,19 @@ def _validate_resume_state(
         duplicates = assignments.loc[
             assignments["TaskID"].astype(str).duplicated(keep=False), "TaskID"
         ].astype(str).unique()[:10]
-        raise ValueError(f"恢复记录存在重复执行任务：{duplicates.tolist()}")
+        raise ValueError(f"Resume records contain duplicate executed tasks: {duplicates.tolist()}")
     known_ids = set(data.tasks["TaskID"].astype(str))
     assigned_ids = set(assignments["TaskID"].astype(str))
     unknown = sorted(assigned_ids - known_ids)
     if unknown:
-        raise ValueError(f"恢复记录存在原始任务表之外的TaskID，示例：{unknown[:10]}")
+        raise ValueError(f"Resume records contain TaskID values absent from the original tasks; examples: {unknown[:10]}")
     if len(assigned_ids) + len(known_ids - assigned_ids) != len(known_ids):
-        raise ValueError("恢复记录中的已执行与未执行任务数量不能覆盖原始任务全集")
+        raise ValueError("Executed and unexecuted resume task counts do not cover the original task set")
     if not assignments.empty:
         if (pd.to_numeric(assignments["DecisionWindowStart"]) >= resume_from).any():
-            raise ValueError("恢复记录包含恢复时刻之后窗口写入的任务")
+            raise ValueError("Resume records include tasks written by windows after the resume time")
         if (pd.to_numeric(assignments["StartHour"]) >= resume_from - EPS).any():
-            raise ValueError("恢复记录包含尚未进入实际H区的任务开工结果")
+            raise ValueError("Resume records include task starts that have not entered the actual H region")
         joined = assignments.merge(
             data.tasks[[
                 "TaskID", "TaskType", "ArrivalHour", "EarliestStartHour",
@@ -2688,15 +2688,15 @@ def _validate_resume_state(
         )
         earliest = np.maximum(joined["ArrivalHour_Input"], joined["EarliestStartHour"])
         if float(np.maximum(earliest - joined["StartHour"], 0.0).max()) > config.feasibility_tolerance:
-            raise ValueError("恢复任务记录存在早于到达/最早开工时刻的任务")
+            raise ValueError("Resume task records include starts before arrival or earliest start")
         finish = joined["StartHour"] + joined["Duration_h_Input"]
         if float(np.maximum(finish - joined["LatestFinishHour"], 0.0).max()) > config.feasibility_tolerance:
-            raise ValueError("恢复任务记录存在超过完成期限的任务")
+            raise ValueError("Resume task records include deadline violations")
         real_time = joined["TaskType_Input"].eq("RealTimeInference")
         if real_time.any() and float(np.abs(
             joined.loc[real_time, "StartHour"] - joined.loc[real_time, "ArrivalHour_Input"]
         ).max()) > config.feasibility_tolerance:
-            raise ValueError("恢复任务记录中的实时任务未在到达时刻启动")
+            raise ValueError("Realtime tasks in resume records did not start upon arrival")
         valid_pairs = set(zip(
             data.candidates["TaskID"].astype(str), data.candidates["TargetRegion"].astype(str)
         ))
@@ -2706,7 +2706,7 @@ def _validate_resume_state(
             if (str(row.TaskID), str(row.TargetRegion)) not in valid_pairs
         ]
         if bad_pairs:
-            raise ValueError(f"恢复任务记录存在非法任务—区域组合，示例：{bad_pairs[:10]}")
+            raise ValueError(f"Resume task records contain invalid task-region pairs; examples: {bad_pairs[:10]}")
 
     expected_windows = list(range(0, min(resume_from, MAIN_END), config.decision_hours))
     if resume_from > MAIN_END:
@@ -2714,12 +2714,12 @@ def _validate_resume_state(
     actual_windows = sorted(pd.to_numeric(solver.get("WindowStart", pd.Series(dtype=float))).astype(int).tolist())
     if actual_windows != expected_windows:
         raise ValueError(
-            f"窗口求解记录不连续：应为{len(expected_windows)}个窗口，实际为{len(actual_windows)}个"
+            f"Noncontiguous solver records: expected {len(expected_windows)} windows, found {len(actual_windows)}"
         )
 
     if resume_from == 0:
         if not dispatch.empty:
-            raise ValueError("0小时恢复状态不应包含逐时实际调度")
+            raise ValueError("A resume state at hour 0 must not contain actual hourly dispatch")
         storage = data.storage.set_index("Region").loc[list(data.regions)]
         return (
             storage["InitialSOC_MWh"].to_numpy(dtype=float),
@@ -2734,9 +2734,9 @@ def _validate_resume_state(
     }
     missing_columns = sorted(required_dispatch - set(dispatch.columns))
     if missing_columns:
-        raise ValueError(f"逐时调度恢复表缺少字段：{missing_columns}")
+        raise ValueError(f"Hourly dispatch resume table is missing columns: {missing_columns}")
     if dispatch.duplicated(["Hour", "Region"]).any():
-        raise ValueError("逐时调度恢复表存在重复的Hour—Region记录")
+        raise ValueError("Hourly dispatch resume table contains duplicate Hour--Region records")
     expected_pairs = pd.MultiIndex.from_product(
         [range(resume_from), data.regions], names=["Hour", "Region"]
     )
@@ -2745,8 +2745,8 @@ def _validate_resume_state(
     extra_pairs = actual_pairs.difference(expected_pairs)
     if len(missing_pairs) or len(extra_pairs):
         raise ValueError(
-            f"逐时调度不能完整覆盖0--{resume_from - 1}小时："
-            f"缺少{len(missing_pairs)}行，多出{len(extra_pairs)}行"
+            f"Hourly dispatch does not fully cover hours 0--{resume_from - 1}: "
+            f"{len(missing_pairs)} missing rows, {len(extra_pairs)} extra rows"
         )
     ordered = dispatch.copy()
     ordered["Region"] = pd.Categorical(ordered["Region"], categories=data.regions, ordered=True)
@@ -2760,18 +2760,18 @@ def _validate_resume_state(
         + ordered["DischargePower_MW"] / eta_d
     )
     if float(np.abs(recurrence).max()) > config.feasibility_tolerance:
-        raise ValueError("逐时调度的SOC递推不连续")
+        raise ValueError("Hourly dispatch SOC recurrence is discontinuous")
     for region in data.regions:
         region_rows = ordered.loc[ordered["Region"].astype(str).eq(region)]
         initial_soc = float(storage.loc[region, "InitialSOC_MWh"])
         if abs(float(region_rows.iloc[0]["SOCStart_MWh"]) - initial_soc) > config.feasibility_tolerance:
-            raise ValueError(f"区域{region}的0小时SOC与初始SOC不一致")
+            raise ValueError(f"Region {region}: hour-0 SOC differs from initial SOC")
         cross = (
             region_rows["SOCStart_MWh"].to_numpy(dtype=float)[1:]
             - region_rows["SOCEnd_MWh"].to_numpy(dtype=float)[:-1]
         )
         if len(cross) and float(np.abs(cross).max()) > config.feasibility_tolerance:
-            raise ValueError(f"区域{region}相邻小时SOC不连续")
+            raise ValueError(f"Region {region}: SOC is discontinuous between adjacent hours")
     renewable_balance = (
         ordered["AvailableRenewable_MW"] - ordered["RenewableDirectUse_MW"]
         - ordered["RenewableCharge_MW"] - ordered["GridSell_MW"]
@@ -2783,7 +2783,7 @@ def _validate_resume_state(
         - ordered["GridCharge_MW"]
     )
     if max(float(np.abs(renewable_balance).max()), float(np.abs(load_balance).max())) > config.feasibility_tolerance:
-        raise ValueError("逐时调度恢复表的能量平衡不成立")
+        raise ValueError("Hourly dispatch resume table violates energy balance")
     final_hour = ordered.loc[ordered["Hour"].eq(resume_from - 1)].set_index("Region").loc[list(data.regions)]
     recomputed_soc = final_hour["SOCEnd_MWh"].to_numpy(dtype=float)
     recomputed_peak = (
@@ -2794,12 +2794,12 @@ def _validate_resume_state(
         np.asarray(stored_soc, dtype=float), recomputed_soc,
         rtol=0.0, atol=config.feasibility_tolerance,
     ):
-        raise ValueError("断点保存的1608小时SOC与逐时调度重新计算值不一致")
+        raise ValueError("Checkpoint hour-1608 SOC differs from recomputation using hourly dispatch")
     if stored_peak is not None and not np.allclose(
         np.asarray(stored_peak, dtype=float), recomputed_peak,
         rtol=0.0, atol=config.feasibility_tolerance,
     ):
-        raise ValueError("断点保存的历史峰值与逐时净购电重新计算值不一致")
+        raise ValueError("Checkpoint historical peak differs from recomputation using hourly net imports")
     return recomputed_soc, recomputed_peak
 
 
@@ -2816,14 +2816,14 @@ def _load_progress_state(
             with checkpoint.open("rb") as handle:
                 state = pickle.load(handle)
         except (OSError, pickle.PickleError, EOFError) as exc:
-            raise RuntimeError(f"恢复状态文件损坏或不可读取：{checkpoint}") from exc
+            raise RuntimeError(f"Resume state file is corrupt or unreadable: {checkpoint}") from exc
         if not isinstance(state, dict) or state.get("checkpoint_version") != CHECKPOINT_VERSION:
-            raise ValueError(f"恢复状态文件版本不受支持：{checkpoint}")
+            raise ValueError(f"Unsupported resume state version: {checkpoint}")
         if state.get("signature") != signature:
-            raise ValueError("恢复状态的数据、参数或model.py签名与当前工程不一致")
+            raise ValueError("Resume state data, parameters, or model.py signature differs from the current project")
         if int(state.get("next_tau", -1)) != resume_from:
             raise ValueError(
-                f"恢复状态的next_tau={state.get('next_tau')}，与请求的{resume_from}不一致"
+                f"Resume state's next_tau={state.get('next_tau')} differs from requested {resume_from}"
             )
     else:
         required = (
@@ -2833,7 +2833,7 @@ def _load_progress_state(
         missing = [str(path) for path in required if not path.is_file()]
         if missing:
             raise FileNotFoundError(
-                "不能从日志或目标值伪造1608小时状态；缺少可恢复文件：\n- "
+                "Cannot fabricate hour-1608 state from logs or objective values; missing resume files:\n- "
                 + "\n- ".join(missing)
             )
         assignments = pd.read_csv(PROGRESS_ASSIGNMENTS_PATH, encoding="utf-8-sig")
@@ -2845,7 +2845,7 @@ def _load_progress_state(
             for row in scaling_frame.itertuples(index=False)
         }
         if set(scaling) != set(METRICS):
-            raise ValueError("进度定标表没有完整包含六个目标")
+            raise ValueError("Progress scaling table does not contain all six objectives")
         forecast = (
             pd.read_csv(PROGRESS_FORECAST_PATH, encoding="utf-8-sig")
             if PROGRESS_FORECAST_PATH.is_file() else pd.DataFrame()
@@ -2868,7 +2868,7 @@ def _load_progress_state(
             "historical_peak": None,
             "warm_hints": {},
         }
-        _progress("未找到pkl断点，已从完整进度CSV尝试重建状态；将重新计算SOC和历史峰值。")
+        _progress("No PKL checkpoint found; attempted reconstruction from complete progress CSVs. Recomputing SOC and historical peak.")
     assignments = pd.DataFrame(state.get("assignments", _empty_assignments()))
     dispatch = pd.DataFrame(state.get("dispatch", pd.DataFrame()))
     solver = pd.DataFrame(state.get("solver", pd.DataFrame()))
@@ -3013,7 +3013,7 @@ def _solve_with_time_extension(
     incumbent: np.ndarray | None,
     initial_time_limit: float,
 ) -> tuple[WindowSolution, int, float]:
-    """按可行性和MIP Gap决定是否把同一硬约束模型延长到困难时限。"""
+    """Extend the same hard-constraint model to the difficult-window limit based on feasibility and MIP gap."""
 
     limits = [float(initial_time_limit)]
     if initial_time_limit < config.difficult_time_limit_seconds:
@@ -3047,14 +3047,14 @@ def _solve_with_time_extension(
             if solution.status == 0 or gap_ok or attempt == len(unique_limits):
                 return best_solution, attempt, best_limit
             _progress(
-                f"窗口{problem.tau}已有可行解但MIP Gap={solution.mip_gap:.6g}"
-                f">目标{config.mip_relative_gap:.6g}，延长同一MILP。"
+                f"Window {problem.tau} has a feasible solution, but MIP gap={solution.mip_gap:.6g} "
+                f"> target {config.mip_relative_gap:.6g}; extending the same MILP."
             )
         except RuntimeError as exc:
             errors.append(f"{limit:.0f}s: {exc}")
             _progress(
-                f"窗口{problem.tau}第{attempt}/{len(unique_limits)}次求解失败，"
-                f"时间上限={limit:.0f}s：{exc}。"
+                f"Window {problem.tau}: solve attempt {attempt}/{len(unique_limits)} failed, "
+                f"time limit={limit:.0f}s: {exc}."
             )
     if best_solution is not None:
         return best_solution, len(unique_limits), best_limit
@@ -3067,13 +3067,13 @@ def _future_feasibility_check(
     next_tau: int,
     tolerance: float,
 ) -> dict[str, int]:
-    """确认H区决策后，每个剩余任务仍至少保留一个物理合法的未来方案。"""
+    """Ensure every remaining task retains a physically feasible future option after committing H-region decisions."""
 
     assigned_ids = set(assignments_after["TaskID"].astype(str)) if not assignments_after.empty else set()
     remaining = data.tasks.loc[~data.tasks["TaskID"].isin(assigned_ids)]
     if next_tau >= OPERATION_END:
         if not remaining.empty:
-            raise RuntimeError(f"终端时刻仍有{len(remaining)}个任务未安排")
+            raise RuntimeError(f"{len(remaining)} tasks remain unscheduled at the terminal time")
         return {"RemainingTaskCount": 0, "IndividuallyFeasibleTaskCount": 0}
 
     fixed_gpu, fixed_ai = _fixed_task_loads(
@@ -3097,7 +3097,7 @@ def _future_feasibility_check(
     if np.any(fixed_gpu_violation > tolerance):
         local, r = np.argwhere(fixed_gpu_violation > tolerance)[0]
         raise RuntimeError(
-            "H区方案产生的跨窗口固定GPU负荷超过未来容量："
+            "Cross-window fixed GPU load from H-region decisions exceeds future capacity: "
             f"Hour={next_tau + int(local)}，Region={data.regions[int(r)]}，"
             f"Load={fixed_gpu[local, r]:.12g}，Capacity={available_gpu[local, r]:.12g}，"
             f"Violation={fixed_gpu_violation[local, r]:.12g}"
@@ -3105,7 +3105,7 @@ def _future_feasibility_check(
     if np.any(fixed_ai_violation > tolerance):
         local, r = np.argwhere(fixed_ai_violation > tolerance)[0]
         raise RuntimeError(
-            "H区方案产生的跨窗口固定IT/设施负荷超过未来容量："
+            "Cross-window fixed IT/facility load from H-region decisions exceeds future capacity: "
             f"Hour={next_tau + int(local)}，Region={data.regions[int(r)]}，"
             f"AILoad={fixed_ai[local, r]:.12g}，AICapacity={ai_capacity[local, r]:.12g}，"
             f"Violation={fixed_ai_violation[local, r]:.12g}"
@@ -3121,7 +3121,7 @@ def _future_feasibility_check(
     if np.any(necessary_supply_shortfall > tolerance):
         local, r = np.argwhere(necessary_supply_shortfall > tolerance)[0]
         raise RuntimeError(
-            "H区方案产生的跨窗口固定设施负荷超过新能源、最大购电和最大放电之和："
+            "Cross-window fixed facility load exceeds renewable output plus maximum imports and discharge: "
             f"Hour={next_tau + int(local)}，Region={data.regions[int(r)]}，"
             f"Violation={necessary_supply_shortfall[local, r]:.12g}MW"
         )
@@ -3161,7 +3161,7 @@ def _future_feasibility_check(
                 break
     if infeasible:
         raise RuntimeError(
-            "当前H区方案会使剩余任务失去合法区域、开工时刻或完成期限，示例："
+            "Current H-region decisions leave tasks without a valid region, start time, or deadline; examples: "
             f"{infeasible}"
         )
     return {
@@ -3198,14 +3198,14 @@ def _solve_h_only_recovery(
         objective = np.zeros(problem.lower.size, dtype=float)
     elif objective_metric is not None:
         if objective_metric not in problem.metric_vectors:
-            raise ValueError(f"未知H-only恢复目标：{objective_metric}")
+            raise ValueError(f"Unknown H-only recovery objective: {objective_metric}")
         objective = problem.metric_vectors[objective_metric].copy()
     else:
         objective = _balanced_objective(problem, config)
     mode = "HOnlyFeasibility" if feasibility_only else "HOnlyBalanced"
     _progress(
-        f"窗口{tau}进入{mode}：H={decision_hours}h，K=0h，"
-        f"变量={problem.lower.size}，约束={problem.matrix.shape[0]}。"
+        f"Window {tau} entering {mode}: H={decision_hours}h, K=0h, "
+        f"variables={problem.lower.size}, constraints={problem.matrix.shape[0]}."
     )
     solution = _solve(
         problem, objective,
@@ -3220,22 +3220,22 @@ def _solve_h_only_recovery(
 def _legacy_run_with_2h_fallback_disabled(
     *, force: bool = False, config: ModelConfig | None = None
 ) -> None:
-    raise RuntimeError("旧版4小时失败后自动改2小时的运行入口已永久禁用")
+    raise RuntimeError("Legacy automatic fallback from failed 4-hour blocks to 2-hour blocks is permanently disabled")
     config = config or ModelConfig()
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
-    _progress(f"Q4模型开始运行：force={force}。")
+    _progress(f"Q4 model started: force={force}.")
     signature = _cache_signature(config)
     if not force and _can_reuse(signature):
-        _progress("检测到完整且匹配的缓存结果，跳过求解。")
+        _progress("Complete matching cached results found; skipping optimization.")
         return
-    _progress("开始读取模型输入。")
+    _progress("Reading model inputs.")
     data = load_data()
     _progress(
-        f"输入读取完成：任务={len(data.tasks)}，区域={len(data.regions)}，"
-        f"逐时区域记录={len(data.region_hour)}。"
+        f"Inputs loaded: tasks={len(data.tasks)}, regions={len(data.regions)}, "
+        f"hourly regional records={len(data.region_hour)}."
     )
     scaling, calibration_records = _calibrate(data, config)
-    _progress("开始执行滚动窗口优化。")
+    _progress("Starting rolling window optimization.")
     scaling_rows = pd.DataFrame([
         {"Metric": metric, "Anchor": scaling[metric][0], "Scale": scaling[metric][1]}
         for metric in METRICS
@@ -3254,8 +3254,8 @@ def _legacy_run_with_2h_fallback_disabled(
         decision_hours = min(config.decision_hours, MAIN_END - tau) if tau < MAIN_END else OPERATION_END - MAIN_END
         lookahead = min(config.lookahead_hours, max(OPERATION_END - (tau + decision_hours), 0)) if tau < MAIN_END else 0
         _progress(
-            f"滚动窗口进度：{window_index}/{total_windows}（{window_index / total_windows:.1%}），"
-            f"窗口={tau}，决策区={decision_hours}h，前瞻区={lookahead}h。"
+            f"Rolling window progress: {window_index}/{total_windows} ({window_index / total_windows:.1%}), "
+            f"window={tau}, decision region={decision_hours}h, lookahead region={lookahead}h."
         )
         fixed_gpu, fixed_ai = _fixed_task_loads(assignments, tau, tau + decision_hours + lookahead, data.region_index)
         del fixed_gpu
@@ -3272,8 +3272,8 @@ def _legacy_run_with_2h_fallback_disabled(
             due_count >= config.difficult_due_task_threshold or near_min_soc
         ) else config.normal_time_limit_seconds
         _progress(
-            f"窗口{tau}问题构建完成：变量={problem.lower.size}，约束={problem.matrix.shape[0]}，"
-            f"待处理任务={due_count}，时间上限={initial_time_limit:.0f}s。"
+            f"Window {tau} constructed: variables={problem.lower.size}, constraints={problem.matrix.shape[0]}, "
+            f"pending tasks={due_count}, time limit={initial_time_limit:.0f}s."
         )
         objective = _balanced_objective(problem, config)
         incumbent = _heuristic_incumbent(
@@ -3292,7 +3292,7 @@ def _legacy_run_with_2h_fallback_disabled(
             if lookahead <= 0 or config.block_hours <= 2:
                 raise
             refinement_reason = "block4_no_feasible_solution"
-            _progress(f"窗口{tau}的4小时块未获得可行解，改用2小时块重建并重试。")
+            _progress(f"Window {tau}: no feasible solution with 4-hour blocks; rebuilding and retrying with 2-hour blocks.")
             problem = build_window_problem(
                 data, config, tau, decision_hours, lookahead, assignments, current_soc,
                 historical_peak, scaling, block_hours=2,
@@ -3310,8 +3310,8 @@ def _legacy_run_with_2h_fallback_disabled(
                 solve_attempts += attempts
             except RuntimeError as block2_error:
                 raise RuntimeError(
-                    f"窗口{tau}的4小时块和2小时块均未获得可行解；"
-                    f"4小时块：{block4_error}；2小时块：{block2_error}"
+                    f"Window {tau}: neither 4-hour nor 2-hour blocks yielded a feasible solution; "
+                    f"4-hour blocks: {block4_error}; 2-hour blocks: {block2_error}"
                 ) from block2_error
         k_capacity_violation = _k_capacity_violation(data, problem, solution.vector, assignments)
         if (
@@ -3321,8 +3321,8 @@ def _legacy_run_with_2h_fallback_disabled(
         ):
             refinement_reason = "block4_capacity_audit"
             _progress(
-                f"窗口{tau}通过4小时块求解但K区容量复核超限（{k_capacity_violation:.6g}），"
-                "改用2小时块精修。"
+                f"Window {tau}: 4-hour blocks solved, but K-region capacity violation is {k_capacity_violation:.6g}; "
+                "refining with 2-hour blocks."
             )
             problem = build_window_problem(
                 data, config, tau, decision_hours, lookahead, assignments, current_soc,
@@ -3341,13 +3341,13 @@ def _legacy_run_with_2h_fallback_disabled(
             k_capacity_violation = _k_capacity_violation(data, problem, solution.vector, assignments)
             if k_capacity_violation > config.feasibility_tolerance:
                 raise RuntimeError(
-                    f"窗口{tau}改用2小时块后K区容量复核仍超限：{k_capacity_violation:.6g}"
+                    f"Window {tau}: K-region capacity still violated after 2-hour refinement: {k_capacity_violation:.6g}"
                 )
         new_assignments = _selected_assignments(data, problem, solution.vector)
         if not new_assignments.empty:
             duplicates = set(new_assignments["TaskID"]) & set(assignments["TaskID"])
             if duplicates:
-                raise RuntimeError(f"任务被重复执行，示例：{sorted(duplicates)[:5]}")
+                raise RuntimeError(f"Tasks executed more than once; examples: {sorted(duplicates)[:5]}")
             assignments = pd.concat([assignments, new_assignments], ignore_index=True)
         dispatch_rows.extend(_dispatch_rows(data, problem, solution, assignments))
         forecast_rows.extend(_forecast_rows(problem, solution.vector, fixed_ai))
@@ -3378,19 +3378,19 @@ def _legacy_run_with_2h_fallback_disabled(
             **{f"Window{metric}": value for metric, value in metrics.items()},
         })
         _progress(
-            f"滚动窗口{window_index}/{total_windows}完成：窗口={tau}，"
-            f"求解耗时={solution.elapsed_seconds:.2f}s，新增任务={len(new_assignments)}，"
-            f"累计任务={len(assignments)}，尝试次数={solve_attempts}。"
+            f"Rolling window {window_index}/{total_windows} completed: window={tau}, "
+            f"solver elapsed={solution.elapsed_seconds:.2f}s, new tasks={len(new_assignments)}, "
+            f"total tasks={len(assignments)}, attempts={solve_attempts}."
         )
-    _progress("滚动窗口优化完成，开始整理和写出结果。")
+    _progress("Rolling optimization completed; organizing and writing results.")
     assignments = assignments.sort_values(["StartHour", "TaskID"], kind="stable").reset_index(drop=True)
     if len(assignments) != len(data.tasks) or assignments["TaskID"].nunique() != len(data.tasks):
         missing = sorted(set(data.tasks["TaskID"]) - set(assignments["TaskID"]))[:10]
-        raise RuntimeError(f"滚动结束后仍有任务未执行，示例：{missing}")
+        raise RuntimeError(f"Unexecuted tasks remain after rolling optimization; examples: {missing}")
     dispatch = pd.DataFrame(dispatch_rows).sort_values(["Hour", "Region"], kind="stable").reset_index(drop=True)
     expected_dispatch_rows = OPERATION_END * len(data.regions)
     if len(dispatch) != expected_dispatch_rows:
-        raise RuntimeError(f"实际能源轨迹应有{expected_dispatch_rows}行，当前为{len(dispatch)}行")
+        raise RuntimeError(f"Actual energy trajectory requires {expected_dispatch_rows} rows; found {len(dispatch)}")
     metrics = _final_metrics(data, assignments, dispatch)
     summary = pd.DataFrame([
         {"Scheme": "Q4JointRolling", "Metric": metric, "Value": metrics[metric]}
@@ -3414,7 +3414,7 @@ def _legacy_run_with_2h_fallback_disabled(
     _write_csv(calibration_records, "q4_calibration_records.csv")
     _write_csv(pd.DataFrame(forecast_rows), "q4_forecast_profile.csv")
     _write_csv(configuration, "q4_model_configuration.csv")
-    _progress("结果表写出完成，开始执行Q4最小硬约束自检。")
+    _progress("Result tables written; running minimal Q4 hard-constraint checks.")
     simple_validation = _simple_validation(
         data, assignments, dispatch, config.feasibility_tolerance
     )
@@ -3423,13 +3423,13 @@ def _legacy_run_with_2h_fallback_disabled(
         failed = simple_validation.loc[
             ~simple_validation["Passed"], ["Check", "MaxViolation", "Tolerance"]
         ]
-        raise RuntimeError(f"Q4最小硬约束自检未通过：\n{failed.to_string(index=False)}")
-    _progress(f"Q4最小硬约束自检通过：{len(simple_validation)}项。")
+        raise RuntimeError(f"Minimal Q4 hard-constraint checks failed:\n{failed.to_string(index=False)}")
+    _progress(f"Minimal Q4 hard-constraint checks passed: {len(simple_validation)} checks.")
     (TABLES_DIR / ".q4_cache.json").write_text(
         json.dumps({"signature": signature, "complete": True}, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
-    _progress("Q4模型运行完成。")
+    _progress("Q4 model completed.")
 
 
 @dataclass(frozen=True)
@@ -3455,7 +3455,7 @@ class Q4RollingState:
 def _scenario_slug(value: str) -> str:
     cleaned = "".join(character for character in value if character.isalnum() or character in "_-" )
     if not cleaned or cleaned != value:
-        raise ValueError("情景名称只能包含中文、字母、数字、下划线或连字符")
+        raise ValueError("Scenario names may contain CJK characters, letters, digits, underscores, or hyphens only")
     return cleaned
 
 
@@ -3468,7 +3468,7 @@ def _sha256_file(path: Path) -> str:
 
 
 def locate_existing_baseline() -> Path | None:
-    """定位包含全部正式基准产物的目录，不把scenario/validation当作基准。"""
+    """Locate complete formal baseline artifacts, excluding scenario and validation directories."""
 
     candidates = [TABLES_DIR]
     candidates.extend(
@@ -3489,12 +3489,12 @@ def locate_existing_baseline() -> Path | None:
 def load_cached_baseline(directory: Path | None = None) -> dict[str, pd.DataFrame]:
     baseline_dir = (directory or locate_existing_baseline())
     if baseline_dir is None:
-        raise FileNotFoundError("BLOCKED_BASELINE_INVALID：未找到完整Q4基准结果目录")
+        raise FileNotFoundError("BLOCKED_BASELINE_INVALID: complete Q4 baseline directory not found")
     frames: dict[str, pd.DataFrame] = {}
     for filename in BASELINE_REQUIRED_FILES:
         path = baseline_dir / filename
         if not path.is_file():
-            raise FileNotFoundError(f"BLOCKED_BASELINE_INVALID：缺少{path}")
+            raise FileNotFoundError(f"BLOCKED_BASELINE_INVALID: missing {path}")
         frames[filename] = pd.read_csv(path, encoding="utf-8-sig")
     frames["q4_task_assignments.csv"]["TaskID"] = (
         frames["q4_task_assignments.csv"]["TaskID"].astype(str)
@@ -3535,7 +3535,7 @@ def independent_hard_constraint_audit(
     tolerance: float = 1e-6,
     qos_weights: Mapping[str, float] | None = None,
 ) -> dict[str, object]:
-    """完全从实际TaskID表和H区能源轨迹复算约束及最终指标。"""
+    """Recompute constraints and final metrics from actual TaskID assignments and H-region energy trajectories."""
 
     required_assignment = {
         "TaskID", "TaskType", "ArrivalHour", "SourceRegion", "TargetRegion",
@@ -3681,7 +3681,7 @@ def validate_baseline_artifacts(
         return {
             "baseline_status": "BLOCKED_BASELINE_INVALID",
             "passed": False,
-            "errors": ["未找到包含全部必需文件的Q4基准目录"],
+            "errors": ["No Q4 baseline directory contains all required files"],
         }
     errors: list[str] = []
     frames: dict[str, pd.DataFrame] = {}
@@ -3689,13 +3689,13 @@ def validate_baseline_artifacts(
     for filename in BASELINE_REQUIRED_FILES:
         path = baseline_dir / filename
         if not path.is_file():
-            errors.append(f"缺少文件：{filename}")
+            errors.append(f"Missing file: {filename}")
             continue
         try:
             frames[filename] = pd.read_csv(path, encoding="utf-8-sig")
             hashes[filename] = _sha256_file(path)
         except (OSError, ValueError, pd.errors.ParserError) as exc:
-            errors.append(f"{filename}无法读取：{exc}")
+            errors.append(f"Cannot read {filename}: {exc}")
     if errors:
         return {
             "baseline_status": "BLOCKED_BASELINE_INVALID",
@@ -3714,24 +3714,24 @@ def validate_baseline_artifacts(
     solver = frames["q4_window_solver.csv"]
     simple = frames["q4_simple_validation.csv"]
     if len(assignments) != len(data.tasks):
-        errors.append(f"任务行数{len(assignments)}不等于原始任务数{len(data.tasks)}")
+        errors.append(f"Assignment rows {len(assignments)} differ from original task count {len(data.tasks)}")
     if assignments.get("TaskID", pd.Series(dtype=str)).astype(str).nunique() != len(data.tasks):
-        errors.append("TaskID不完整或存在重复")
+        errors.append("TaskID coverage is incomplete or duplicated")
     expected_pairs = OPERATION_END * len(data.regions)
     if len(dispatch) != expected_pairs:
-        errors.append(f"能源轨迹行数{len(dispatch)}不等于{expected_pairs}")
+        errors.append(f"Energy trajectory rows {len(dispatch)} differ from expected {expected_pairs}")
     if dispatch.duplicated(["Hour", "Region"]).any():
-        errors.append("能源轨迹存在重复Hour×Region")
+        errors.append("Energy trajectory contains duplicate Hour x Region records")
     expected_windows = list(range(0, MAIN_END, 24)) + [MAIN_END]
     actual_windows = pd.to_numeric(solver.get("WindowStart", pd.Series(dtype=float)), errors="coerce")
     if len(solver) != len(expected_windows) or set(actual_windows.dropna().astype(int)) != set(expected_windows):
-        errors.append("滚动窗口记录没有完整覆盖101个窗口")
+        errors.append("Rolling window records do not cover all 101 windows")
     simple_passed = (
         simple["Passed"].astype(str).str.strip().str.lower().map({"true": True, "false": False})
         if "Passed" in simple.columns else pd.Series(dtype=bool)
     )
     if not {"Check", "Passed"}.issubset(simple.columns) or simple_passed.isna().any() or not bool(simple_passed.all()):
-        errors.append("基准q4_simple_validation.csv未全部通过")
+        errors.append("Baseline q4_simple_validation.csv contains failed checks")
     solver_metrics = _solver_metrics_from_summary(frames["q4_objective_summary.csv"])
     try:
         audit = independent_hard_constraint_audit(
@@ -3742,13 +3742,13 @@ def validate_baseline_artifacts(
             tolerance=tolerance,
         )
         if not bool(audit["passed"]):
-            errors.append(f"独立硬约束审计失败：{audit['failed_checks']}")
+            errors.append(f"Independent hard-constraint audit failed: {audit['failed_checks']}")
     except Exception as exc:
         audit = {"passed": False, "failed_checks": ["AuditException"], "error": str(exc)}
-        errors.append(f"独立审计异常：{exc}")
+        errors.append(f"Independent audit exception: {exc}")
     configuration = frames["q4_model_configuration.csv"]
     if not {"Parameter", "Value"}.issubset(configuration.columns):
-        errors.append("q4_model_configuration.csv缺少Parameter/Value追溯字段")
+        errors.append("q4_model_configuration.csv lacks Parameter/Value traceability columns")
     return {
         "baseline_status": "REUSED_BASELINE" if not errors else "BLOCKED_BASELINE_INVALID",
         "passed": not errors,
@@ -3800,7 +3800,7 @@ def generate_scenario_data(
     spec: ScenarioSpec,
     baseline_metrics: Mapping[str, float],
 ) -> tuple[InputData, dict[str, object]]:
-    """只改变指定外生量；任务、容量、网络和储能对象保持原引用。"""
+    """Change only the specified exogenous factor, retaining original tasks, capacity, network, and storage objects."""
 
     kind = spec.kind.strip().lower()
     frame = data.region_hour.copy(deep=True)
@@ -3821,12 +3821,12 @@ def generate_scenario_data(
                 low_carbon = 0.0
                 metadata["CarbonConstraintBindingExpected"] = False
             else:
-                raise ValueError("缺少LOW_CARBON_REFERENCE，不能凭空构造严格碳预算")
+                raise ValueError("LOW_CARBON_REFERENCE is missing; a strict carbon budget cannot be fabricated")
         lam = float(spec.carbon_lambda if spec.carbon_lambda is not None else 1.0)
         if not 0.0 <= lam <= 1.0:
-            raise ValueError("carbon_lambda必须位于[0,1]")
+            raise ValueError("carbon_lambda must lie within [0,1]")
         if float(low_carbon) > baseline_carbon + 1e-8:
-            raise ValueError("LOW_CARBON_REFERENCE的碳排放不得高于基准方案")
+            raise ValueError("LOW_CARBON_REFERENCE emissions must not exceed baseline emissions")
         cap = float(baseline_carbon - lam * (baseline_carbon - float(low_carbon)))
         metadata.update({
             "CarbonLambda": lam,
@@ -3844,7 +3844,7 @@ def generate_scenario_data(
     elif kind == "low_variability_renewable":
         gamma = float(spec.renewable_gamma if spec.renewable_gamma is not None else 1.0)
         if not 0.0 <= gamma <= 1.0:
-            raise ValueError("renewable_gamma必须位于[0,1]")
+            raise ValueError("renewable_gamma must lie within [0,1]")
         frame["_Day"] = frame["Hour"].astype(int) // 24
         smoothed = frame["AvailableRenewable_MW"].copy()
         for _, indexes in frame.groupby(["Region", "_Day"], observed=True).groups.items():
@@ -3867,7 +3867,7 @@ def generate_scenario_data(
             "ChangedColumns": ["AvailableRenewable_MW"] if gamma > EPS else [],
         })
     else:
-        raise ValueError(f"未知情景类型：{spec.kind}")
+        raise ValueError(f"Unknown scenario type: {spec.kind}")
     scenario_data = _copy_input_data_with_region_hour(data, frame)
     metadata["StructuralInputsUnchanged"] = bool(
         scenario_data.tasks is data.tasks
@@ -4045,15 +4045,15 @@ def classify_task_states(
         if not assigned.empty and task_id in assigned.index:
             result = assigned.loc[task_id]
             finish = float(result.FinishHour)
-            state = "已完成" if finish <= tau + EPS else "已在H区安排"
+            state = "completed" if finish <= tau + EPS else "scheduled_in_H"
         elif latest_start < tau:
-            state = "不可行"
+            state = "infeasible"
         elif int(task.ArrivalHour) > tau:
-            state = "未到达"
+            state = "not_arrived"
         elif int(task.ArrivalHour) < tau and latest_start >= tau:
-            state = "已延期"
+            state = "deferred"
         else:
-            state = "已到达但未安排"
+            state = "arrived_unscheduled"
         rows.append({
             "TaskID": task_id,
             "State": state,
@@ -4133,7 +4133,7 @@ def identify_critical_neighborhood(
     problem: WindowProblem,
     limit: int = 250,
 ) -> tuple[str, ...]:
-    """为情景MILP提供确定性的关键任务组排序，不删除任何硬约束。"""
+    """Provide deterministic critical task-group ordering for scenario MILPs without removing hard constraints."""
 
     ranked = sorted(
         problem.task_rules,
@@ -4161,7 +4161,7 @@ def _window_lp_scaling(
     *,
     lp_time_limit: float,
 ) -> tuple[dict[str, tuple[float, float]], pd.DataFrame, np.ndarray]:
-    """以当前窗口连续松弛下界和可行参考解建立固定于该窗的六目标尺度。"""
+    """Build window-fixed six-objective scales from current continuous lower bounds and feasible references."""
 
     reference = _heuristic_incumbent(
         data, problem, assignments, current_soc, historical_peak,
@@ -4183,7 +4183,7 @@ def _window_lp_scaling(
         problem, reference,
         max(config.feasibility_tolerance, config.integrality_tolerance),
     ):
-        raise RuntimeError(f"窗口{problem.tau}的定标参考解未通过原硬约束")
+        raise RuntimeError(f"Window {problem.tau}: scaling reference violates original hard constraints")
     reference_values = _metric_values(problem, reference)
     scaling: dict[str, tuple[float, float]] = {}
     records: list[dict[str, object]] = []
@@ -4205,11 +4205,11 @@ def _window_lp_scaling(
             else:
                 lower, certified, bound_source = _certified_box_lower_bound(problem, metric)
                 if not certified:
-                    raise RuntimeError(f"{metric}没有可证明下界")
+                    raise RuntimeError(f"{metric} has no provable lower bound")
         except RuntimeError:
             lower, certified, bound_source = _certified_box_lower_bound(problem, metric)
             if not certified or not np.isfinite(lower):
-                raise RuntimeError(f"窗口{problem.tau}指标{metric}没有可证明安全下界")
+                raise RuntimeError(f"Window {problem.tau}, metric {metric}: no provably safe lower bound")
         reference_value = float(reference_values[metric])
         raw_scale = reference_value - float(lower)
         degeneracy_tolerance = max(abs(reference_value), abs(float(lower)), 1.0) * 1e-6
@@ -4259,8 +4259,8 @@ def _baseline_state_at_tau(
         str(row.Metric): (float(row.Anchor), float(row.Scale))
         for row in scaling_frame.itertuples(index=False)
     }
-    # 基准Delay定标来自旧的未加权定义，不能与修正后的J混用。
-    # 加权相对延期损失按定义位于[0,1]，因此使用可证明安全的固定尺度。
+    # Baseline Delay scaling uses the old unweighted definition and cannot be combined with corrected J.
+    # Weighted relative delay loss lies in [0,1] by definition; use a provably safe fixed scale.
     scaling["Latency"] = (
         0.0,
         max(float(data.tasks["MaxLatency_ms"].max()), 1.0),
@@ -4300,7 +4300,7 @@ def critical_neighborhood_with_fallback(
     local_solver: Callable[[], WindowSolution | None],
     full_solver: Callable[[], WindowSolution],
 ) -> tuple[WindowSolution, str]:
-    """局部MILP失败时恢复完整原模型；绝不把失败的启发式当正式解。"""
+    """Restore the complete original MILP after local failure; never accept failed heuristics as formal solutions."""
 
     try:
         local = local_solver()
@@ -4360,12 +4360,12 @@ def _run_validation_window(
     if incumbent is not None and not _vector_is_feasible(
         problem, incumbent, max(config.feasibility_tolerance, config.integrality_tolerance)
     ):
-        raise RuntimeError("状态感知启发式返回了违反原MILP硬约束的候选")
+        raise RuntimeError("State-aware heuristic returned a candidate violating original MILP hard constraints")
     milp_attempt_status = "UNKNOWN"
     milp_attempt_message = ""
     try:
         if time_limit <= 0.0:
-            raise RuntimeError("按VALIDATION_ONLY配置跳过耗时MILP，仅审计可行候选")
+            raise RuntimeError("VALIDATION_ONLY skips the expensive MILP and audits the feasible candidate only")
         solution = _solve(
             problem, _balanced_objective(problem, config),
             time_limit=time_limit,
@@ -4391,8 +4391,8 @@ def _run_validation_window(
             vector=incumbent,
             status=-3,
             message=(
-                "VALIDATION_ONLY使用已通过原MILP全部硬约束的状态感知候选；"
-                f"该候选不是正式情景结果，完整MILP信息：{exc}"
+                "VALIDATION_ONLY uses a state-aware candidate satisfying every original MILP hard constraint; "
+                f"this is not a formal scenario result. Complete MILP details: {exc}"
             ),
             objective=float(np.dot(_balanced_objective(problem, config), incumbent)),
             mip_gap=float("nan"),
@@ -4475,7 +4475,7 @@ def _run_validation_window(
         "EndSOC": solution.vector[problem.indices["soc"][problem.decision_end - tau]].tolist(),
         "MaxEnergyBalanceError": energy_error,
         "AggregationConsistent": bool(aggregation["FeasibleDomainEquivalent"]),
-        "DeferredTaskCount": int((states["State"] == "已延期").sum()),
+        "DeferredTaskCount": int((states["State"] == "deferred").sum()),
         "RealtimeImmediate": realtime_bad.empty,
         "KPredictionExcluded": k_leak.empty,
         "IndependentAuditPassed": window_audit_passed,
@@ -4495,36 +4495,36 @@ def run_validation_only_windows(
     include_scenario_smoke: bool = True,
 ) -> pd.DataFrame:
     _progress(
-        f"VALIDATION_ONLY开始：窗口时间上限={time_limit:.1f}s，"
-        f"情景接口冒烟={include_scenario_smoke}。"
+        f"VALIDATION_ONLY started: window time limit={time_limit:.1f}s, "
+        f"scenario interface smoke tests={include_scenario_smoke}."
     )
     report = validate_baseline_artifacts()
     if not report.get("passed"):
-        raise RuntimeError("BLOCKED_BASELINE_INVALID：不能执行依赖基准状态的小窗口验证")
-    _progress(f"VALIDATION_ONLY基准检查通过：目录={report.get('baseline_dir')}。")
+        raise RuntimeError("BLOCKED_BASELINE_INVALID: cannot validate small windows dependent on baseline state")
+    _progress(f"VALIDATION_ONLY baseline check passed: directory={report.get('baseline_dir')}.")
     data = load_data()
     baseline = load_cached_baseline(Path(str(report["baseline_dir"])))
     _progress(
-        f"VALIDATION_ONLY输入读取完成：任务={len(data.tasks)}，"
-        f"区域={len(data.regions)}。"
+        f"VALIDATION_ONLY inputs loaded: tasks={len(data.tasks)}, "
+        f"regions={len(data.regions)}."
     )
     config = ModelConfig(
         normal_time_limit_seconds=time_limit,
         difficult_time_limit_seconds=time_limit,
     )
-    _progress("VALIDATION_ONLY开始识别验证窗口。")
+    _progress("VALIDATION_ONLY selecting validation windows.")
     selected = identify_validation_windows(
         data, baseline["q4_region_hour_dispatch.csv"], config
     )
     VALIDATION_DIR.mkdir(parents=True, exist_ok=True)
     _atomic_write_csv(selected, VALIDATION_DIR / "q4_validation_window_selection.csv")
-    _progress(f"VALIDATION_ONLY验证窗口识别完成：共{len(selected)}个。")
+    _progress(f"VALIDATION_ONLY selected {len(selected)} validation windows.")
     summaries: list[dict[str, object]] = []
     for index, row in enumerate(selected.itertuples(index=False), start=1):
         tau = int(row.WindowStart)
         _progress(
-            f"VALIDATION_ONLY窗口开始：{index}/{len(selected)}，"
-            f"起点={tau}，类型={row.WindowType}，时间上限={time_limit:.1f}s。"
+            f"VALIDATION_ONLY window started: {index}/{len(selected)}, "
+            f"start={tau}, type={row.WindowType}, time limit={time_limit:.1f}s."
         )
         try:
             summary, assignments, dispatch = _run_validation_window(
@@ -4542,10 +4542,10 @@ def run_validation_only_windows(
                 VALIDATION_DIR / f"q4_validation_window_{tau}_dispatch.csv",
             )
             _progress(
-                f"VALIDATION_ONLY窗口完成：起点={tau}，"
+                f"VALIDATION_ONLY window completed: start={tau}, "
                 f"status={summary.get('SolverStatus')}，"
-                f"独立审计={summary.get('IndependentAuditPassed')}，"
-                f"耗时={float(summary.get('ElapsedSeconds', float('nan'))):.2f}s。"
+                f"independent audit={summary.get('IndependentAuditPassed')}, "
+                f"elapsed={float(summary.get('ElapsedSeconds', float('nan'))):.2f}s."
             )
         except Exception as exc:
             summaries.append({
@@ -4557,12 +4557,12 @@ def run_validation_only_windows(
                 "Error": str(exc),
                 "IndependentAuditPassed": False,
             })
-            _progress(f"VALIDATION_ONLY窗口失败但继续：起点={tau}，错误={exc}。")
+            _progress(f"VALIDATION_ONLY window failed; continuing: start={tau}, error={exc}.")
     summary_frame = pd.DataFrame(summaries)
     _atomic_write_csv(summary_frame, VALIDATION_DIR / "q4_validation_window_summary.csv")
     _progress(
-        f"VALIDATION_ONLY窗口汇总已写出：{VALIDATION_DIR / 'q4_validation_window_summary.csv'}，"
-        f"记录={len(summary_frame)}。"
+        f"VALIDATION_ONLY window summary written: {VALIDATION_DIR / 'q4_validation_window_summary.csv'}, "
+        f"records={len(summary_frame)}."
     )
     if include_scenario_smoke:
         ordinary_tau = int(
@@ -4578,11 +4578,11 @@ def run_validation_only_windows(
         )
         smoke_rows: list[dict[str, object]] = []
         _progress(
-            f"VALIDATION_ONLY情景接口冒烟开始：共{len(specs)}个，"
-            f"窗口起点={ordinary_tau}。"
+            f"VALIDATION_ONLY scenario interface smoke tests started: {len(specs)} cases, "
+            f"window start={ordinary_tau}."
         )
         for index, spec in enumerate(specs, start=1):
-            _progress(f"VALIDATION_ONLY情景冒烟：{index}/{len(specs)}，情景={spec.name}。")
+            _progress(f"VALIDATION_ONLY scenario smoke test: {index}/{len(specs)}, scenario={spec.name}.")
             scenario_data, metadata = generate_scenario_data(data, spec, baseline_metrics)
             factor_check = validate_single_factor_scenario(data, scenario_data, metadata)
             try:
@@ -4594,9 +4594,9 @@ def run_validation_only_windows(
                 )
                 smoke_rows.append({**metadata, **factor_check, **scenario_summary})
                 _progress(
-                    f"VALIDATION_ONLY情景冒烟完成：情景={spec.name}，"
+                    f"VALIDATION_ONLY scenario smoke test completed: scenario={spec.name}, "
                     f"status={scenario_summary.get('SolverStatus')}，"
-                    f"独立审计={scenario_summary.get('IndependentAuditPassed')}。"
+                    f"independent audit={scenario_summary.get('IndependentAuditPassed')}."
                 )
             except Exception as exc:
                 smoke_rows.append({
@@ -4607,20 +4607,20 @@ def run_validation_only_windows(
                     "SolverStatus": "EXCEPTION",
                     "Error": str(exc),
                 })
-                _progress(f"VALIDATION_ONLY情景冒烟失败但继续：情景={spec.name}，错误={exc}。")
+                _progress(f"VALIDATION_ONLY scenario smoke test failed; continuing: scenario={spec.name}, error={exc}.")
         _atomic_write_csv(
             pd.DataFrame(smoke_rows),
             VALIDATION_DIR / "q4_scenario_interface_smoke.csv",
         )
         _progress(
-            f"VALIDATION_ONLY情景接口冒烟汇总已写出："
-            f"{VALIDATION_DIR / 'q4_scenario_interface_smoke.csv'}，记录={len(smoke_rows)}。"
+            f"VALIDATION_ONLY scenario interface smoke summary written: "
+            f"{VALIDATION_DIR / 'q4_scenario_interface_smoke.csv'}, records={len(smoke_rows)}."
         )
     return summary_frame
 
 
 def run_automated_tests() -> pd.DataFrame:
-    """在真实缓存和接口层执行无基准重算的回归检查。"""
+    """Run regression checks against actual caches and interfaces without recomputing the baseline."""
 
     records: list[dict[str, object]] = []
 
@@ -4681,7 +4681,7 @@ def run_automated_tests() -> pd.DataFrame:
     record("AggregationFeasibleDomain", bool(aggregation["FeasibleDomainEquivalent"]))
     record("DelaySensitivityInAggregationKey", bool(aggregation["DelaySensitivityInKey"]))
     states = classify_task_states(data, before, tau)
-    record("DeferredTaskTransferred", not states.loc[states["State"].eq("已延期"), "TaskID"].duplicated().any())
+    record("DeferredTaskTransferred", not states.loc[states["State"].eq("deferred"), "TaskID"].duplicated().any())
     realtime = baseline["q4_task_assignments.csv"].loc[lambda x: x["TaskType"].eq("RealTimeInference")]
     record("RealtimeImmediateStart", np.allclose(realtime["StartHour"], realtime["ArrivalHour"], atol=1e-6))
     specs = (
@@ -4737,7 +4737,7 @@ def run_automated_tests() -> pd.DataFrame:
     fallback, mode = critical_neighborhood_with_fallback(lambda: None, lambda: dummy)
     record("NeighborhoodFallbackFullMILP", fallback is dummy and mode == "FULL_HK_MILP_FALLBACK")
     record("TaskNoEarlyExecution", "TaskEarliestStart" not in audit["failed_checks"])
-    record("BaselineNoResolveGuard", True, "run入口在求解代码前强制REUSED_BASELINE返回")
+    record("BaselineNoResolveGuard", True, "run returns REUSED_BASELINE before reaching solver code")
     after_hashes = {
         filename: _sha256_file(baseline_dir / filename)
         for filename in BASELINE_REQUIRED_FILES
@@ -4869,10 +4869,10 @@ def _load_complete_scenario(directory: Path) -> dict[str, pd.DataFrame]:
     )
     complete = tables / ".q4_scenario_complete.json"
     if not complete.is_file() or not all((tables / name).is_file() for name in required):
-        raise FileNotFoundError(f"情景结果尚未完整：{tables.parent}")
+        raise FileNotFoundError(f"Incomplete scenario results: {tables.parent}")
     marker = json.loads(complete.read_text(encoding="utf-8"))
     if marker.get("complete") is not True or marker.get("audit_passed") is not True:
-        raise RuntimeError(f"情景结果未通过最终审计：{tables.parent}")
+        raise RuntimeError(f"Scenario results failed final audit: {tables.parent}")
     return {
         name: pd.read_csv(tables / name, encoding="utf-8-sig")
         for name in required
@@ -4886,11 +4886,11 @@ def _scenario_prerequisites(
 ) -> tuple[dict[str, pd.DataFrame] | None, np.ndarray | None, list[Path]]:
     if spec.kind == "corrected_baseline":
         raise RuntimeError(
-            "禁止重新计算已有Q4基准；三类新情景必须直接复用只读基准。"
+            "Recomputation of the existing Q4 baseline is prohibited; all three scenario types must reuse the read-only baseline."
         )
     baseline_dir = locate_existing_baseline()
     if baseline_dir is None:
-        raise RuntimeError("BLOCKED_BASELINE_INVALID：未找到完整只读Q4基准")
+        raise RuntimeError("BLOCKED_BASELINE_INVALID: complete read-only Q4 baseline not found")
     baseline = load_cached_baseline(baseline_dir)
     baseline_cumulative = _cumulative_carbon(
         baseline["q4_region_hour_dispatch.csv"]
@@ -4900,17 +4900,17 @@ def _scenario_prerequisites(
         return baseline, None, dependencies
     lam = float(spec.carbon_lambda if spec.carbon_lambda is not None else 1.0)
     if not 0.0 <= lam <= 1.0:
-        raise ValueError("carbon_lambda必须位于[0,1]")
+        raise ValueError("carbon_lambda must lie within [0,1]")
     if abs(float(baseline_cumulative[-1])) <= 1e-8:
         low_cumulative = np.zeros_like(baseline_cumulative)
     elif lam >= 1.0 - EPS:
-        # lambda=1时预算轨迹就是现有基准轨迹，不需要伪造低碳参考。
+        # At lambda=1, the budget trajectory equals the existing baseline; no fabricated low-carbon reference is needed.
         low_cumulative = np.zeros_like(baseline_cumulative)
     else:
         if low_carbon_reference_dir is None:
             raise RuntimeError(
-                "BLOCKED_BASELINE_INVALID：碳约束情景需要完整LOW_CARBON_REFERENCE；"
-                "当前修正基准碳排放非零，不能伪造低碳轨迹。"
+                "BLOCKED_BASELINE_INVALID: carbon-constrained scenarios require complete LOW_CARBON_REFERENCE; "
+                "corrected baseline emissions are nonzero; a low-carbon trajectory cannot be fabricated."
             )
         low = _load_complete_scenario(low_carbon_reference_dir.resolve())
         low_dispatch_path = (
@@ -4990,11 +4990,11 @@ def _load_scenario_progress(
     with checkpoint.open("rb") as handle:
         payload = pickle.load(handle)
     if not isinstance(payload, dict) or payload.get("checkpoint_version") != 2:
-        raise RuntimeError(f"情景断点版本不受支持：{checkpoint}")
+        raise RuntimeError(f"Unsupported scenario checkpoint version: {checkpoint}")
     if payload.get("signature") != signature:
         raise RuntimeError(
-            "已有情景断点与当前数据、参数或model.py不一致；"
-            "为保护旧结果，请更换--scenario-name，不得覆盖。"
+            "Existing scenario checkpoint differs from current data, parameters, or model.py; "
+            "use a different --scenario-name to protect old results; overwriting is prohibited."
         )
     return payload
 
@@ -5027,7 +5027,7 @@ def _legacy_run_full_scenario(
     lp_time_limit: float = 20.0,
     low_carbon_reference_dir: Path | None = None,
 ) -> dict[str, object]:
-    """运行或恢复一个独立V2情景；每个成功H窗口立即原子保存。"""
+    """Run or resume one independent V2 scenario; atomically save after every successful H window."""
 
     config = config or ModelConfig()
     paths = _scenario_output_paths(spec.name)
@@ -5035,20 +5035,20 @@ def _legacy_run_full_scenario(
     paths["validation"].mkdir(parents=True, exist_ok=True)
     old_baseline_report = validate_baseline_artifacts()
     if not old_baseline_report.get("passed"):
-        raise RuntimeError("BLOCKED_BASELINE_INVALID：旧Q4参考基准完整性审计未通过")
+        raise RuntimeError("BLOCKED_BASELINE_INVALID: legacy Q4 reference baseline integrity audit failed")
     original_data = load_data()
     baseline_reference, carbon_budget, dependencies = _scenario_prerequisites(
         original_data, spec, low_carbon_reference_dir
     )
     if baseline_reference is None:
-        raise RuntimeError("BLOCKED_BASELINE_INVALID：只读Q4基准未加载")
+        raise RuntimeError("BLOCKED_BASELINE_INVALID: read-only Q4 baseline not loaded")
     baseline_metrics = dict(old_baseline_report["audit"]["independent_metrics"])
     reference_assignments = baseline_reference["q4_task_assignments.csv"]
     if spec.kind == "carbon_constraint" and spec.low_carbon_reference is None:
         baseline_carbon = float(baseline_metrics["Carbon"])
         lam = float(spec.carbon_lambda if spec.carbon_lambda is not None else 1.0)
         if carbon_budget is None:
-            raise RuntimeError("碳约束情景缺少累计预算轨迹")
+            raise RuntimeError("Carbon-constrained scenario lacks a cumulative budget trajectory")
         low_total = (
             float((carbon_budget[-1] - lam * baseline_carbon) / (1.0 - lam))
             if lam < 1.0 - EPS else baseline_carbon
@@ -5066,7 +5066,7 @@ def _legacy_run_full_scenario(
         original_data, scenario_data, scenario_metadata
     )
     if not single_factor["passed"]:
-        raise RuntimeError(f"情景单因素检查失败：{single_factor}")
+        raise RuntimeError(f"Scenario single-factor check failed: {single_factor}")
     signature = _scenario_signature(
         scenario_data, spec, config, dependencies=dependencies
     )
@@ -5074,10 +5074,10 @@ def _legacy_run_full_scenario(
         marker = json.loads(paths["complete"].read_text(encoding="utf-8"))
         if marker.get("signature") != signature:
             raise RuntimeError(
-                "同名情景已有不同签名的完整结果；请更换--scenario-name，禁止覆盖。"
+                "Complete results with a different signature already exist under this scenario name; change --scenario-name; overwriting is prohibited."
             )
         if marker.get("complete") is True and marker.get("audit_passed") is True:
-            _progress(f"情景{spec.name}已完整且审计通过，直接复用，不重新求解。")
+            _progress(f"Scenario {spec.name} is complete and audited; reusing without solving again.")
             return marker
     storage = scenario_data.storage.set_index("Region").loc[list(scenario_data.regions)]
     global_groups, _ = _global_exact_groups(scenario_data)
@@ -5118,8 +5118,8 @@ def _legacy_run_full_scenario(
         warm_hints = dict(payload.get("warm_hints", {}))
         start_tau = int(payload["next_tau"])
         _progress(
-            f"情景{spec.name}从原子断点恢复：next_tau={start_tau}，"
-            f"已执行任务={len(assignments)}。"
+            f"Scenario {spec.name} resumed from atomic checkpoint: next_tau={start_tau}, "
+            f"executed tasks={len(assignments)}."
         )
     windows = list(range(0, MAIN_END, config.decision_hours)) + [MAIN_END]
     for tau in [value for value in windows if value >= start_tau]:
@@ -5139,12 +5139,12 @@ def _legacy_run_full_scenario(
                 _atomic_write_json(paths["failure"], {
                     "WindowStart": tau,
                     "Status": "INFEASIBLE",
-                    "Reason": "累计实际碳排放已经超过当前累计预算轨迹",
+                    "Reason": "Cumulative actual emissions already exceed the current cumulative budget trajectory",
                     "PastCarbon": past_carbon,
                     "BudgetAtDecisionEnd": float(carbon_budget[decision_end]),
                     "CheckpointPreserved": str(paths["checkpoint"]),
                 })
-                raise RuntimeError(f"窗口{tau}累计碳预算已不可行")
+                raise RuntimeError(f"Window {tau}: cumulative carbon budget is already infeasible")
             carbon_remaining = max(carbon_remaining, 0.0)
         unscaled = build_window_problem(
             scenario_data, config, tau, decision_hours, lookahead,
@@ -5228,13 +5228,13 @@ def _legacy_run_full_scenario(
                     "CheckpointPreserved": str(paths["checkpoint"]),
                 })
                 raise RuntimeError(
-                    f"情景{spec.name}窗口{tau}没有合法整数解；最后成功断点已保留。"
+                    f"Scenario {spec.name}, window {tau}: no valid integer solution; last successful checkpoint retained."
                 )
         new_assignments = _selected_assignments(
             scenario_data, problem, solution.vector
         )
         if set(new_assignments["TaskID"].astype(str)) & set(assignments["TaskID"].astype(str)):
-            raise RuntimeError(f"情景{spec.name}窗口{tau}出现重复TaskID")
+            raise RuntimeError(f"Scenario {spec.name}, window {tau}: duplicate TaskID values")
         assignments_after = pd.concat(
             [assignments, new_assignments], ignore_index=True
         )
@@ -5272,7 +5272,7 @@ def _legacy_run_full_scenario(
             next_peak[r] = max(next_peak[r], net_values.max(initial=0.0), 0.0)
         next_carbon = past_carbon + float(h_dispatch["CarbonEmission_tCO2"].sum())
         if carbon_budget is not None and next_carbon > carbon_budget[decision_end] + config.feasibility_tolerance:
-            raise RuntimeError(f"情景{spec.name}窗口{tau}实际碳排放超过累计预算")
+            raise RuntimeError(f"Scenario {spec.name}, window {tau}: actual emissions exceed cumulative budget")
         renewable_error = (
             h_dispatch["AvailableRenewable_MW"]
             - h_dispatch["RenewableDirectUse_MW"]
@@ -5372,15 +5372,15 @@ def _legacy_run_full_scenario(
         past_carbon = next_carbon
         warm_hints = next_hints
         _progress(
-            f"情景{spec.name}窗口{tau}已原子保存：status={solution.status_name}，"
+            f"Scenario {spec.name}, window {tau} atomically saved: status={solution.status_name}, "
             f"gap={solution.mip_gap}，next_tau={next_tau}。"
         )
     assignments = assignments.sort_values(["StartHour", "TaskID"], kind="stable").reset_index(drop=True)
     dispatch = dispatch.sort_values(["Hour", "Region"], kind="stable").reset_index(drop=True)
     if len(assignments) != len(scenario_data.tasks) or assignments["TaskID"].nunique() != len(scenario_data.tasks):
-        raise RuntimeError(f"情景{spec.name}最终任务数量不完整")
+        raise RuntimeError(f"Scenario {spec.name}: final task count is incomplete")
     if len(dispatch) != OPERATION_END * len(scenario_data.regions):
-        raise RuntimeError(f"情景{spec.name}最终能源轨迹不完整")
+        raise RuntimeError(f"Scenario {spec.name}: final energy trajectory is incomplete")
     qos_weights = _qos_weight_map(config)
     final_metrics = _final_metrics(
         scenario_data, assignments, dispatch, qos_weights=qos_weights
@@ -5411,7 +5411,7 @@ def _legacy_run_full_scenario(
             "FailedChecks": audit["failed_checks"],
             "CheckpointPreserved": str(paths["checkpoint"]),
         })
-        raise RuntimeError(f"情景{spec.name}最终独立审计失败：{audit['failed_checks']}")
+        raise RuntimeError(f"Scenario {spec.name}: final independent audit failed: {audit['failed_checks']}")
     configuration = pd.DataFrame([
         {"Parameter": key, "Value": value} for key, value in asdict(config).items()
     ] + [
@@ -5465,11 +5465,11 @@ def _legacy_run_full_scenario(
 def build_scenario_comparison(
     scenario_names: Sequence[str] | None = None,
 ) -> pd.DataFrame:
-    """只读复算已有基准，并汇总已完成且审计通过的新情景。"""
+    """Recompute the existing baseline read-only and summarize completed, audited scenarios."""
 
     report = validate_baseline_artifacts()
     if not report.get("passed"):
-        raise RuntimeError("BLOCKED_BASELINE_INVALID：只读Q4基准审计未通过")
+        raise RuntimeError("BLOCKED_BASELINE_INVALID: read-only Q4 baseline audit failed")
     baseline_dir = Path(str(report["baseline_dir"]))
     baseline = load_cached_baseline(baseline_dir)
     data = load_data()
@@ -5482,7 +5482,7 @@ def build_scenario_comparison(
     else:
         names = [_scenario_slug(name) for name in scenario_names]
     if not names:
-        raise FileNotFoundError("没有已完成且可比较的新情景")
+        raise FileNotFoundError("No completed comparable new scenarios")
 
     output_names = {
         "Cost": "Cost",
@@ -5522,7 +5522,7 @@ def build_scenario_comparison(
         }
         for internal_name, output_name in output_names.items():
             if output_name not in scenario_summary:
-                raise ValueError(f"情景{name}缺少指标{output_name}")
+                raise ValueError(f"Scenario {name} lacks metric {output_name}")
             baseline_value = float(baseline_values[internal_name])
             scenario_value = float(scenario_summary[output_name])
             absolute_change = scenario_value - baseline_value
@@ -5765,7 +5765,7 @@ def _matheuristic_region_hour(
     frame = frame.sort_values(["Hour", "Region"], kind="stable").reset_index(drop=True)
     t_count = upper - lower
     if len(frame) != t_count * len(data.regions):
-        raise ValueError(f"{lower}--{upper - 1}小时的逐时区域数据不完整")
+        raise ValueError(f"Incomplete hourly regional data for hours {lower}--{upper - 1}")
     arrays = {
         column: frame[column].to_numpy(dtype=float).reshape(t_count, len(data.regions))
         for column in (
@@ -5784,27 +5784,27 @@ def _standardize_shadow_schedule(data: InputData, schedule: pd.DataFrame) -> pd.
     required = {"TaskID", "TargetRegion", "StartHour"}
     missing = sorted(required - set(schedule.columns))
     if missing:
-        raise ValueError(f"任务种子缺少字段：{missing}")
+        raise ValueError(f"Task seed is missing columns: {missing}")
     seed = schedule[["TaskID", "TargetRegion", "StartHour"]].copy()
     seed["TaskID"] = seed["TaskID"].astype(str)
     seed["TargetRegion"] = seed["TargetRegion"].astype(str)
     seed["StartHour"] = pd.to_numeric(seed["StartHour"], errors="raise")
     if seed["TaskID"].duplicated().any():
         example = seed.loc[seed["TaskID"].duplicated(keep=False), "TaskID"].iloc[0]
-        raise ValueError(f"任务种子存在重复TaskID：{example}")
+        raise ValueError(f"Task seed contains duplicate TaskID values: {example}")
     expected = set(data.tasks["TaskID"].astype(str))
     actual = set(seed["TaskID"])
     if expected != actual:
         missing_ids = sorted(expected - actual)[:5]
         extra_ids = sorted(actual - expected)[:5]
-        raise ValueError(f"任务种子不能完整覆盖Q4任务；缺失={missing_ids}，额外={extra_ids}")
+        raise ValueError(f"Task seed does not cover all Q4 tasks; missing={missing_ids}, extra={extra_ids}")
     candidate_pairs = data.candidates[[
         "TaskID", "TargetRegion", "NetworkLatency_ms",
     ]].copy()
     candidate_pairs["TaskID"] = candidate_pairs["TaskID"].astype(str)
     candidate_pairs["TargetRegion"] = candidate_pairs["TargetRegion"].astype(str)
     if candidate_pairs.duplicated(["TaskID", "TargetRegion"]).any():
-        raise ValueError("候选区域表存在重复的TaskID—TargetRegion记录")
+        raise ValueError("Candidate-region table contains duplicate TaskID--TargetRegion pairs")
     rebuilt = seed.merge(
         data.tasks,
         on="TaskID",
@@ -5821,7 +5821,7 @@ def _standardize_shadow_schedule(data: InputData, schedule: pd.DataFrame) -> pd.
             rebuilt["TaskType"].isna() | rebuilt["NetworkLatency_ms"].isna(),
             "TaskID",
         ].astype(str).head(5).tolist()
-        raise ValueError(f"任务种子含未知TaskID或非法候选区域：{invalid}")
+        raise ValueError(f"Task seed contains unknown TaskID values or invalid candidate regions: {invalid}")
     rebuilt["FinishHour"] = rebuilt["StartHour"] + rebuilt["Duration_h"]
     earliest = np.maximum(rebuilt["ArrivalHour"], rebuilt["EarliestStartHour"])
     rebuilt["WaitHours"] = np.maximum(rebuilt["StartHour"] - earliest, 0.0)
@@ -5844,7 +5844,7 @@ def _validate_shadow_schedule(
     """Validate the Q2 shadow extension before it is allowed to seed Q4."""
 
     if len(schedule) != len(data.tasks) or schedule["TaskID"].astype(str).nunique() != len(data.tasks):
-        raise ValueError("影子任务计划必须一一覆盖全部TaskID")
+        raise ValueError("Shadow task schedule must cover every TaskID exactly once")
     starts = schedule["StartHour"].to_numpy(dtype=float)
     integer_error = float(np.abs(starts - np.rint(starts)).max(initial=0.0))
     earliest = np.maximum(
@@ -5864,9 +5864,9 @@ def _validate_shadow_schedule(
     ).max(initial=0.0)) if realtime.any() else 0.0
     if max(integer_error, earliest_error, latest_error, realtime_error) > tolerance:
         raise ValueError(
-            "Q2影子计划违反时间约束："
-            f"整数={integer_error:.3g}，最早={earliest_error:.3g}，"
-            f"最晚={latest_error:.3g}，实时={realtime_error:.3g}"
+            "Q2 shadow schedule violates time constraints: "
+            f"integer={integer_error:.3g}, earliest={earliest_error:.3g}, "
+            f"latest={latest_error:.3g}, realtime={realtime_error:.3g}"
         )
     gpu, ai = _fixed_task_loads(schedule, 0, OPERATION_END, data.region_index)
     _, arrays = _matheuristic_region_hour(data, 0, OPERATION_END)
@@ -5878,7 +5878,7 @@ def _validate_shadow_schedule(
     ai_error = float(np.maximum(ai - ai_limit, 0.0).max(initial=0.0))
     if max(gpu_error, ai_error) > tolerance:
         raise ValueError(
-            f"Q2影子计划违反资源容量：GPU={gpu_error:.3g}，AI/设施={ai_error:.3g}"
+            f"Q2 shadow schedule violates capacity: GPU={gpu_error:.3g}, AI/facility={ai_error:.3g}"
         )
     return {
         "IntegerStartViolation": integer_error,
@@ -5911,7 +5911,7 @@ def load_and_validate_q2_schedule(data: InputData, config: ModelConfig) -> pd.Da
             raw = pd.read_csv(path, encoding="utf-8-sig")
             schedule = _standardize_shadow_schedule(data, raw)
             _validate_shadow_schedule(data, schedule, config.feasibility_tolerance)
-            _progress(f"已加载并复核Q2影子任务计划：{path.name}，任务={len(schedule)}。")
+            _progress(f"Q2 shadow task schedule loaded and checked: {path.name}, tasks={len(schedule)}.")
             schedule = schedule.sort_values(["StartHour", "TaskID"], kind="stable").reset_index(drop=True)
             schedule.attrs["q2_schedule_source"] = str(path)
             return schedule
@@ -5919,8 +5919,8 @@ def load_and_validate_q2_schedule(data: InputData, config: ModelConfig) -> pd.Da
             errors.append(f"{path.name}: {exc}")
     expected_text = "、".join(str(path) for path in expected_paths)
     raise RuntimeError(
-        "未找到可作为Q4全局可行延拓的正式Q2Balanced任务计划。"
-        f"期望文件：{expected_text}；校验错误：" + "；".join(errors)
+        "No formal Q2Balanced task schedule provides a globally feasible continuation for Q4. "
+        f"Expected files: {expected_text}; validation errors: " + "; ".join(errors)
     )
 
 
@@ -6218,7 +6218,7 @@ def _matheuristic_storage_arrays(data: InputData) -> dict[str, np.ndarray]:
 def _validate_objective_mode(objective_mode: str) -> str:
     mode = str(objective_mode).strip().lower()
     if mode not in {OBJECTIVE_MODE_MINIMAX, OBJECTIVE_MODE_CARBON_PRIORITY}:
-        raise ValueError(f"未知Q4优化模式：{objective_mode}")
+        raise ValueError(f"Unknown Q4 optimization mode: {objective_mode}")
     return mode
 
 
@@ -6311,7 +6311,7 @@ def _build_energy_only_problem(
     h_count = decision_end - tau
     r_count = len(data.regions)
     if ai_profile.shape != (t_count, r_count):
-        raise ValueError("固定任务负荷剖面维度与Q4滚动窗口不一致")
+        raise ValueError("Fixed task load profile dimension differs from the Q4 rolling window")
     frame, arrays = _matheuristic_region_hour(data, tau, plan_end)
     storage = _matheuristic_storage_arrays(data)
     offset = 0
@@ -6546,7 +6546,7 @@ def _assert_document_energy_semantics(
     }
     failed = {name: value for name, value in violations.items() if value > tolerance}
     if failed:
-        raise RuntimeError(f"{context}违反Q4文档能源语义约束：{failed}")
+        raise RuntimeError(f"{context} violates Q4 documented energy semantics: {failed}")
 
 
 def _energy_solution_from_vector(
@@ -6572,7 +6572,7 @@ def _energy_solution_from_vector(
     )
     _assert_document_energy_semantics(
         dispatch, config.feasibility_tolerance * 10.0,
-        context=f"固定任务能源响应窗口{problem.tau}",
+        context=f"Fixed-task energy response window {problem.tau}",
     )
     renewable_total = max(float(dispatch["AvailableRenewable_MW"].sum()), EPS)
     metrics = {
@@ -6674,7 +6674,7 @@ def solve_energy_response(
     elapsed = time.perf_counter() - started
     if result.x is None:
         raise RuntimeError(
-            f"窗口{tau}固定任务负荷的储能—新能源—电网响应无可行解：{result.message}"
+            f"Window {tau}: no feasible storage-renewable-grid response for fixed task loads: {result.message}"
         )
     vector = np.asarray(result.x, dtype=float)
     activity = problem.matrix @ vector
@@ -6683,7 +6683,7 @@ def solve_energy_response(
         np.maximum(activity - problem.constraint_upper, 0.0).max(initial=0.0),
     ))
     if violation > max(config.feasibility_tolerance * 10.0, 1e-5):
-        raise RuntimeError(f"窗口{tau}能源响应返回违反约束的解：{violation:.3g}")
+        raise RuntimeError(f"Window {tau}: energy response violates constraints: {violation:.3g}")
     status = "ENERGY_OPTIMAL" if int(result.status) == 0 else "ENERGY_TIME_LIMIT_FEASIBLE"
     return _energy_solution_from_vector(
         data, problem, vector, scaling, config,
@@ -7069,7 +7069,7 @@ def build_local_repair_problem(
     for task_id in selected:
         catalog = _operational_task_options(data, task_id, tau, decision_end, plan_end)
         if not catalog:
-            raise RuntimeError(f"局部修复任务{task_id}没有H区合法选项")
+            raise RuntimeError(f"Local repair task {task_id} has no valid H-region option")
         by_task[task_id] = list(range(len(options), len(options) + len(catalog)))
         options.extend(catalog)
     n = len(options)
@@ -7383,7 +7383,7 @@ def build_joint_lns_problem(
     r_count = len(data.regions)
     selected = tuple(dict.fromkeys(str(task_id) for task_id in selected_task_ids))
     if not selected:
-        raise ValueError("联合LNS邻域不能为空")
+        raise ValueError("Joint LNS neighborhood must not be empty")
     fixed = schedule.loc[~schedule["TaskID"].astype(str).isin(selected)].copy()
     fixed_gpu, fixed_ai, frame, arrays = _shadow_profiles(data, fixed, tau, plan_end)
     options: list[JointTaskOption] = []
@@ -7391,11 +7391,11 @@ def build_joint_lns_problem(
     for task_id in selected:
         catalog = _operational_task_options(data, task_id, tau, decision_end, plan_end)
         if not catalog:
-            raise RuntimeError(f"联合LNS任务{task_id}没有H区合法时空选项")
+            raise RuntimeError(f"Joint LNS task {task_id} has no valid H-region space-time option")
         by_task[task_id] = list(range(len(options), len(options) + len(catalog)))
         options.extend(catalog)
     if len(options) > config.lns_max_integer_option_vars:
-        raise ValueError(f"联合LNS整数任务选项{len(options)}超过上限{config.lns_max_integer_option_vars}")
+        raise ValueError(f"Joint LNS integer task options {len(options)} exceed limit {config.lns_max_integer_option_vars}")
     storage = _matheuristic_storage_arrays(data)
     offset = 0
     indices: dict[str, np.ndarray] = {}
@@ -7626,7 +7626,7 @@ def solve_joint_lns(
     )
     _assert_document_energy_semantics(
         dispatch, config.feasibility_tolerance * 10.0,
-        context=f"联合LNS窗口{tau}",
+        context=f"Joint LNS window {tau}",
     )
     renewable_total = max(float(dispatch["AvailableRenewable_MW"].sum()), EPS)
     metrics = {
@@ -7670,7 +7670,7 @@ def solve_joint_lns(
 
 def _matheuristic_window_starts(config: ModelConfig) -> list[int]:
     if config.decision_hours != 24 or config.lookahead_hours != 48:
-        raise ValueError("Q4终稿固定采用H=24小时、K=48小时，不支持在正式入口改变窗口口径")
+        raise ValueError("Final Q4 configuration fixes H=24h and K=48h; formal entry points do not support different windows")
     return list(range(0, MAIN_END, config.decision_hours)) + [MAIN_END]
 
 
@@ -7761,12 +7761,12 @@ def _load_or_build_fixed_schedule_energy_reference(
                 return {"assignments": assignments, "dispatch": dispatch, "metrics": metrics, "reused": True}
         except (OSError, ValueError, json.JSONDecodeError, pd.errors.ParserError):
             pass
-    _progress(f"未发现可复用的{progress_label}，开始生成V4统一能源响应轨迹。")
+    _progress(f"No reusable {progress_label} found; generating the unified V4 energy response trajectory.")
     dispatch, windows = _run_fixed_schedule_energy_rollout(data, config, schedule, scaling)
     simple = _simple_validation(data, schedule, dispatch, config.feasibility_tolerance)
     if not bool(simple["Passed"].all()):
         failed = simple.loc[~simple["Passed"], "Check"].tolist()
-        raise RuntimeError(f"{progress_label}独立验证未通过：{failed}")
+        raise RuntimeError(f"{progress_label} failed independent validation: {failed}")
     metrics = _final_metrics(data, schedule, dispatch, _qos_weight_map(config))
     metrics_frame = pd.DataFrame([
         {"Scheme": scheme_label, "Metric": key, "Value": value}
@@ -7805,7 +7805,7 @@ def load_or_build_q2_v3_sequential_reference(
         paths=paths,
         file_prefix="q4_sequential_baseline",
         scheme_label="Q2_TaskSeed_to_V4_EnergyReference",
-        progress_label="Q2任务种子→V4能源顺序参考",
+        progress_label="Q2 task seed -> V4 sequential energy reference",
         source_schedule=str(q2_schedule.attrs.get("q2_schedule_source", "Q2ValidatedSchedule")),
     )
 
@@ -7837,8 +7837,8 @@ def run_sequential_reference_repair(
         paths=paths,
     )
     _progress(
-        "顺序基准定点修复完成："
-        f"复用定标记录={len(calibration_records)}行，"
+        "Sequential baseline targeted repair completed: "
+        f"reused calibration records={len(calibration_records)} rows, "
         f"Cost={float(result['metrics']['Cost']):.6g}，"
         f"Carbon={float(result['metrics']['Carbon']):.6g}，"
         f"Peak={float(result['metrics']['Peak']):.6g}。"
@@ -7854,13 +7854,13 @@ def load_and_validate_existing_joint_schedule(
 
     source = LEGACY_JOINT_ROOT / "tables" / "q4_task_assignments.csv"
     if not source.is_file():
-        raise FileNotFoundError(f"既有联合任务方案不存在：{source}")
+        raise FileNotFoundError(f"Existing joint task schedule not found: {source}")
     raw = pd.read_csv(source, encoding="utf-8-sig")
     schedule = _standardize_shadow_schedule(data, raw)
     _validate_shadow_schedule(data, schedule, config.feasibility_tolerance)
     schedule = schedule.sort_values(["StartHour", "TaskID"], kind="stable").reset_index(drop=True)
     schedule.attrs["joint_schedule_source"] = str(source)
-    _progress(f"已加载并复核既有联合任务方案：{source.name}，任务={len(schedule)}。")
+    _progress(f"Existing joint task schedule loaded and checked: {source.name}, tasks={len(schedule)}.")
     return schedule
 
 
@@ -7892,12 +7892,12 @@ def run_joint_energy_reference_repair(
         paths=paths,
         file_prefix="q4_joint_energy_reference",
         scheme_label="ExistingJointTaskSchedule_to_V4_EnergyReference",
-        progress_label="既有联合任务方案→V4统一能源参考",
+        progress_label="Existing joint task schedule -> unified V4 energy reference",
         source_schedule=str(joint_schedule.attrs["joint_schedule_source"]),
     )
     _progress(
-        "联合任务方案V4能源定点复算完成："
-        f"复用定标记录={len(calibration_records)}行，"
+        "Joint schedule targeted V4 energy recomputation completed: "
+        f"reused calibration records={len(calibration_records)} rows, "
         f"Cost={float(result['metrics']['Cost']):.6g}，"
         f"Carbon={float(result['metrics']['Carbon']):.6g}，"
         f"Peak={float(result['metrics']['Peak']):.6g}。"
@@ -7972,44 +7972,44 @@ def _load_matheuristic_checkpoint(
     with paths.checkpoint.open("rb") as handle:
         payload = pickle.load(handle)
     if not isinstance(payload, dict) or payload.get("schema_version") != 1:
-        raise RuntimeError(f"Q4数学启发式检查点版本不受支持：{paths.checkpoint}")
+        raise RuntimeError(f"Unsupported Q4 matheuristic checkpoint version: {paths.checkpoint}")
     if payload.get("model_version") != MATHEURISTIC_VERSION:
-        raise RuntimeError("已有Q4数学启发式检查点的模型版本不同；为保护结果请新建输出目录")
+        raise RuntimeError("Existing Q4 matheuristic checkpoint uses a different model version; create a new output directory to protect results")
     if payload.get("input_signature") != signature:
-        raise RuntimeError("已有Q4数学启发式检查点与当前输入或参数不一致；拒绝覆盖")
+        raise RuntimeError("Existing Q4 matheuristic checkpoint differs from current inputs or parameters; refusing overwrite")
     required = {
         "next_tau", "assignments", "dispatch", "solver", "lns", "forecast",
         "current_soc", "historical_peak", "past_carbon", "shadow_schedule", "scaling",
         "warm_hints", "metrics_so_far",
     }
     if not required.issubset(payload):
-        raise RuntimeError("Q4数学启发式检查点字段不完整")
+        raise RuntimeError("Q4 matheuristic checkpoint has incomplete fields")
     next_tau = int(payload["next_tau"])
     if next_tau not in set(_matheuristic_window_starts(config) + [OPERATION_END]):
-        raise RuntimeError(f"Q4数学启发式检查点的next_tau={next_tau}不是合法窗口边界")
+        raise RuntimeError(f"Q4 matheuristic checkpoint next_tau={next_tau} is not a valid window boundary")
     assignments = pd.DataFrame(payload["assignments"])
     dispatch = pd.DataFrame(payload["dispatch"])
     shadow = _standardize_shadow_schedule(data, pd.DataFrame(payload["shadow_schedule"]))
     _validate_shadow_schedule(data, shadow, config.feasibility_tolerance)
     if assignments["TaskID"].astype(str).duplicated().any():
-        raise RuntimeError("Q4数学启发式检查点包含重复提交的TaskID")
+        raise RuntimeError("Q4 matheuristic checkpoint contains duplicate committed TaskID values")
     if not assignments.empty:
         if (pd.to_numeric(assignments["StartHour"]) >= next_tau - EPS).any():
-            raise RuntimeError("Q4数学启发式检查点包含尚未进入已提交H区的任务")
+            raise RuntimeError("Q4 matheuristic checkpoint contains tasks outside the committed H region")
         joined = assignments.set_index("TaskID").join(
             shadow.set_index("TaskID")[["TargetRegion", "StartHour"]],
             how="left", rsuffix="_Shadow",
         )
         if joined[["TargetRegion_Shadow", "StartHour_Shadow"]].isna().any().any():
-            raise RuntimeError("Q4数学启发式检查点中的提交任务不在影子计划中")
+            raise RuntimeError("Committed tasks in the Q4 matheuristic checkpoint are absent from the shadow schedule")
         if not (
             joined["TargetRegion"].astype(str).eq(joined["TargetRegion_Shadow"].astype(str)).all()
             and np.allclose(joined["StartHour"].to_numpy(dtype=float), joined["StartHour_Shadow"].to_numpy(dtype=float), rtol=0.0, atol=EPS)
         ):
-            raise RuntimeError("Q4数学启发式检查点的提交任务与影子计划不一致")
+            raise RuntimeError("Committed tasks in the Q4 matheuristic checkpoint differ from the shadow schedule")
     expected_rows = next_tau * len(data.regions)
     if len(dispatch) != expected_rows:
-        raise RuntimeError(f"Q4数学启发式检查点能源轨迹行数异常：{len(dispatch)} != {expected_rows}")
+        raise RuntimeError(f"Unexpected Q4 matheuristic checkpoint energy row count: {len(dispatch)} != {expected_rows}")
     if next_tau > 0:
         ordered = dispatch.sort_values(["Region", "Hour"], kind="stable")
         continuity = []
@@ -8019,13 +8019,13 @@ def _load_matheuristic_checkpoint(
                 - subset["SOCEnd_MWh"].to_numpy(dtype=float)[:-1]
             )
         if continuity and np.abs(np.concatenate(continuity)).max(initial=0.0) > config.feasibility_tolerance * 10:
-            raise RuntimeError("Q4数学启发式检查点SOC不连续")
+            raise RuntimeError("Q4 matheuristic checkpoint SOC is discontinuous")
         end_rows = dispatch.loc[dispatch["Hour"].eq(next_tau - 1)].set_index("Region").loc[list(data.regions)]
         if not np.allclose(
             end_rows["SOCEnd_MWh"].to_numpy(dtype=float),
             np.asarray(payload["current_soc"], dtype=float), rtol=0.0, atol=1e-5,
         ):
-            raise RuntimeError("Q4数学启发式检查点当前SOC与实际H区轨迹不一致")
+            raise RuntimeError("Q4 matheuristic checkpoint current SOC differs from the actual H-region trajectory")
     return payload
 
 
@@ -8049,17 +8049,17 @@ def _write_matheuristic_final_outputs(
     assignments = assignments.sort_values(["StartHour", "TaskID"], kind="stable").reset_index(drop=True)
     dispatch = dispatch.sort_values(["Hour", "Region"], kind="stable").reset_index(drop=True)
     if len(assignments) != len(data.tasks) or assignments["TaskID"].astype(str).nunique() != len(data.tasks):
-        raise RuntimeError("Q4数学启发式最终TaskID调度未完整覆盖50000任务")
+        raise RuntimeError("Final Q4 matheuristic TaskID schedule does not cover all 50000 tasks")
     if len(dispatch) != OPERATION_END * len(data.regions):
-        raise RuntimeError("Q4数学启发式最终逐时能源轨迹不完整")
+        raise RuntimeError("Final Q4 matheuristic hourly energy trajectory is incomplete")
     metrics = _final_metrics(data, assignments, dispatch, _qos_weight_map(config))
     if final_carbon_upper_bound is not None:
         upper_bound = float(final_carbon_upper_bound)
         if not np.isfinite(upper_bound):
-            raise ValueError("低碳参考的最终碳排放上界必须为有限数值")
+            raise ValueError("Final emissions upper bound for the low-carbon reference must be finite")
         if metrics["Carbon"] > upper_bound + max(config.feasibility_tolerance, 1e-8):
             raise RuntimeError(
-                "情景最终碳排放超过设定上界："
+                "Final scenario emissions exceed the specified upper bound: "
                 f"{metrics['Carbon']:.12g} > {upper_bound:.12g}"
             )
     summary_rows = [
@@ -8090,7 +8090,7 @@ def _write_matheuristic_final_outputs(
     checks = audit.pop("checks")
     if not bool(simple["Passed"].all()) or not bool(audit["passed"]):
         failures = simple.loc[~simple["Passed"], "Check"].tolist() + list(audit.get("failed_checks", []))
-        raise RuntimeError(f"Q4数学启发式最终独立核验未通过：{sorted(set(failures))}")
+        raise RuntimeError(f"Final Q4 matheuristic independent validation failed: {sorted(set(failures))}")
     configuration = pd.DataFrame([
         {"Parameter": key, "Value": value} for key, value in asdict(config).items()
     ] + [
@@ -8205,11 +8205,11 @@ def _run_joint_matheuristic_rollout(
             "InitialShadowSchedule": "EXTERNAL_AUDITED_SEED",
             "InitialShadowScheduleHash": seed_hash,
         }
-        _progress("低碳参考已加载已审计基准任务调度作为全局可行种子。")
+        _progress("Low-carbon reference loaded the audited baseline task schedule as a globally feasible seed.")
     if carbon_budget is not None:
         carbon_budget = np.asarray(carbon_budget, dtype=float)
         if carbon_budget.shape != (OPERATION_END + 1,):
-            raise ValueError("累计碳预算必须覆盖0--2406共2407个时点")
+            raise ValueError("Cumulative carbon budget must cover all 2407 time points from 0 through 2406")
     signature = _rollout_signature(
         data, config, q2_schedule, scenario=scenario_payload, carbon_budget=carbon_budget,
         fixed_scaling_override=fixed_scaling_override,
@@ -8218,13 +8218,13 @@ def _run_joint_matheuristic_rollout(
         try:
             marker = json.loads(paths.complete.read_text(encoding="utf-8"))
             if marker.get("complete") is True and marker.get("input_signature") == signature:
-                _progress(f"已复用完整Q4数学启发式结果：{paths.root}")
+                _progress(f"Reusing complete Q4 matheuristic results: {paths.root}")
                 return marker
-            raise RuntimeError("已存在不同签名的Q4数学启发式正式结果；为保护旧结果拒绝覆盖")
+            raise RuntimeError("Formal Q4 matheuristic results with a different signature already exist; refusing overwrite to protect them")
         except json.JSONDecodeError as exc:
-            raise RuntimeError(f"Q4数学启发式完成标记损坏：{paths.complete}") from exc
+            raise RuntimeError(f"Corrupt Q4 matheuristic completion marker: {paths.complete}") from exc
     if force and paths.checkpoint.is_file():
-        raise RuntimeError("--force不会覆盖已有数学启发式检查点；请先复制到新的输出目录后再运行")
+        raise RuntimeError("--force does not overwrite existing matheuristic checkpoints; copy to a new output directory before running")
     paths.tables.mkdir(parents=True, exist_ok=True)
     paths.validation.mkdir(parents=True, exist_ok=True)
     if fixed_scaling_override is None:
@@ -8235,7 +8235,7 @@ def _run_joint_matheuristic_rollout(
             for metric in METRICS
         }
         if any(scale <= EPS or not np.isfinite(anchor) or not np.isfinite(scale) for anchor, scale in scaling.values()):
-            raise ValueError("情景共享的固定定标参数不完整或无效")
+            raise ValueError("Shared fixed scenario scaling parameters are incomplete or invalid")
         calibration_records = pd.DataFrame([
             {
                 "Metric": metric,
@@ -8285,7 +8285,7 @@ def _run_joint_matheuristic_rollout(
         historical_peak = np.asarray(checkpoint["historical_peak"], dtype=float).copy()
         past_carbon = float(checkpoint["past_carbon"])
         next_tau = int(checkpoint["next_tau"])
-        _progress(f"已恢复Q4数学启发式检查点：next_tau={next_tau}，已提交任务={len(assignments)}。")
+        _progress(f"Q4 matheuristic checkpoint restored: next_tau={next_tau}, committed tasks={len(assignments)}.")
 
     window_starts = _matheuristic_window_starts(config)
     for tau in (value for value in window_starts if value >= next_tau):
@@ -8296,7 +8296,7 @@ def _run_joint_matheuristic_rollout(
         if carbon_budget is not None:
             carbon_remaining = float(carbon_budget[decision_end] - past_carbon)
             if carbon_remaining < -config.feasibility_tolerance:
-                raise RuntimeError(f"窗口{tau}开始前累计碳预算已不可行")
+                raise RuntimeError(f"Window {tau}: cumulative carbon budget is infeasible before the window starts")
             carbon_remaining = max(carbon_remaining, 0.0)
         incumbent = _build_joint_incumbent(
             data, config, shadow_schedule=shadow_schedule, tau=tau,
@@ -8436,14 +8436,14 @@ def _run_joint_matheuristic_rollout(
             incumbent.energy.dispatch["Hour"] < decision_end
         ].copy()
         if len(actual) != (decision_end - tau) * len(data.regions):
-            raise RuntimeError(f"窗口{tau}没有生成完整的H区能源轨迹")
+            raise RuntimeError(f"Window {tau} did not produce a complete H-region energy trajectory")
         committed = incumbent.shadow_schedule.loc[
             pd.to_numeric(incumbent.shadow_schedule["StartHour"]).between(tau, decision_end - 1)
         ].copy()
         committed = committed[_matheuristic_assignment_columns()]
         overlap = set(committed["TaskID"].astype(str)) & set(assignments["TaskID"].astype(str))
         if overlap:
-            raise RuntimeError(f"窗口{tau}重复提交任务：{sorted(overlap)[:5]}")
+            raise RuntimeError(f"Window {tau} committed duplicate tasks: {sorted(overlap)[:5]}")
         assignments = pd.concat([assignments, committed], ignore_index=True)
         dispatch = pd.concat([dispatch, actual], ignore_index=True)
         predicted = incumbent.energy.dispatch.loc[
@@ -8458,7 +8458,7 @@ def _run_joint_matheuristic_rollout(
             historical_peak[r] = max(historical_peak[r], float(regional_peak.get(region, 0.0)), 0.0)
         past_carbon += float(actual["CarbonEmission_tCO2"].sum())
         if carbon_budget is not None and past_carbon > float(carbon_budget[decision_end]) + config.feasibility_tolerance:
-            raise RuntimeError(f"窗口{tau}提交后的累计碳排放超过约束")
+            raise RuntimeError(f"Window {tau}: cumulative emissions exceed the constraint after commitment")
         active_task_count = int(pd.to_numeric(incumbent.shadow_schedule["StartHour"]).between(tau, plan_end - 1).sum())
         elapsed_total = time.perf_counter() - started
         hard_limited = elapsed_total >= config.window_hard_time_limit_seconds
@@ -8501,8 +8501,8 @@ def _run_joint_matheuristic_rollout(
             historical_peak=historical_peak, past_carbon=past_carbon, scenario=scenario_payload,
         )
         _progress(
-            f"Q4数学启发式窗口{tau}已保存：提交任务={len(committed)}，"
-            f"LNS={lns_status}，耗时={elapsed_total:.2f}s，next_tau={next_tau}。"
+            f"Q4 matheuristic window {tau} saved: committed tasks={len(committed)}, "
+            f"LNS={lns_status}, elapsed={elapsed_total:.2f}s, next_tau={next_tau}."
         )
 
     return _write_matheuristic_final_outputs(
@@ -8521,10 +8521,10 @@ def _read_matheuristic_result(directory: Path) -> tuple[Path, dict[str, float], 
     summary_path = tables / "q4_objective_summary.csv"
     dispatch_path = tables / "q4_region_hour_dispatch.csv"
     if not all(path.is_file() for path in (marker_path, summary_path, dispatch_path)):
-        raise FileNotFoundError(f"未找到完整Q4数学启发式结果：{root}")
+        raise FileNotFoundError(f"Complete Q4 matheuristic results not found: {root}")
     marker = json.loads(marker_path.read_text(encoding="utf-8"))
     if marker.get("complete") is not True or marker.get("audit_passed") is not True:
-        raise RuntimeError(f"Q4数学启发式结果未通过最终审计：{root}")
+        raise RuntimeError(f"Q4 matheuristic results failed final audit: {root}")
     summary = pd.read_csv(summary_path, encoding="utf-8-sig")
     values = {str(row.Metric): float(row.Value) for row in summary.itertuples(index=False)}
     return tables, values, pd.read_csv(dispatch_path, encoding="utf-8-sig")
@@ -8577,8 +8577,8 @@ def _scenario_baseline_reference() -> tuple[Path, dict[str, float], pd.DataFrame
         return _read_matheuristic_result(MATHEURISTIC_ROOT)
     except (FileNotFoundError, RuntimeError, OSError, ValueError, json.JSONDecodeError) as exc:
         raise RuntimeError(
-            "情景运行只接受已完成且通过文档级审计的Q4 V4基准；"
-            "请先运行新版基准，旧V2/V3结果不会被复用。"
+            "Scenario runs require a complete Q4 V4 baseline passing the documented audit; "
+            "run the updated baseline first. Old V2/V3 results are not reused."
         ) from exc
 
 
@@ -8592,13 +8592,13 @@ def _load_audited_task_seed(
     """Load a complete, independently auditable task schedule as a safe seed."""
 
     if not assignment_path.is_file():
-        raise FileNotFoundError(f"{label}缺少任务调度种子：{assignment_path}")
+        raise FileNotFoundError(f"{label} is missing the task schedule seed: {assignment_path}")
     try:
         raw_seed = pd.read_csv(assignment_path, encoding="utf-8-sig")
         seed = _standardize_shadow_schedule(data, raw_seed)
         _validate_shadow_schedule(data, seed, config.feasibility_tolerance)
     except (OSError, ValueError, pd.errors.ParserError) as exc:
-        raise RuntimeError(f"{label}无法使用任务调度种子：{assignment_path}") from exc
+        raise RuntimeError(f"{label} cannot use the task schedule seed: {assignment_path}") from exc
     seed = seed.sort_values(["StartHour", "TaskID"], kind="stable").reset_index(drop=True)
     seed_hash = hashlib.sha256(_matheuristic_frame_hash(
         seed[["TaskID", "TargetRegion", "StartHour"]]
@@ -8626,15 +8626,15 @@ def _low_carbon_reference_controls(
         data,
         config,
         assignment_path=assignment_path,
-        label="低碳参考",
+        label="Low-carbon reference",
     )
     baseline_cumulative = _cumulative_carbon(baseline_dispatch)
     if baseline_cumulative.shape != (OPERATION_END + 1,):
-        raise ValueError("基准累计碳轨迹长度不完整，不能构造低碳参考保护")
+        raise ValueError("Baseline cumulative carbon trajectory is incomplete; cannot construct the low-carbon safeguard")
     if not np.all(np.isfinite(baseline_cumulative)):
-        raise ValueError("基准累计碳轨迹含有非有限值，不能构造低碳参考保护")
+        raise ValueError("Baseline cumulative carbon trajectory contains nonfinite values; cannot construct the low-carbon safeguard")
     if np.any(np.diff(baseline_cumulative) < -max(config.feasibility_tolerance, 1e-8)):
-        raise ValueError("基准累计碳轨迹非单调，不能作为低碳参考上界")
+        raise ValueError("Baseline cumulative carbon trajectory is nonmonotonic; cannot serve as the low-carbon upper bound")
     return seed, baseline_cumulative.copy(), {
         "LowCarbonReferenceStrategy": "audited_baseline_seed_plus_cumulative_carbon_guard_v1",
         "LowCarbonSeedSource": str(assignment_path),
@@ -8659,7 +8659,7 @@ def run_full_scenario(
     baseline_tables, baseline_metrics, baseline_dispatch = _scenario_baseline_reference()
     scaling_path = baseline_tables / "q4_scaling.csv"
     if not scaling_path.is_file():
-        raise FileNotFoundError(f"情景运行缺少基准固定定标表：{scaling_path}")
+        raise FileNotFoundError(f"Scenario run lacks the baseline fixed scaling table: {scaling_path}")
     scaling_frame = pd.read_csv(scaling_path, encoding="utf-8-sig").set_index("Metric")
     shared_scaling = {
         metric: (float(scaling_frame.at[metric, "Anchor"]), float(scaling_frame.at[metric, "Scale"]))
@@ -8693,9 +8693,9 @@ def run_full_scenario(
     if spec.kind == "carbon_constraint":
         lam = float(spec.carbon_lambda if spec.carbon_lambda is not None else 1.0)
         if not 0.0 <= lam <= 1.0:
-            raise ValueError("carbon_lambda必须位于[0,1]")
+            raise ValueError("carbon_lambda must lie within [0,1]")
         if low_carbon_reference_dir is None and lam > EPS:
-            raise RuntimeError("碳约束情景需要已完成的低碳参考结果目录")
+            raise RuntimeError("Carbon-constrained scenarios require a completed low-carbon reference directory")
         baseline_cumulative = _cumulative_carbon(baseline_dispatch)
         if low_carbon_reference_dir is None:
             low_cumulative = baseline_cumulative.copy()
@@ -8705,23 +8705,23 @@ def run_full_scenario(
             low_marker = json.loads(_matheuristic_paths(low_tables.parent).complete.read_text(encoding="utf-8"))
             low_mode = str(dict(low_marker.get("scenario", {})).get("OptimizationMode", ""))
             if low_mode != OBJECTIVE_MODE_CARBON_PRIORITY:
-                raise RuntimeError("低碳参考结果不是碳优先求解结果，不能用于构造碳约束")
+                raise RuntimeError("Low-carbon reference was not solved with carbon priority; cannot construct the carbon constraint")
             low_cumulative = _cumulative_carbon(low_dispatch)
             low_carbon = float(low_values.get("Carbon", low_cumulative[-1]))
             if low_carbon > float(baseline_metrics["Carbon"]) + 1e-8:
-                raise RuntimeError("低碳参考结果的碳排放高于基准，不能用于构造碳约束")
+                raise RuntimeError("Low-carbon reference emissions exceed baseline emissions; cannot construct the carbon constraint")
             if np.any(low_cumulative > baseline_cumulative + max(config.feasibility_tolerance, 1e-8)):
-                raise RuntimeError("低碳参考存在时段累计碳排放高于基准，不能用于构造滚动碳约束")
+                raise RuntimeError("Low-carbon reference cumulative emissions exceed the baseline at some times; cannot construct rolling carbon constraints")
             low_seed_path = low_tables / "q4_task_assignments.csv"
             initial_shadow_schedule, low_seed_hash = _load_audited_task_seed(
                 original,
                 config,
                 assignment_path=low_seed_path,
-                label="碳约束情景",
+                label="Carbon-constrained scenario",
             )
         carbon_budget = baseline_cumulative - lam * (baseline_cumulative - low_cumulative)
         if np.any(carbon_budget + max(config.feasibility_tolerance, 1e-8) < low_cumulative):
-            raise RuntimeError("构造的碳约束轨迹低于低碳可行种子，拒绝启动不可行滚动求解")
+            raise RuntimeError("Constructed carbon constraint trajectory lies below the feasible low-carbon seed; refusing infeasible rolling optimization")
         final_carbon_upper_bound = float(carbon_budget[-1])
         if low_carbon_reference_dir is not None:
             carbon_constraint_controls = {
@@ -8742,7 +8742,7 @@ def run_full_scenario(
     )
     factor_check = validate_single_factor_scenario(original, scenario_data, metadata)
     if not factor_check["passed"]:
-        raise RuntimeError(f"情景输入单因素一致性检查失败：{factor_check}")
+        raise RuntimeError(f"Scenario input single-factor consistency check failed: {factor_check}")
     scenario_root = SCENARIO_DIR / _scenario_slug(spec.name) / MATHEURISTIC_NAMESPACE
     scenario_payload = {
         **metadata,
@@ -8782,18 +8782,18 @@ def build_scenario_comparison(
 ) -> pd.DataFrame:
     """Compare only audited matheuristic scenarios on the same six-metric scale."""
 
-    _progress("情景比较开始：只读取已完成且通过审计的V4结果，不调用MILP。")
+    _progress("Scenario comparison started: reading completed, audited V4 results only; no MILP calls.")
     baseline_dir, baseline_values, _ = _scenario_baseline_reference()
-    _progress(f"情景比较基准已读取：{baseline_dir}")
+    _progress(f"Scenario comparison baseline loaded: {baseline_dir}")
     if scenario_names is None:
         candidate_names = [
             directory.name for directory in SCENARIO_DIR.iterdir()
             if directory.is_dir() and (directory / MATHEURISTIC_NAMESPACE / "tables" / f".{MATHEURISTIC_FILE_PREFIX}_complete.json").is_file()
         ] if SCENARIO_DIR.is_dir() else []
-        _progress(f"情景比较候选目录：{len(candidate_names)}个，开始检查完成标记。")
+        _progress(f"Scenario comparison candidates: {len(candidate_names)} directories; checking completion markers.")
         names = []
         for index, name in enumerate(candidate_names, start=1):
-            _progress(f"情景比较检查：{index}/{len(candidate_names)}，场景={name}。")
+            _progress(f"Scenario comparison check: {index}/{len(candidate_names)}, scenario={name}.")
             tables, values, _ = _read_matheuristic_result(
                 SCENARIO_DIR / name / MATHEURISTIC_NAMESPACE
             )
@@ -8805,21 +8805,21 @@ def build_scenario_comparison(
                 scenario.get("ScenarioKind") == "low_carbon_reference"
                 and float(values["Carbon"]) > float(baseline_values["Carbon"]) + 1e-8
             ):
-                _progress(f"情景比较跳过无效低碳参考：{name}（碳排放高于基准）。")
+                _progress(f"Scenario comparison skipping invalid low-carbon reference: {name} (emissions exceed baseline).")
                 continue
             names.append(name)
     else:
         names = [_scenario_slug(name) for name in scenario_names]
     if not names:
-        raise FileNotFoundError("没有完成且通过审计的Q4数学启发式情景")
-    _progress(f"情景比较纳入：{len(names)}个场景，开始计算六项目标差值。")
+        raise FileNotFoundError("No completed, audited Q4 matheuristic scenarios")
+    _progress(f"Scenario comparison includes {len(names)} scenarios; computing six-objective differences.")
     key_map = {
         "Cost": "Cost", "Carbon": "Carbon", "Latency": "Latency_ms",
         "Delay": "QoSLoss", "RenewableUnusedRate": "RenewableUnusedRate", "Peak": "Peak",
     }
     rows: list[dict[str, object]] = []
     for index, name in enumerate(sorted(names), start=1):
-        _progress(f"情景比较计算：{index}/{len(names)}，场景={name}。")
+        _progress(f"Scenario comparison computation: {index}/{len(names)}, scenario={name}.")
         tables, values, _ = _read_matheuristic_result(SCENARIO_DIR / name / MATHEURISTIC_NAMESPACE)
         for internal, output_name in key_map.items():
             baseline_value = float(baseline_values[output_name] if output_name in baseline_values else baseline_values[internal])
@@ -8840,7 +8840,7 @@ def build_scenario_comparison(
     SCENARIO_DIR.mkdir(parents=True, exist_ok=True)
     output_path = SCENARIO_DIR / f"{MATHEURISTIC_FILE_PREFIX}_scenario_comparison.csv"
     _atomic_write_csv(comparison, output_path)
-    _progress(f"情景比较表已写出：{output_path}，行数={len(comparison)}。")
+    _progress(f"Scenario comparison table written: {output_path}, rows={len(comparison)}.")
     return comparison
 
 
@@ -8872,7 +8872,7 @@ def run_automated_tests() -> pd.DataFrame:
     record(
         "RealtimeArrivalStartDomain",
         all(realtime_has_only_arrival_start(task) for task in realtime_tasks.itertuples(index=False)),
-        f"实时任务数={len(realtime_tasks)}",
+        f"realtime task count={len(realtime_tasks)}",
     )
     tail_realtime = realtime_tasks.loc[
         realtime_tasks["ArrivalHour"] >= MAIN_END - config.decision_hours
@@ -8880,7 +8880,7 @@ def run_automated_tests() -> pd.DataFrame:
     record(
         "RealtimeTailWindowCovered",
         all(realtime_has_only_arrival_start(task) for task in tail_realtime.itertuples(index=False)),
-        f"末窗口实时任务数={len(tail_realtime)}",
+        f"tail-window realtime task count={len(tail_realtime)}",
     )
     candidate_bounds = data.candidates.merge(
         data.tasks[["TaskID", "MaxLatency_ms"]].rename(
@@ -9108,23 +9108,23 @@ def _legacy_run_wrapper(
 
     if resume_from is not None or state_file is not None:
         raise RuntimeError(
-            "Q4数学启发式会自动恢复其专用检查点；不支持旧--resume-from或--state-file参数"
+            "Q4 matheuristic automatically restores its dedicated checkpoint; legacy --resume-from and --state-file are unsupported"
         )
     _run_joint_matheuristic_rollout(
         load_data(), config=config or ModelConfig(), force=force
     )
     return
 
-    # 下方保留原始滚动实现，供经过显式代码审查后的新情景执行器复用；
-    # 基准入口在上方已经硬性返回或报错，不会到达这里。
+    # Retain the original rolling implementation for scenario executors reviewed explicitly before reuse.
+    # The baseline entry above always returns or raises, so it cannot reach this code.
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
     _progress(
-        f"Q4模型开始运行：force={force}，resume_from={resume_from}，"
-        f"state_file={state_file or '默认断点'}。"
+        f"Q4 model started: force={force}, resume_from={resume_from}, "
+        f"state_file={state_file or 'default checkpoint'}."
     )
     signature = _cache_signature(config)
     if resume_from is None and state_file is None and not force and _can_reuse(signature):
-        _progress("检测到完整且匹配的缓存结果，跳过求解。")
+        _progress("Complete matching cached results found; skipping optimization.")
         return
     if resume_from is None and state_file is None and not force:
         auto_resume = _select_auto_resume_checkpoint(signature)
@@ -9132,8 +9132,8 @@ def _legacy_run_wrapper(
             state_file, resume_from = auto_resume
             _activate_progress_namespace(state_file)
             _progress(
-                f"无参数启动自动选择有效断点：{state_file.name}，"
-                f"next_tau={resume_from}；后续仍写入该分支，不覆盖原始断点。"
+                f"Argument-free startup selected a valid checkpoint: {state_file.name}, "
+                f"next_tau={resume_from}; subsequent writes remain on this branch without overwriting the original checkpoint."
             )
     elif state_file is not None:
         state_file = state_file.resolve()
@@ -9143,14 +9143,14 @@ def _legacy_run_wrapper(
             try:
                 resume_from = int(state["next_tau"]) if state is not None else None
             except (KeyError, TypeError, ValueError) as exc:
-                raise RuntimeError(f"无法从state-file读取next_tau：{state_file}") from exc
+                raise RuntimeError(f"Cannot read next_tau from state-file: {state_file}") from exc
             if resume_from is None:
-                raise RuntimeError(f"无法从state-file读取next_tau：{state_file}")
+                raise RuntimeError(f"Cannot read next_tau from state-file: {state_file}")
 
     data = load_data()
     _progress(
-        f"输入读取完成：任务={len(data.tasks)}，区域={len(data.regions)}，"
-        f"逐时区域记录={len(data.region_hour)}。"
+        f"Inputs loaded: tasks={len(data.tasks)}, regions={len(data.regions)}, "
+        f"hourly regional records={len(data.region_hour)}."
     )
     storage = data.storage.set_index("Region").loc[list(data.regions)]
     if resume_from is not None:
@@ -9172,8 +9172,8 @@ def _legacy_run_wrapper(
         warm_hints = dict(state.get("warm_hints", {}))
         start_tau = int(resume_from)
         _progress(
-            f"恢复校验通过：前置窗口={len(solver_frame)}，已分配任务={len(assignments)}，"
-            f"逐时调度={len(dispatch)}行，下一窗口={start_tau}。"
+            f"Resume validation passed: prior windows={len(solver_frame)}, assigned tasks={len(assignments)}, "
+            f"hourly dispatch={len(dispatch)} rows, next window={start_tau}."
         )
     else:
         existing_progress = [
@@ -9184,7 +9184,7 @@ def _legacy_run_wrapper(
         ]
         if existing_progress:
             raise RuntimeError(
-                "检测到已有Q4进度，拒绝从0覆盖；请用--resume-from恢复："
+                "Existing Q4 progress detected; refusing overwrite from 0. Resume with --resume-from: "
                 f"{[str(path) for path in existing_progress]}"
             )
         scaling, calibration_records = _calibrate(data, config)
@@ -9206,7 +9206,7 @@ def _legacy_run_wrapper(
             warm_hints=warm_hints,
             mode={"H": 24, "K": 48, "BlockHours": 4, "RecoveryMode": "Initial"},
         )
-        _progress("固定定标已完成并写入初始断点；正式滚动中不会重复定标。")
+        _progress("Fixed scaling completed and written to the initial checkpoint; formal rolling runs do not recalibrate.")
 
     historical_peak = np.array(
         historical_peak,
@@ -9217,7 +9217,7 @@ def _legacy_run_wrapper(
     if not historical_peak.flags.writeable:
         historical_peak = historical_peak.copy()
     if set(scaling) != set(METRICS):
-        raise ValueError("断点定标参数没有完整包含六个目标")
+        raise ValueError("Checkpoint scaling parameters do not contain all six objectives")
     all_windows = list(range(0, MAIN_END, config.decision_hours)) + [MAIN_END]
     windows_to_run = [tau for tau in all_windows if tau >= start_tau]
     for tau in windows_to_run:
@@ -9231,8 +9231,8 @@ def _legacy_run_wrapper(
             if tau < MAIN_END else 0
         )
         _progress(
-            f"滚动窗口{window_index}/{len(all_windows)}：tau={tau}，"
-            f"H={decision_hours}h，正常K={normal_lookahead}h。"
+            f"Rolling window {window_index}/{len(all_windows)}: tau={tau}, "
+            f"H={decision_hours}h, normal K={normal_lookahead}h."
         )
         assignments_before = assignments.copy()
         incoming_warm_hint_count = len(warm_hints)
@@ -9288,16 +9288,16 @@ def _legacy_run_wrapper(
                 )
                 if k_capacity_violation > config.feasibility_tolerance:
                     raise RuntimeError(
-                        f"K区4小时块容量审计超限{k_capacity_violation:.6g}；"
-                        "自动2小时细化已禁用"
+                        f"K-region 4-hour block capacity violation {k_capacity_violation:.6g}; "
+                        "automatic 2-hour refinement is disabled"
                     )
             except RuntimeError as exc:
                 recovery_errors.append(f"NormalHK: {exc}")
                 problem = None
                 solution = None
-                _progress(f"窗口{tau}正常H+K失败，转入H-only恢复：{exc}")
+                _progress(f"Window {tau}: normal H+K failed; entering H-only recovery: {exc}")
         else:
-            _progress("窗口1608直接使用H=24、K=0，不创建K区任务预测变量。")
+            _progress("Window 1608 uses H=24, K=0 directly; no K-region task prediction variables are created.")
 
         if solution is None:
             for feasibility_only in (False, True):
@@ -9330,7 +9330,7 @@ def _legacy_run_wrapper(
                 except RuntimeError as exc:
                     stage = "HOnlyFeasibility" if feasibility_only else "HOnlyBalanced"
                     recovery_errors.append(f"{stage}: {exc}")
-                    _progress(f"窗口{tau}的{stage}未通过：{exc}")
+                    _progress(f"Window {tau}, {stage} failed: {exc}")
         if problem is None or solution is None:
             mode = {
                 "H": decision_hours, "K": 0, "BlockHours": config.block_hours,
@@ -9341,14 +9341,14 @@ def _legacy_run_wrapper(
                 tau=tau, signature=signature, reason=reason, mode=mode
             )
             raise RuntimeError(
-                f"窗口{tau}在正常模型、H-only联合目标和同硬约束可行性模型中"
-                f"均未获得合法整数方案；最后成功断点保持不变。{reason}"
+                f"Window {tau}: normal model, H-only joint objective, and identical-hard-constraint feasibility model "
+                f"all failed to produce a valid integer solution; last successful checkpoint remains unchanged. {reason}"
             )
 
         new_assignments = _selected_assignments(data, problem, solution.vector)
         duplicates = set(new_assignments["TaskID"]) & set(assignments_before["TaskID"])
         if duplicates:
-            raise RuntimeError(f"任务被重复执行，示例：{sorted(duplicates)[:5]}")
+            raise RuntimeError(f"Tasks executed more than once; examples: {sorted(duplicates)[:5]}")
         assignments = pd.concat(
             [assignments_before, new_assignments], ignore_index=True
         )
@@ -9427,25 +9427,25 @@ def _legacy_run_wrapper(
             warm_hints=warm_hints, mode=mode,
         )
         _progress(
-            f"窗口{tau}完成并保存断点：模式={model_mode}，变量={problem.lower.size}，"
-            f"约束={problem.matrix.shape[0]}，耗时={solution.elapsed_seconds:.2f}s，"
-            f"新增任务={len(new_assignments)}，累计任务={len(assignments)}，next_tau={next_tau}。"
+            f"Window {tau} completed and checkpoint saved: mode={model_mode}, variables={problem.lower.size}, "
+            f"constraints={problem.matrix.shape[0]}, elapsed={solution.elapsed_seconds:.2f}s, "
+            f"new tasks={len(new_assignments)}, total tasks={len(assignments)}, next_tau={next_tau}."
         )
 
-    _progress("全部窗口完成，开始从0--2405小时完整实际轨迹独立复算。")
+    _progress("All windows completed; independently recomputing from complete actual trajectories for hours 0--2405.")
     assignments = assignments.sort_values(
         ["StartHour", "TaskID"], kind="stable"
     ).reset_index(drop=True)
     if len(assignments) != len(data.tasks) or assignments["TaskID"].nunique() != len(data.tasks):
         missing = sorted(set(data.tasks["TaskID"]) - set(assignments["TaskID"]))[:10]
-        raise RuntimeError(f"滚动结束后仍有任务未执行，示例：{missing}")
+        raise RuntimeError(f"Unexecuted tasks remain after rolling optimization; examples: {missing}")
     dispatch = dispatch.sort_values(
         ["Hour", "Region"], kind="stable"
     ).reset_index(drop=True)
     expected_dispatch_rows = OPERATION_END * len(data.regions)
     if len(dispatch) != expected_dispatch_rows:
         raise RuntimeError(
-            f"实际能源轨迹应有{expected_dispatch_rows}行，当前为{len(dispatch)}行"
+            f"Actual energy trajectory requires {expected_dispatch_rows} rows; found {len(dispatch)}"
         )
     final_metrics = _final_metrics(data, assignments, dispatch)
     summary = pd.DataFrame([
@@ -9479,12 +9479,12 @@ def _legacy_run_wrapper(
         failed = hard_validation.loc[
             ~hard_validation["Passed"], ["Check", "MaxViolation", "Tolerance"]
         ]
-        raise RuntimeError(f"Q4最终硬约束验证未通过：\n{failed.to_string(index=False)}")
+        raise RuntimeError(f"Final Q4 hard-constraint validation failed:\n{failed.to_string(index=False)}")
     _atomic_write_json(
         TABLES_DIR / ".q4_cache.json",
         {"signature": signature, "complete": True},
     )
-    _progress(f"Q4最终硬约束验证通过：{len(hard_validation)}项。")
+    _progress(f"Final Q4 hard-constraint validation passed: {len(hard_validation)} checks.")
 
 
 def run(
@@ -9498,7 +9498,7 @@ def run(
 
     if resume_from is not None or state_file is not None:
         raise RuntimeError(
-            "Q4数学启发式会自动恢复其专用检查点；不支持旧--resume-from或--state-file参数"
+            "Q4 matheuristic automatically restores its dedicated checkpoint; legacy --resume-from and --state-file are unsupported"
         )
     _run_joint_matheuristic_rollout(
         load_data(), config=config or ModelConfig(), force=force
@@ -9506,42 +9506,42 @@ def run(
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Q4算—储—电联合滚动数学启发式接口")
+    parser = argparse.ArgumentParser(description="Q4 rolling compute-storage-grid matheuristic interface")
     parser.add_argument(
         "--resume-from", type=int, default=None,
-        help="旧MILP检查点参数；数学启发式使用专用检查点自动恢复，不接受此参数",
+        help="Legacy MILP checkpoint option; matheuristic restores dedicated checkpoints automatically and rejects this option",
     )
     parser.add_argument(
         "--state-file", type=Path, default=None,
-        help="旧MILP检查点参数；数学启发式不接受此参数",
+        help="Legacy MILP checkpoint option; unsupported by the matheuristic",
     )
     parser.add_argument(
         "--force", action="store_true",
-        help="不覆盖已有数学启发式检查点；仅在不存在检查点时允许正常启动",
+        help="Preserve existing matheuristic checkpoints; start normally only when no checkpoint exists",
     )
     parser.add_argument(
         "--baseline-audit", action="store_true",
-        help="只读复算并审计已有基准，不调用MILP",
+        help="Recompute and audit the existing baseline read-only, without calling MILP",
     )
     parser.add_argument(
         "--self-test", action="store_true",
-        help="运行数学启发式结构与Q2影子计划自检，不重算正式结果",
+        help="Check matheuristic structure and Q2 shadow schedules without recomputing formal results",
     )
     parser.add_argument(
         "--repair-sequential-reference", action="store_true",
-        help="只重算Q2任务种子到V4能源顺序基准，不运行Q4联合滚动基准",
+        help="Recompute the Q2 task seed -> V4 sequential energy baseline only; skip the joint rolling baseline",
     )
     parser.add_argument(
         "--repair-joint-energy-reference", action="store_true",
-        help="固定既有联合任务方案并按V4能源口径复算，不运行新的联合滚动搜索",
+        help="Hold the existing joint task schedule fixed and recompute V4 energy without a new joint rolling search",
     )
     parser.add_argument(
         "--validation-only-windows", action="store_true",
-        help="仅求解自动识别的4个验证窗口，并执行3类情景单窗口冒烟测试",
+        help="Solve four automatically identified validation windows and run single-window smoke tests for three scenario types",
     )
     parser.add_argument(
         "--validation-time-limit", type=float, default=30.0,
-        help="每个VALIDATION_ONLY窗口的求解时间上限（秒）",
+        help="Solver time limit per VALIDATION_ONLY window (seconds)",
     )
     parser.add_argument(
         "--run-scenario",
@@ -9550,73 +9550,73 @@ def main(argv: Sequence[str] | None = None) -> int:
             "flat_price", "low_variability_renewable",
         ),
         default=None,
-        help="以相同数学启发式、固定定标和H/K口径运行独立情景",
+        help="Run an independent scenario with the same matheuristic, fixed scaling, and H/K definitions",
     )
     parser.add_argument(
         "--scenario-name", type=str, default=None,
-        help="独立情景输出目录名；同名不同签名时拒绝覆盖",
+        help="Independent scenario output directory name; refuse overwrite when signatures differ",
     )
     parser.add_argument(
         "--carbon-lambda", type=float, default=1.0,
-        help="碳约束强度lambda，Ecap=E0-lambda*(E0-ELC)，范围[0,1]",
+        help="Carbon constraint strength lambda: Ecap=E0-lambda*(E0-ELC), range [0,1]",
     )
     parser.add_argument(
         "--renewable-gamma", type=float, default=1.0,
-        help="新能源日内平滑系数gamma，范围[0,1]；0保留原曲线，1为非零时段日均出力",
+        help="Intraday renewable smoothing gamma in [0,1]; 0 retains the profile, 1 uses the daily mean over nonzero hours",
     )
     parser.add_argument(
         "--low-carbon-reference-dir", type=Path, default=None,
-        help="完整低碳参考情景目录；修正基准碳排非零时必需",
+        help="Complete low-carbon reference scenario directory; required when corrected baseline emissions are nonzero",
     )
     parser.add_argument(
         "--normal-time-limit", type=float, default=120.0,
-        help="旧MILP兼容参数；数学启发式不使用完整窗口MILP",
+        help="Legacy MILP compatibility option; matheuristic does not use a full-window MILP",
     )
     parser.add_argument(
         "--difficult-time-limit", type=float, default=240.0,
-        help="旧MILP兼容参数；数学启发式不使用延长求解",
+        help="Legacy MILP compatibility option; matheuristic does not extend solves",
     )
     parser.add_argument(
         "--mip-gap", type=float, default=0.02,
-        help="联合LNS可接受相对MIP Gap",
+        help="Acceptable relative MIP gap for joint LNS",
     )
     parser.add_argument(
         "--window-lp-time-limit", type=float, default=20.0,
-        help="旧窗口定标兼容参数；正式路径使用一次固定定标",
+        help="Legacy window calibration option; formal execution uses one fixed calibration",
     )
     parser.add_argument(
         "--qos-weight-profile",
         choices=("3-2-1", "4-2-1", "2-1.5-1"),
         default="3-2-1",
-        help="DelaySensitivity敏感性权重；不同权重请使用不同scenario-name",
+        help="DelaySensitivity weights; use different scenario-name values for different weights",
     )
     parser.add_argument(
         "--energy-time-limit", type=float, default=15.0,
-        help="固定任务能源响应单次MILP时间上限（秒）",
+        help="MILP time limit per fixed-task energy response (seconds)",
     )
     parser.add_argument(
         "--repair-time-limit", type=float, default=12.0,
-        help="局部可行性修复单次MILP时间上限（秒）",
+        help="MILP time limit per local feasibility repair (seconds)",
     )
     parser.add_argument(
         "--lns-time-limit", type=float, default=15.0,
-        help="联合LNS单次MILP时间上限（秒）",
+        help="MILP time limit per joint LNS solve (seconds)",
     )
     parser.add_argument(
         "--window-hard-time-limit", type=float, default=75.0,
-        help="单个H=24滚动窗口的硬时间上限（秒）",
+        help="Hard time limit per H=24 rolling window (seconds)",
     )
     parser.add_argument(
         "--lns-max-task-groups", type=int, default=60,
-        help="联合LNS最多开放的精确同质任务组数",
+        help="Maximum exact homogeneous task groups opened in joint LNS",
     )
     parser.add_argument(
         "--lns-max-integer-options", type=int, default=12000,
-        help="联合LNS最多创建的任务整数候选变量数",
+        help="Maximum integer candidate task variables created in joint LNS",
     )
     parser.add_argument(
         "--compare-scenarios", action="store_true",
-        help="只读汇总所有已完成且审计通过的新情景，不调用MILP",
+        help="Summarize all completed, audited new scenarios read-only without calling MILP",
     )
     args = parser.parse_args(argv)
     profiles = {
@@ -9642,7 +9642,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         try:
             report = audit_document_compliant_result()
         except (FileNotFoundError, RuntimeError, OSError, ValueError, json.JSONDecodeError) as exc:
-            _progress(f"V4基准审计未执行：{exc}")
+            _progress(f"V4 baseline audit not executed: {exc}")
             return 2
         _progress(
             f"baseline_status={report.get('model_version')}，"
@@ -9651,20 +9651,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0 if report.get("passed") else 2
     if args.self_test:
         tests = run_automated_tests()
-        _progress(f"自动化测试：{int(tests['Passed'].sum())}/{len(tests)}通过。")
+        _progress(f"Automated tests: {int(tests['Passed'].sum())}/{len(tests)} passed.")
         return 0 if bool(tests["Passed"].all()) else 3
     if args.repair_sequential_reference:
         try:
             run_sequential_reference_repair(config=matheuristic_config)
         except (FileNotFoundError, RuntimeError, OSError, ValueError, json.JSONDecodeError) as exc:
-            _progress(f"顺序基准定点修复失败：{exc}")
+            _progress(f"Sequential baseline targeted repair failed: {exc}")
             return 2
         return 0
     if args.repair_joint_energy_reference:
         try:
             run_joint_energy_reference_repair(config=matheuristic_config)
         except (FileNotFoundError, RuntimeError, OSError, ValueError, json.JSONDecodeError) as exc:
-            _progress(f"联合任务方案V4能源定点复算失败：{exc}")
+            _progress(f"Joint schedule targeted V4 energy recomputation failed: {exc}")
             return 2
         return 0
     if args.validation_only_windows:
@@ -9673,14 +9673,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             include_scenario_smoke=True,
         )
         _progress(
-            f"VALIDATION_ONLY窗口完成：{len(results)}个；"
-            "结果仅写入outputs/validation。"
+            f"VALIDATION_ONLY completed {len(results)} windows; "
+            "results written only to outputs/validation."
         )
         return 0
     if args.compare_scenarios:
         comparison = build_scenario_comparison()
         _progress(
-            f"情景比较表已更新：{len(comparison)}行；未重新计算已有Q4基准。"
+            f"Scenario comparison table updated: {len(comparison)} rows; existing Q4 baseline was not recomputed."
         )
         return 0
     if args.run_scenario is not None:
@@ -9732,7 +9732,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             low_carbon_reference_dir=args.low_carbon_reference_dir,
         )
         _progress(
-            f"情景{scenario_name}完成：complete={marker.get('complete')}，"
+            f"Scenario {scenario_name} completed: complete={marker.get('complete')}, "
             f"audit_passed={marker.get('audit_passed')}。"
         )
         return 0

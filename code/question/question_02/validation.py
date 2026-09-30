@@ -1,23 +1,27 @@
-"""问题2最终模型检验。
+"""Question 2 final-model validation.
 
-当前Q2主模型的求解结构是：
+The Q2 solution structure is:
 
-    全局连续定标 + 多目标边际贪心 + 容量修复 + LNS-MILP
+    global continuous calibration + multiobjective marginal greedy construction
+    + capacity repair + LNS-MILP
 
-本脚本只负责检验，不导入或调用model.py，也不启动新的MILP。检验分为四层：
+This script validates only: it never imports or calls model.py or launches a
+new MILP. Four validation layers:
 
-1. 全时域独立复算与能源守恒：从最终TaskID级安排重新构造0--2405小时、
-   6区域的资源和能源状态；2406小时只作为完成边界，不作为占用时段。
-2. 同口径基线与机制一致性：用同一份输入和同一套无储能能源结算函数重算
-   Q1PureComputeBaseline与Q2Balanced，检查工作量守恒和指标差异。
-3. 精确模型对照与LNS消融：读取单独验证目录中的同窗exact/heuristic结果；
-   同时读取正式窗口日志中的LNS前后独立复算z，统计LNS改善窗口。
-4. 滚动前瞻稳定性：读取正式K=48以及单独保存的K=24、K=72结果。只检查
-   三种设置是否满足硬约束，以及成本下降、新能源利用率提高的方向是否反转。
+1. Independent full-horizon recomputation and energy conservation: reconstruct
+   resource/energy states for hours 0--2405 in six regions from TaskID-level
+   assignments. Hour 2406 is a finish boundary, never an occupied interval.
+2. Consistent baseline and mechanisms: recompute Q1PureComputeBaseline and
+   Q2Balanced from the same inputs and no-storage settlement function; check
+   workload conservation and metric differences.
+3. Exact comparison and LNS ablation: read separate same-window exact/heuristic
+   results and independently recomputed pre/post-LNS z in official window logs.
+4. Rolling-lookahead stability: read official K=48 and separately saved K=24/72
+   results; check hard constraints and whether cost/renewable-use directions reverse.
 
-缺少精确对照或K=24/K=72文件时，脚本会输出PENDING状态并明确缺口，
-不会把“文件不存在”解释成模型通过。验证结果只写入q2_validation_*.csv，
-不覆盖q2_assignments.csv、q2_resource_profile.csv等正式结果。
+Missing exact comparisons or K=24/72 files produce PENDING with explicit gaps,
+never a passing result. Write q2_validation_*.csv only; do not overwrite official
+q2_assignments.csv, q2_resource_profile.csv, or other model results.
 """
 
 from __future__ import annotations
@@ -120,7 +124,7 @@ PROFILE_COMPARE_COLUMNS = (
 
 
 class ValidationTimeout(RuntimeError):
-    """验证超过独立预算后的显式停止。"""
+    """Explicit stop when validation exceeds its independent budget."""
 
 
 @dataclass
@@ -132,8 +136,8 @@ class Deadline:
         elapsed = time.perf_counter() - self.started_at
         if elapsed > self.max_seconds:
             raise ValidationTimeout(
-                f"{label}阶段超过验证预算{self.max_seconds:.1f}s，"
-                f"已耗时{elapsed:.1f}s；结果未被伪造"
+                f"{label} stage exceeded the validation budget of {self.max_seconds:.1f}s，"
+                f"; elapsed {elapsed:.1f}s; results were not fabricated"
             )
 
 
@@ -167,7 +171,7 @@ class AuditResult:
 def _configure_logging(level_name: str) -> None:
     level = getattr(logging, level_name.upper(), None)
     if not isinstance(level, int):
-        raise ValueError(f"不支持的日志级别：{level_name}")
+        raise ValueError(f"Unsupported log level: {level_name}")
     LOGS_DIR.mkdir(parents=True, exist_ok=True)
     formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
     logging.basicConfig(
@@ -181,7 +185,7 @@ def _configure_logging(level_name: str) -> None:
     for handler in logging.getLogger().handlers:
         handler.setFormatter(formatter)
     logging.info(
-        "问题2新检验日志初始化：文件=%s，级别=%s。",
+        "Q2 validation logging initialized: file=%s, level=%s.",
         VALIDATION_LOG_PATH,
         level_name.upper(),
     )
@@ -189,11 +193,11 @@ def _configure_logging(level_name: str) -> None:
 
 def _read_csv(path: Path, required: Iterable[str]) -> pd.DataFrame:
     if not path.is_file():
-        raise FileNotFoundError(f"缺少文件：{path}")
+        raise FileNotFoundError(f"File missing: {path}")
     frame = pd.read_csv(path, encoding="utf-8-sig")
     missing = [column for column in required if column not in frame.columns]
     if missing:
-        raise ValueError(f"{path.name}缺少字段：{missing}")
+        raise ValueError(f"{path.name} is missing columns: {missing}")
     return frame
 
 
@@ -202,18 +206,18 @@ def _to_numeric(frame: pd.DataFrame, columns: Iterable[str], source: str) -> pd.
     for column in columns:
         result[column] = pd.to_numeric(result[column], errors="coerce")
         if result[column].isna().any():
-            raise ValueError(f"{source}的{column}存在无法转换为数值的记录")
+            raise ValueError(f"{source} column {column} contains records that cannot be converted to numbers")
     return result
 
 
 def _load_inputs() -> Inputs:
-    logging.info("阶段1/4：开始读取Q2新模型检验输入。")
+    logging.info("Stage 1/4: reading Q2 model-validation inputs.")
     region_hour_raw = _read_csv(Q2_INPUT_DIR / "q2_region_hour_input.csv", REGION_HOUR_COLUMNS)
     tasks = _read_csv(SHARED_DIR / "tasks_clean.csv", TASK_COLUMNS)
     candidates = _read_csv(SHARED_DIR / "task_candidate_regions.csv", CANDIDATE_COLUMNS)
     boundaries = _read_csv(SHARED_DIR / "storage_params.csv", BOUNDARY_COLUMNS)
     logging.info(
-        "阶段1/4：原始输入读取完成：逐时=%d、任务=%d、候选=%d、区域边界=%d。",
+        "Stage 1/4: raw inputs loaded: hourly=%d, tasks=%d, candidates=%d, regional boundaries=%d.",
         len(region_hour_raw),
         len(tasks),
         len(candidates),
@@ -276,34 +280,34 @@ def _load_inputs() -> Inputs:
     ].copy()
     if raw_terminal_rows:
         logging.info(
-            "时域口径：发现%d条Hour=2406输入记录；验证资源剖面只使用0--2405，"
-            "Hour=2406不作为占用时段。",
+            "Time convention: found %d Hour=2406 input records; validation resource profiles use hours 0--2405 only; "
+            "Hour=2406 is not an occupied interval.",
             raw_terminal_rows,
         )
     if tasks["TaskID"].duplicated().any():
-        raise ValueError("tasks_clean.csv的TaskID不唯一")
+        raise ValueError("tasks_clean.csv contains duplicate TaskID values")
     if candidates.duplicated(["TaskID", "TargetRegion"]).any():
-        raise ValueError("task_candidate_regions.csv存在重复TaskID×TargetRegion")
+        raise ValueError("task_candidate_regions.csv contains duplicate TaskID x TargetRegion keys")
     if region_hour.duplicated(["Hour", "Region"]).any():
-        raise ValueError("逐时输入存在重复Hour×Region")
+        raise ValueError("Hourly inputs contain duplicate Hour x Region keys")
     if boundaries["Region"].duplicated().any():
-        raise ValueError("storage_params.csv的Region不唯一")
+        raise ValueError("storage_params.csv contains duplicate Region values")
     if not tasks["ArrivalHour"].between(MAIN_START_HOUR, MAIN_END_HOUR).all():
-        raise ValueError("任务ArrivalHour必须位于0--2399")
+        raise ValueError("Task ArrivalHour must be within 0--2399")
     if (tasks["LatestFinishHour"] > TERMINAL_HOUR + FLOAT_EPS).any():
-        raise ValueError("存在LatestFinishHour超过2406的任务")
+        raise ValueError("Tasks have LatestFinishHour beyond 2406")
     if (
         tasks["LatestFinishHour"]
         < tasks["EarliestStartHour"] + tasks["Duration_h"] - FLOAT_EPS
     ).any():
-        raise ValueError("存在任务时间窗无法容纳持续时间的记录")
+        raise ValueError("Task time windows cannot accommodate their durations")
     if not candidates["TaskID"].isin(set(tasks["TaskID"])).all():
-        raise ValueError("候选区域表包含不存在的TaskID")
+        raise ValueError("Candidate-region table contains unknown TaskID values")
     if (
         candidates["NetworkLatency_ms"]
         > candidates["MaxLatency_ms"] + FLOAT_EPS
     ).any():
-        raise ValueError("候选区域表存在超过MaxLatency的网络时延")
+        raise ValueError("Candidate-region table contains network latency exceeding MaxLatency")
 
     region_hour = region_hour.merge(
         boundaries.loc[:, list(BOUNDARY_COLUMNS)],
@@ -312,7 +316,7 @@ def _load_inputs() -> Inputs:
         validate="many_to_one",
     )
     if region_hour[list(BOUNDARY_COLUMNS[1:])].isna().any().any():
-        raise ValueError("storage_params.csv无法覆盖全部逐时区域")
+        raise ValueError("storage_params.csv does not cover all hourly regions")
     region_hour["ExportLimit_MW"] = np.minimum(
         region_hour["SellLimit_MW"],
         region_hour["MaxGridExport_MW"],
@@ -338,7 +342,7 @@ def _load_inputs() -> Inputs:
         ]
     )
     if (region_hour["Effective_AI_IT_Capacity_MW"] < -FLOAT_EPS).any():
-        raise ValueError("固定NonAI负荷导致有效AI IT容量为负")
+        raise ValueError("Fixed NonAI loads make effective AI IT capacity negative")
 
     regions = tuple(sorted(region_hour["Region"].unique().tolist()))
     expected = pd.MultiIndex.from_product(
@@ -348,13 +352,13 @@ def _load_inputs() -> Inputs:
     actual = pd.MultiIndex.from_frame(region_hour.loc[:, ["Hour", "Region"]])
     missing = expected.difference(actual)
     if len(missing):
-        raise ValueError(f"逐时输入缺少Hour×Region记录，例如：{list(missing[:5])}")
+        raise ValueError(f"Hourly inputs are missing Hour x Region records; examples: {list(missing[:5])}")
     latest_2406 = int(
         (tasks["LatestFinishHour"].sub(TERMINAL_HOUR).abs() <= FLOAT_EPS).sum()
     )
     logging.info(
-        "阶段1/4完成：任务=%d，候选=%d，区域=%d，资源键=%d，"
-        "允许LatestFinishHour=2406的任务=%d。",
+        "Stage 1/4 completed: tasks=%d, candidates=%d, regions=%d, resource keys=%d, "
+        "tasks allowed to finish at LatestFinishHour=2406=%d.",
         len(tasks),
         len(candidates),
         len(regions),
@@ -391,10 +395,10 @@ def _load_assignments(root: Path, filenames: tuple[str, ...]) -> tuple[pd.DataFr
         if path is not None:
             break
     if path is None:
-        raise FileNotFoundError(f"{root}中缺少任务安排：{filenames}")
+        raise FileNotFoundError(f"{root} is missing task assignments: {filenames}")
     frame = _read_csv(path, ASSIGNMENT_COLUMNS)
     if frame["TaskID"].isna().any():
-        raise ValueError(f"{path.name}存在空TaskID")
+        raise ValueError(f"{path.name} contains empty TaskID values")
     for column in ("TaskID", "TaskType", "SourceRegion", "TargetRegion"):
         frame[column] = frame[column].astype(str)
     frame = _to_numeric(
@@ -414,7 +418,7 @@ def _load_assignments(root: Path, filenames: tuple[str, ...]) -> tuple[pd.DataFr
         ],
         path.name,
     )
-    logging.info("已读取%s：记录=%d。", path, len(frame))
+    logging.info("Loaded %s: records=%d.", path, len(frame))
     return frame, path
 
 
@@ -446,7 +450,7 @@ def _add_check(
         }
     )
     logging.info(
-        "检验1/4-%s逻辑审计：%s完成，违规数=%d。",
+        "Validation 1/4-%s logical audit: %s completed, violations=%d.",
         label,
         name,
         count,
@@ -461,7 +465,7 @@ def _audit_logical(
     tolerance: float,
 ) -> tuple[pd.DataFrame, int, pd.DataFrame]:
     logging.info(
-        "检验1/4-%s：开始任务级硬约束审计，安排=%d、期望任务=%d。",
+        "Validation 1/4-%s: task-level hard-constraint audit started, assignments=%d, expected tasks=%d.",
         label,
         len(assignments),
         len(inputs.tasks),
@@ -472,24 +476,24 @@ def _audit_logical(
     duplicate_count = int((counts - 1).clip(lower=0).sum())
     unknown_count = int((~assignments["TaskID"].isin(task_ids)).sum())
     missing_count = int((~inputs.tasks["TaskID"].isin(set(counts.index))).sum())
-    _add_check(records, "任务重复执行", duplicate_count, "每个TaskID最多出现一次", label)
-    _add_check(records, "任务未知ID", unknown_count, "安排中的TaskID必须来自任务表", label)
-    _add_check(records, "任务漏排", missing_count, "每个任务必须恰好出现一次", label)
+    _add_check(records, "Duplicate task execution", duplicate_count, "Each TaskID appears at most once", label)
+    _add_check(records, "Unknown task IDs", unknown_count, "Assigned TaskID values must come from the task table", label)
+    _add_check(records, "Unscheduled tasks", missing_count, "Each task must appear exactly once", label)
 
     joined = _join_tasks(inputs, assignments)
     known = joined.loc[joined["_task_merge"].eq("both")].copy()
     if known.empty:
         for name, description in (
-            ("候选区域", "TargetRegion必须存在于候选区域表"),
-            ("任务时间与资源字段", "安排字段必须与任务表一致"),
-            ("时间窗", "Start/Finish必须满足到达、最早和最晚边界"),
-            ("实时任务立即启动", "RealTimeInference的StartHour必须等于ArrivalHour"),
-            ("网络时延", "网络时延必须满足候选和任务MaxLatency"),
-            ("2406终止边界", "FinishHour=2406允许，但不得超过2406"),
-            ("迁移与等待派生字段", "IsMigrated、WaitHours和迁移工作量应与安排一致"),
+            ("Candidate region", "TargetRegion must exist in the candidate-region table"),
+            ("Task time and resource fields", "Assignment fields must match the task table"),
+            ("Time window", "Start/Finish must respect arrival, earliest, and latest boundaries"),
+            ("Immediate real-time start", "RealTimeInference StartHour must equal ArrivalHour"),
+            ("Network latency", "Network latency must satisfy candidate and task MaxLatency"),
+            ("Hour 2406 terminal boundary", "FinishHour=2406 is allowed, but later finishes are forbidden"),
+            ("Derived migration and waiting fields", "IsMigrated, WaitHours, and migration workload must agree with assignments"),
         ):
             _add_check(records, name, 0, description, label)
-        deadline.check(f"{label}逻辑审计")
+        deadline.check(f"{label}Logical audit ")
         detail = pd.DataFrame(records)
         return detail, int(detail["ViolationCount"].sum()), joined
 
@@ -526,12 +530,12 @@ def _audit_logical(
             )
         ).sum()
     )
-    _add_check(records, "候选区域", candidate_missing, "TargetRegion必须存在于候选区域表", label)
+    _add_check(records, "Candidate region", candidate_missing, "TargetRegion must exist in the candidate-region table", label)
     _add_check(
         records,
-        "候选时延一致性",
+        "Candidate latency consistency",
         candidate_latency_bad,
-        "安排网络时延必须与候选区域表一致",
+        "Assigned network latency must match the candidate-region table",
         label,
     )
 
@@ -555,9 +559,9 @@ def _audit_logical(
         if left in known.columns and right in known.columns:
             _add_check(
                 records,
-                f"任务字段一致性-{left}",
+                f"Task field consistency-{left}",
                 int((known[left].astype(str) != known[right].astype(str)).sum()),
-                "安排中的任务属性必须与任务表一致",
+                "Assigned task attributes must match the task table",
                 label,
             )
     for field in ("GPU_Demand", "Duration_h", "Task_Full_IT_Power_MW"):
@@ -566,9 +570,9 @@ def _audit_logical(
         if left in known.columns and right in known.columns:
             _add_check(
                 records,
-                f"任务数值一致性-{field}",
+                f"Task numeric consistency-{field}",
                 _bad_equal(left, right),
-                "安排数值字段必须与任务表一致",
+                "Assigned numeric fields must match the task table",
                 label,
             )
 
@@ -597,27 +601,27 @@ def _audit_logical(
         ).sum()
     )
     assignment_duration_bad = _bad_equal("Duration_h_assign", "Duration_h_task")
-    _add_check(records, "到达时刻边界", start_arrival, "StartHour不得早于ArrivalHour", label)
+    _add_check(records, "Arrival-time boundary", start_arrival, "StartHour must not precede ArrivalHour", label)
     _add_check(
         records,
-        "最早开工边界",
+        "Earliest-start boundary",
         start_earliest,
-        "StartHour不得早于EarliestStartHour",
+        "StartHour must not precede EarliestStartHour",
         label,
     )
     _add_check(
         records,
-        "最晚完成边界",
+        "Latest-finish boundary",
         finish_latest,
-        "FinishHour不得超过LatestFinishHour",
+        "FinishHour must not exceed LatestFinishHour",
         label,
     )
-    _add_check(records, "持续时间一致性", duration_bad, "Finish-Start必须等于Duration_h", label)
+    _add_check(records, "Duration consistency", duration_bad, "Finish-Start must equal Duration_h", label)
     _add_check(
         records,
-        "安排持续时间一致性",
+        "Assigned duration consistency",
         assignment_duration_bad,
-        "安排Duration_h必须与任务Duration_h一致",
+        "Assigned Duration_h must match task Duration_h",
         label,
     )
 
@@ -646,23 +650,23 @@ def _audit_logical(
     )
     _add_check(
         records,
-        "实时任务立即启动",
+        "Immediate real-time start",
         realtime_bad,
-        "RealTimeInference必须在到达小时开工",
+        "RealTimeInference must start at its arrival hour",
         label,
     )
     _add_check(
         records,
-        "网络时延上限",
+        "Network latency limit",
         latency_bad,
-        "NetworkLatency_ms不得超过任务或安排MaxLatency_ms",
+        "NetworkLatency_ms must not exceed task or assignment MaxLatency_ms",
         label,
     )
     _add_check(
         records,
-        "2406终止边界",
+        "Hour 2406 terminal boundary",
         terminal_bad,
-        "FinishHour=2406允许，但不得超过2406；2406不作为占用小时",
+        "FinishHour=2406 is allowed, but later finishes are forbidden; hour 2406 is never occupied",
         label,
     )
 
@@ -675,7 +679,7 @@ def _audit_logical(
         )
         derived_checks.append(
             (
-                "等待时间派生一致性",
+                "Derived waiting-time consistency",
                 int(
                     (
                         np.abs(
@@ -684,7 +688,7 @@ def _audit_logical(
                         > tolerance
                     ).sum()
                 ),
-                "WaitHours应等于max(StartHour-ArrivalHour,0)",
+                "WaitHours must equal max(StartHour-ArrivalHour,0)",
             )
         )
     if "IsMigrated" in assignments.columns:
@@ -694,7 +698,7 @@ def _audit_logical(
         ).astype(float)
         derived_checks.append(
             (
-                "迁移标记派生一致性",
+                "Derived migration-flag consistency",
                 int(
                     (
                         np.abs(
@@ -704,7 +708,7 @@ def _audit_logical(
                         > tolerance
                     ).sum()
                 ),
-                "IsMigrated应等于TargetRegion!=SourceRegion",
+                "IsMigrated must equal TargetRegion!=SourceRegion",
             )
         )
     if "Migration_GPU_Workload_GPUh" in assignments.columns:
@@ -717,7 +721,7 @@ def _audit_logical(
         )
         derived_checks.append(
             (
-                "迁移工作量派生一致性",
+                "Derived migration-workload consistency",
                 int(
                     (
                         np.abs(
@@ -727,17 +731,17 @@ def _audit_logical(
                         > tolerance
                     ).sum()
                 ),
-                "迁移GPU工作量应等于迁移任务GPU_Demand×Duration_h",
+                "Migrated GPU workload must equal GPU_Demand x Duration_h for migrated tasks",
             )
         )
     for name, count, description in derived_checks:
         _add_check(records, name, count, description, label)
 
-    deadline.check(f"{label}逻辑审计")
+    deadline.check(f"{label}Logical audit ")
     detail = pd.DataFrame(records)
     logical_count = int(detail["ViolationCount"].sum())
     logging.info(
-        "检验1/4-%s逻辑审计完成：检查项=%d，累计违规=%d。",
+        "Validation 1/4-%s logical audit completed: checks=%d, total violations=%d.",
         label,
         len(detail),
         logical_count,
@@ -778,7 +782,7 @@ def _recompute_profile(
     terminal_overlap_count = 0
     invalid_row_count = 0
     logging.info(
-        "检验1/4-%s资源重算开始：任务=%d，逐时键=%d，每%d条任务反馈一次。",
+        "Validation 1/4-%s resource recomputation started: tasks=%d, hourly keys=%d, progress every %d tasks.",
         label,
         total_known,
         len(profile),
@@ -786,9 +790,9 @@ def _recompute_profile(
     )
     for row_number, row in enumerate(known.itertuples(index=False), start=1):
         if row_number % progress_every == 0 or row_number == total_known:
-            deadline.check(f"{label}逐时资源重算")
+            deadline.check(f"{label}Hourly resource recomputation ")
             logging.info(
-                "检验1/4-%s资源重算进度：%d/%d（%.1f%%），已耗时%.1fs。",
+                "Validation 1/4-%s resource recomputation progress: %d/%d (%.1f%%), elapsed=%.1fs.",
                 label,
                 row_number,
                 total_known,
@@ -902,12 +906,12 @@ def _recompute_profile(
 
     checks: list[dict[str, object]] = []
     for column, description in (
-        ("GPU_Violation_MW", "GPU容量"),
-        ("IT_Violation_MW", "IT功率"),
-        ("Facility_Violation_MW", "设施功率"),
-        ("EffectiveAI_Violation_MW", "有效AI IT容量"),
-        ("GridPurchaseViolation_MW", "最大购电"),
-        ("ExportViolation_MW", "新能源外送"),
+        ("GPU_Violation_MW", "GPU capacity"),
+        ("IT_Violation_MW", "IT power"),
+        ("Facility_Violation_MW", "Facility power"),
+        ("EffectiveAI_Violation_MW", "Effective AI IT capacity"),
+        ("GridPurchaseViolation_MW", "Maximum grid purchase"),
+        ("ExportViolation_MW", "Renewable export"),
     ):
         values = profile[column].to_numpy(dtype=float)
         maximum = float(values.max()) if len(values) else 0.0
@@ -925,7 +929,7 @@ def _recompute_profile(
     checks.append(
         {
             "Model": label,
-            "Check": "能源平衡残差",
+            "Check": "Energy-balance residual",
             "MaximumViolation": residual_max,
             "ViolationCount": int((residual > tolerance).sum()),
             "Status": "PASS" if residual_max <= tolerance else "FAIL",
@@ -934,7 +938,7 @@ def _recompute_profile(
     checks.append(
         {
             "Model": label,
-            "Check": "第2406小时正占用",
+            "Check": "Positive occupancy at hour 2406",
             "MaximumViolation": float(terminal_overlap_count),
             "ViolationCount": terminal_overlap_count,
             "Status": "PASS" if terminal_overlap_count == 0 else "FAIL",
@@ -944,7 +948,7 @@ def _recompute_profile(
         checks.append(
             {
                 "Model": label,
-                "Check": "非法任务区间未参与资源重算",
+                "Check": "Invalid task intervals excluded from resource recomputation",
                 "MaximumViolation": float(invalid_row_count),
                 "ViolationCount": invalid_row_count,
                 "Status": "FAIL",
@@ -953,7 +957,7 @@ def _recompute_profile(
     detail = pd.DataFrame(checks)
     vmax = float(
         detail.loc[
-            detail["Check"].ne("能源平衡残差"),
+            detail["Check"].ne("Energy-balance residual"),
             "MaximumViolation",
         ].max()
     )
@@ -1015,9 +1019,9 @@ def _recompute_profile(
         "TaskCount": float(len(inputs.tasks)),
         "AssignedKnownTaskCount": float(len(known)),
     }
-    deadline.check(f"{label}能源与资源独立复算")
+    deadline.check(f"{label}Independent energy/resource recomputation ")
     logging.info(
-        "检验1/4-%s资源重算完成：V_max=%.6g，E_max=%.6g，2406正占用=%d，"
+        "Validation 1/4-%s resource recomputation completed: V_max=%.6g, E_max=%.6g, positive hour-2406 occupancy=%d, "
         "Cost=%.8g，UnusedRate=%.8g。",
         label,
         vmax,
@@ -1040,9 +1044,9 @@ def _compare_exported_profile(
             [
                 {
                     "Model": label,
-                    "Check": "正式资源剖面文件",
+                    "Check": "Official resource profile file",
                     "Status": "PENDING_NO_EXPORTED_PROFILE",
-                    "Reason": "未找到q2_resource_profile.csv或对应基线剖面",
+                    "Reason": "q2_resource_profile.csv or its baseline profile was not found",
                 }
             ]
         )
@@ -1056,9 +1060,9 @@ def _compare_exported_profile(
             [
                 {
                     "Model": label,
-                    "Check": "正式资源剖面字段",
+                    "Check": "Official resource profile fields",
                     "Status": "FAIL_EXPORTED_PROFILE_INCOMPLETE",
-                    "Reason": "正式剖面缺少可比较的独立复算字段",
+                    "Reason": "Official profile lacks comparable independently recomputed fields",
                 }
             ]
         )
@@ -1075,7 +1079,7 @@ def _compare_exported_profile(
     rows.append(
         {
             "Model": label,
-            "Check": "正式剖面Hour×Region键",
+            "Check": "Official profile Hour x Region keys",
             "MaximumDifference": float(key_mismatch),
             "DifferenceCount": key_mismatch,
             "Status": "PASS" if key_mismatch == 0 else "FAIL",
@@ -1093,14 +1097,14 @@ def _compare_exported_profile(
         rows.append(
             {
                 "Model": label,
-                "Check": f"正式剖面字段-{column}",
+                "Check": f"Official profile field-{column}",
                 "MaximumDifference": maximum,
                 "DifferenceCount": int((difference > tolerance).sum()),
                 "Status": "PASS" if maximum <= tolerance else "FAIL",
             }
         )
     logging.info(
-        "独立复算与正式%s资源剖面对比完成：比较字段=%d，键差异=%d。",
+        "Independent versus official %s resource-profile comparison completed: fields=%d, key differences=%d.",
         label,
         len(right_columns),
         key_mismatch,
@@ -1112,7 +1116,7 @@ def _write_table(frame: pd.DataFrame, filename: str) -> Path:
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
     path = TABLES_DIR / filename
     frame.to_csv(path, index=False, encoding="utf-8-sig", float_format="%.15g")
-    logging.info("验证结果写出：%s，行数=%d。", path, len(frame))
+    logging.info("Validation results saved: %s, rows=%d.", path, len(frame))
     return path
 
 
@@ -1132,9 +1136,9 @@ def _metric_consistency_rows(
         return [
             {
                 "Model": independent.label,
-                "Check": "正式目标汇总",
+                "Check": "Official objective summary",
                 "Status": "PENDING_NO_OBJECTIVE_SUMMARY",
-                "Reason": "未找到q2_objective_summary.csv",
+                "Reason": "q2_objective_summary.csv was not found",
             }
         ]
     matched = official_summary.loc[
@@ -1144,9 +1148,9 @@ def _metric_consistency_rows(
         return [
             {
                 "Model": independent.label,
-                "Check": "正式目标汇总",
+                "Check": "Official objective summary",
                 "Status": "FAIL_MISSING_SOLUTION_ROW",
-                "Reason": f"缺少Solution={solution_name}",
+                "Reason": f"Missing Solution={solution_name}",
             }
         ]
     row = matched.iloc[0]
@@ -1156,7 +1160,7 @@ def _metric_consistency_rows(
             rows.append(
                 {
                     "Model": independent.label,
-                    "Check": f"正式目标-{metric}",
+                    "Check": f"Official objective-{metric}",
                     "Status": "FAIL_MISSING_METRIC_COLUMN",
                 }
             )
@@ -1168,7 +1172,7 @@ def _metric_consistency_rows(
         rows.append(
             {
                 "Model": independent.label,
-                "Check": f"正式目标-{metric}",
+                "Check": f"Official objective-{metric}",
                 "IndependentValue": actual,
                 "OfficialValue": expected,
                 "AbsoluteDifference": difference,
@@ -1186,7 +1190,7 @@ def _baseline_consistency(
     official_summary: pd.DataFrame | None,
     tolerance: float,
 ) -> pd.DataFrame:
-    logging.info("检验2/4：开始同口径基线与物理机制一致性检验。")
+    logging.info("Validation 2/4: consistent baseline and physical-mechanism checks started.")
     rows: list[dict[str, object]] = []
     for metric in (
         "Cost",
@@ -1198,24 +1202,24 @@ def _baseline_consistency(
         base = baseline.metrics[metric]
         q2 = balanced.metrics[metric]
         if metric == "Cost":
-            direction = "Q2成本更低" if q2 < base - tolerance else "Q2成本未降低"
+            direction = "Q2 cost is lower" if q2 < base - tolerance else "Q2 cost did not decrease"
         elif metric == "RenewableUtilizationRate":
             direction = (
-                "Q2新能源利用率更高"
+                "Q2 renewable utilization is higher"
                 if q2 > base + tolerance
-                else "Q2新能源利用率未提高"
+                else "Q2 renewable utilization did not increase"
             )
         elif metric == "RenewableUnusedRate":
             direction = (
-                "Q2弃新能源率更低"
+                "Q2 renewable curtailment rate is lower"
                 if q2 < base - tolerance
-                else "Q2弃新能源率未降低"
+                else "Q2 renewable curtailment rate did not decrease"
             )
         else:
-            direction = "按真实权衡报告，不预设改善方向"
+            direction = "Report actual tradeoffs without assuming improvement directions"
         rows.append(
             {
-                "Check": f"同口径指标-{metric}",
+                "Check": f"Consistent metric-{metric}",
                 "PureComputeBaseline": base,
                 "Q2Balanced": q2,
                 "AbsoluteChange_Q2MinusBaseline": q2 - base,
@@ -1230,8 +1234,8 @@ def _baseline_consistency(
         )
 
     for workload_name, base_key, q2_key in (
-        ("GPU累计工作量", "AssignedGPUWorkload_GPUh", "AssignedGPUWorkload_GPUh"),
-        ("AI IT累计能量", "AssignedAIITEnergy_MWh", "AssignedAIITEnergy_MWh"),
+        ("Cumulative GPU workload", "AssignedGPUWorkload_GPUh", "AssignedGPUWorkload_GPUh"),
+        ("Cumulative AI IT energy", "AssignedAIITEnergy_MWh", "AssignedAIITEnergy_MWh"),
     ):
         base = baseline.workload[base_key]
         q2 = balanced.workload[q2_key]
@@ -1245,7 +1249,7 @@ def _baseline_consistency(
                 "AbsoluteDifference": difference,
                 "AllowedDifference": allowed,
                 "Status": "PASS" if difference <= allowed else "FAIL",
-                "Interpretation": "相同任务集合和执行时长下，调度只改变时空分布",
+                "Interpretation": "With the same tasks and durations, scheduling changes only time/region distribution",
             }
         )
     rows.extend(
@@ -1266,16 +1270,16 @@ def _baseline_consistency(
     )
     rows.append(
         {
-            "Check": "能源结算函数口径",
+            "Check": "Energy-settlement convention",
             "Status": "PASS_SCOPE",
             "Interpretation": (
-                "基线与Q2均由同一份0--2405输入、PUE、购售电边界和无储能分段函数独立重算"
+                "Independently recompute baseline and Q2 with the same hours 0--2405 inputs, PUE, purchase/export boundaries, and no-storage piecewise function"
             ),
         }
     )
     logging.info(
-        "检验2/4完成：Q2成本变化=%.8g，新能源利用率变化=%.8g，"
-        "GPU工作量差=%.6g，AI IT能量差=%.6g。",
+        "Validation 2/4 completed: Q2 cost change=%.8g, renewable utilization change=%.8g, "
+        "GPU workload difference=%.6g, AI IT energy difference=%.6g.",
         balanced.metrics["Cost"] - baseline.metrics["Cost"],
         balanced.metrics["RenewableUtilizationRate"]
         - baseline.metrics["RenewableUtilizationRate"],
@@ -1299,14 +1303,14 @@ def _lns_ablation(
     solver_log_path: Path | None,
     tolerance: float,
 ) -> pd.DataFrame:
-    logging.info("检验3/4-LNS消融开始：读取正式窗口日志中的LNS前后独立复算z。")
+    logging.info("Validation 3/4-LNS ablation started: reading independently recomputed pre/post-LNS z from official window logs.")
     if windows is None:
         return pd.DataFrame(
             [
                 {
-                    "Check": "LNS消融",
+                    "Check": "LNS ablation",
                     "Status": "PENDING_NO_ROLLING_WINDOWS",
-                    "Interpretation": "缺少q2_balanced_rolling_windows.csv",
+                    "Interpretation": "q2_balanced_rolling_windows.csv is missing",
                 }
             ]
         )
@@ -1315,9 +1319,9 @@ def _lns_ablation(
         return pd.DataFrame(
             [
                 {
-                    "Check": "LNS消融",
+                    "Check": "LNS ablation",
                     "Status": "PENDING_INCOMPLETE_LNS_FIELDS",
-                    "Interpretation": f"缺少字段：{sorted(required - set(windows.columns))}",
+                    "Interpretation": f"Missing columns: {sorted(required - set(windows.columns))}",
                 }
             ]
         )
@@ -1334,9 +1338,9 @@ def _lns_ablation(
         return pd.DataFrame(
             [
                 {
-                    "Check": "LNS消融",
+                    "Check": "LNS ablation",
                     "Status": "PENDING_NO_FEASIBLE_LNS_RECORD",
-                    "Interpretation": "没有可用于比较LNS前后z的窗口记录",
+                    "Interpretation": "No window records are available for pre/post-LNS z comparison",
                 }
             ]
         )
@@ -1375,7 +1379,7 @@ def _lns_ablation(
     mismatch = int(frame["AcceptanceFlagMismatch"].fillna(0).sum())
     output_rows.append(
         {
-            "Check": "LNS消融汇总",
+            "Check": "LNS ablation summary",
             "HeuristicWindowCount": int(len(frame)),
             "LNSImprovedWindowCount": int(len(accepted)),
             "LNSImprovedWindowRate": float(len(accepted) / len(frame)),
@@ -1387,14 +1391,14 @@ def _lns_ablation(
             "AcceptanceFlagMismatchCount": mismatch,
             "Status": "PASS_REPORTED" if mismatch == 0 else "FAIL_LOG_INCONSISTENCY",
             "Interpretation": (
-                "ZBeforeLNS/ZStar来自模型对候选计划的独立容量与目标复算；"
-                "本表检验LNS内部消融，不等同于全局精确最优性证明"
+                "ZBeforeLNS/ZStar come from independent capacity and objective recomputation of candidate plans; "
+                "this table validates internal LNS ablation, not global exact optimality"
             ),
         }
     )
     logging.info(
-        "检验3/4-LNS消融完成：可比较启发式窗口=%d，LNS改善=%d（%.1f%%），"
-        "接受标记不一致=%d。",
+        "Validation 3/4-LNS ablation completed: comparable heuristic windows=%d, LNS improvements=%d (%.1f%%), "
+        "inconsistent acceptance flags=%d.",
         len(frame),
         len(accepted),
         100.0 * len(accepted) / len(frame),
@@ -1482,7 +1486,7 @@ def _exact_vs_heuristic(
     heuristic_path: Path | None,
     tolerance: float,
 ) -> pd.DataFrame:
-    logging.info("检验3/4-精确模型对照开始：目标窗口0--9。")
+    logging.info("Validation 3/4-exact model comparison started: target windows 0--9.")
     exact_file, heuristic_file = _discover_exact_pair(
         experiment_root,
         exact_path,
@@ -1490,19 +1494,19 @@ def _exact_vs_heuristic(
     )
     if exact_file is None or heuristic_file is None:
         logging.info(
-            "检验3/4-精确模型对照待补：需要单独保存exact_windows.csv和heuristic_windows.csv；"
-            "当前正式结果不能把前10个精确窗口与后91个启发式窗口错配比较。"
+            "Validation 3/4-exact comparison pending: separately save exact_windows.csv and heuristic_windows.csv; "
+            "do not compare the first 10 exact windows against 91 later heuristic windows with mismatched histories."
         )
         return pd.DataFrame(
             [
                 {
-                    "Check": "精确模型对照",
+                    "Check": "Exact model comparison",
                     "Status": "PENDING_EXACT_HEURISTIC_ARTIFACT",
                     "ExactWindowsPath": str(exact_file) if exact_file else "",
                     "HeuristicWindowsPath": str(heuristic_file) if heuristic_file else "",
                     "Interpretation": (
-                        "必须在相同历史状态、任务集合、H/K和定标参数下保存同一窗口的"
-                        "exact与heuristic结果；当前正式表缺少同窗启发式对照"
+                        "Save exact and heuristic results for the same window with identical history, tasks, H/K, and calibration; "
+                        "the current official table lacks same-window heuristic comparisons"
                     ),
                 }
             ]
@@ -1513,9 +1517,9 @@ def _exact_vs_heuristic(
         return pd.DataFrame(
             [
                 {
-                    "Check": "精确模型对照",
+                    "Check": "Exact model comparison",
                     "Status": "PENDING_MISSING_WINDOW_ID",
-                    "Interpretation": "exact与heuristic结果必须包含WindowID",
+                    "Interpretation": "Exact and heuristic results must contain WindowID",
                 }
             ]
         )
@@ -1537,11 +1541,11 @@ def _exact_vs_heuristic(
         return pd.DataFrame(
             [
                 {
-                    "Check": "精确模型对照",
+                    "Check": "Exact model comparison",
                     "Status": "PENDING_INCOMPLETE_COMMON_WINDOWS",
                     "CommonWindowCount": len(merged),
                     "RequiredWindowCount": EXACT_WINDOW_COUNT,
-                    "Interpretation": "窗口0--9必须全部存在于两套同窗结果中",
+                    "Interpretation": "Windows 0--9 must all appear in both same-window result sets",
                 }
             ]
         )
@@ -1551,7 +1555,7 @@ def _exact_vs_heuristic(
     for row in merged.sort_values("WindowID").itertuples(index=False):
         row_dict = row._asdict()
         output: dict[str, object] = {
-            "Check": "精确模型同窗对照",
+            "Check": "Exact same-window model comparison",
             "WindowID": row_dict["WindowID"],
             "ExactPath": str(exact_file),
             "HeuristicPath": str(heuristic_file),
@@ -1609,7 +1613,7 @@ def _exact_vs_heuristic(
     max_delta_z = max(all_delta_z) if all_delta_z else float("nan")
     rows.append(
         {
-            "Check": "精确模型对照汇总",
+            "Check": "Exact model comparison summary",
             "CommonWindowCount": len(merged),
             "RequiredWindowCount": EXACT_WINDOW_COUNT,
             "MaxDeltaZRelative": max_delta_z,
@@ -1626,12 +1630,12 @@ def _exact_vs_heuristic(
                 else "PENDING_INCOMPLETE_METRICS"
             ),
             "Interpretation": (
-                "5%只作为与当前LNS局部精度同量级的报告界限，不是全局最优性证明"
+                "5% is a reporting threshold comparable to current local LNS precision, not a global optimality proof"
             ),
         }
     )
     logging.info(
-        "检验3/4-精确模型对照完成：共同窗口=%d，最大z相对差=%s。",
+        "Validation 3/4-exact model comparison completed: common windows=%d, maximum relative z difference=%s.",
         len(merged),
         f"{max_delta_z:.6g}" if math.isfinite(max_delta_z) else "NA",
     )
@@ -1672,7 +1676,7 @@ def _read_runtime_seconds(root: Path) -> float:
         text = path.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return float("nan")
-    matches = re.findall(r"总耗时=([0-9]+(?:\.[0-9]+)?)s", text)
+    matches = re.findall(r"(?:total elapsed|\u603b\u8017\u65f6)=([0-9]+(?:\.[0-9]+)?)s", text)
     return float(matches[-1]) if matches else float("nan")
 
 
@@ -1704,7 +1708,7 @@ def _lookahead_stability(
     tolerance: float,
     progress_every: int,
 ) -> pd.DataFrame:
-    logging.info("检验4/4：开始滚动前瞻稳定性检验，目标K=24/48/72，H=24。")
+    logging.info("Validation 4/4: rolling-lookahead stability started, target K=24/48/72, H=24.")
     records: list[dict[str, object]] = []
     current_summary, current_balanced, current_baseline = _summary_row(TABLES_DIR)
     config_path = _locate_file(TABLES_DIR, "q2_model_config.csv")
@@ -1714,7 +1718,7 @@ def _lookahead_stability(
         if not config.empty and "LookaheadHours" in config.columns:
             current_k = int(float(config.iloc[0]["LookaheadHours"]))
     for lookahead in (24, 48, 72):
-        deadline.check(f"K={lookahead}前瞻稳定性")
+        deadline.check(f"K={lookahead}Lookahead stability ")
         if lookahead == current_k:
             root = TABLES_DIR
             balanced_row = current_balanced
@@ -1728,7 +1732,7 @@ def _lookahead_stability(
                 else "FAIL"
             )
             runtime = _read_runtime_seconds(QUESTION_DIR / "outputs")
-            logging.info("检验4/4：K=%d使用正式结果，硬约束状态=%s。", lookahead, hard_status)
+            logging.info("Validation 4/4: K=%d uses official results, hard-constraint status=%s.", lookahead, hard_status)
         else:
             root = _run_root_for_lookahead(experiment_root, lookahead)
             source = str(root) if root is not None else ""
@@ -1781,12 +1785,12 @@ def _lookahead_stability(
                         hard_status = f"FAIL_AUDIT_ERROR:{exc}"
                 else:
                     logging.info(
-                        "检验4/4：K=%d只有指标文件，没有任务安排，硬约束暂不能审计。",
+                        "Validation 4/4: K=%d has metrics only, without assignments; hard constraints cannot yet be audited.",
                         lookahead,
                     )
             else:
                 logging.info(
-                    "检验4/4：K=%d未找到独立运行目录，等待补跑结果。",
+                    "Validation 4/4: K=%d independent run directory not found; awaiting additional results.",
                     lookahead,
                 )
         record: dict[str, object] = {
@@ -1800,7 +1804,7 @@ def _lookahead_stability(
             record.update(
                 {
                     "Status": "PENDING_OBJECTIVE_SUMMARY",
-                    "Interpretation": "需要同一K设置下同时保存Q2Balanced和Q1PureComputeBaseline",
+                    "Interpretation": "Q2Balanced and Q1PureComputeBaseline must both be saved under the same K setting",
                 }
             )
             records.append(record)
@@ -1843,13 +1847,13 @@ def _lookahead_stability(
                     else "PENDING_HARD_AUDIT"
                 ),
                 "Interpretation": (
-                    "只判断成本下降和新能源利用率提高的方向，不设置人为百分比阈值"
+                    "Check only directions of cost reduction and renewable utilization increase, without arbitrary percentage thresholds"
                 ),
             }
         )
         records.append(record)
         logging.info(
-            "检验4/4：K=%d完成，硬约束=%s，成本方向=%s，新能源方向=%s。",
+            "Validation 4/4: K=%d completed, hard constraints=%s, cost direction=%s, renewable direction=%s.",
             lookahead,
             hard_status,
             record["CostDirection"],
@@ -1869,7 +1873,7 @@ def _lookahead_stability(
     ]
     records.append(
         {
-            "Check": "前瞻稳定性结论",
+            "Check": "Lookahead stability conclusion",
             "ComparedLookaheadHours": "24,48,72",
             "Status": (
                 "PASS_DIRECTION_STABLE"
@@ -1880,15 +1884,15 @@ def _lookahead_stability(
             ),
             "MissingOrPendingK": ",".join(map(str, missing_lookahead)),
             "Interpretation": (
-                "三种K均满足硬约束且成本下降、新能源利用率提高时，"
-                "才支持对前瞻长度稳定性的正文表述"
+                "Only when all three K settings satisfy hard constraints, reduce cost, and improve renewable utilization "
+                "is the paper claim of lookahead-length stability supported"
             ),
         }
     )
     logging.info(
-        "检验4/4完成：K=24/48/72可通过记录=%d/3，待补K=%s。",
+        "Validation 4/4 completed: passing K=24/48/72 records=%d/3, pending K=%s.",
         len(available),
-        missing_lookahead or "无",
+        missing_lookahead or "none",
     )
     return pd.DataFrame(records)
 
@@ -1925,28 +1929,28 @@ def _overview(
     return pd.DataFrame(
         [
             {
-                "Layer": "全时域独立复算与守恒",
+                "Layer": "Independent full-horizon recomputation and conservation",
                 "Status": "PASS" if core_pass else "FAIL",
-                "Evidence": "q2_validation_constraint_audit.csv及独立重算资源剖面",
+                "Evidence": "q2_validation_constraint_audit.csv and independently recomputed resource profiles",
             },
             {
-                "Layer": "同口径基线与机制一致性",
+                "Layer": "Consistent baseline and mechanism checks",
                 "Status": "PASS_SCOPE_REPORTED",
                 "Evidence": "q2_validation_baseline_consistency.csv",
             },
             {
-                "Layer": "LNS消融",
-                "Status": _status(lns, "LNS消融汇总"),
+                "Layer": "LNS ablation",
+                "Status": _status(lns, "LNS ablation summary"),
                 "Evidence": "q2_validation_lns_ablation.csv",
             },
             {
-                "Layer": "精确模型同窗对照",
-                "Status": _status(exact, "精确模型对照"),
+                "Layer": "Exact same-window model comparison",
+                "Status": _status(exact, "Exact model comparison"),
                 "Evidence": "q2_validation_exact_vs_heuristic.csv",
             },
             {
-                "Layer": "滚动前瞻K=24/48/72",
-                "Status": _status(rolling, "前瞻稳定性结论"),
+                "Layer": "Rolling lookahead K=24/48/72",
+                "Status": _status(rolling, "Lookahead stability conclusion"),
                 "Evidence": "q2_validation_lookahead.csv",
             },
         ]
@@ -1955,64 +1959,64 @@ def _overview(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="问题2新模型检验：独立复算、同口径基线、LNS消融、精确对照和K稳定性"
+        description="Q2 validation: independent recomputation, consistent baseline, LNS ablation, exact comparison, and K stability"
     )
     parser.add_argument(
         "--max-seconds",
         type=float,
         default=DEFAULT_MAX_SECONDS,
-        help="全流程验证预算，默认600秒；超时会显式退出",
+        help="Total validation budget, default 600 seconds; timeout exits explicitly",
     )
     parser.add_argument(
         "--tolerance",
         type=float,
         default=DEFAULT_TOLERANCE,
-        help="硬约束和守恒残差容差，默认1e-6",
+        help="Hard-constraint and conservation residual tolerance, default 1e-6",
     )
     parser.add_argument(
         "--progress-every",
         type=int,
         default=DEFAULT_PROGRESS_EVERY,
-        help="独立资源重算每处理多少条任务反馈一次，默认1000",
+        help="Report independent resource-recomputation progress every this many tasks, default 1000",
     )
     parser.add_argument(
         "--experiment-root",
         type=Path,
         default=VALIDATION_RUNS_DIR,
-        help="精确对照和K=24/72结果根目录，默认outputs/validation_runs",
+        help="Root directory for exact comparisons and K=24/72 results, default outputs/validation_runs",
     )
     parser.add_argument(
         "--exact-windows",
         type=Path,
         default=None,
-        help="可选：exact同窗窗口CSV，优先于--experiment-root自动发现",
+        help="Optional exact same-window CSV; overrides --experiment-root discovery",
     )
     parser.add_argument(
         "--heuristic-windows",
         type=Path,
         default=None,
-        help="可选：heuristic同窗窗口CSV，优先于--experiment-root自动发现",
+        help="Optional heuristic same-window CSV; overrides --experiment-root discovery",
     )
     parser.add_argument(
         "--log-level",
         choices=("DEBUG", "INFO", "WARNING", "ERROR"),
         default="INFO",
-        help="控制台和文件日志级别，默认INFO",
+        help="Console/file log level, default INFO",
     )
     args = parser.parse_args(argv)
     if args.max_seconds <= 0:
-        raise SystemExit("--max-seconds必须为正")
+        raise SystemExit("--max-seconds must be positive")
     if args.tolerance <= 0:
-        raise SystemExit("--tolerance必须为正")
+        raise SystemExit("--tolerance must be positive")
     if args.progress_every <= 0:
-        raise SystemExit("--progress-every必须为正")
+        raise SystemExit("--progress-every must be positive")
 
     _configure_logging(args.log_level)
     started_at = time.perf_counter()
     deadline = Deadline(args.max_seconds, started_at)
     logging.info(
-        "问题2新模型检验启动：不调用model.py/MILP；预算=%.1fs；"
-        "容差=%.3g；资源重算每%d条反馈；对照根目录=%s。",
+        "Q2 validation started without model.py/MILP: budget=%.1fs; "
+        "tolerance=%.3g; resource progress every %d tasks; comparison root=%s.",
         args.max_seconds,
         args.tolerance,
         args.progress_every,
@@ -2021,7 +2025,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         inputs = _load_inputs()
-        deadline.check("输入读取")
+        deadline.check("Input loading")
         balanced_assignments, balanced_path = _load_assignments(
             TABLES_DIR,
             ("q2_assignments.csv", "q2_balanced_assignments.csv"),
@@ -2030,9 +2034,9 @@ def main(argv: list[str] | None = None) -> int:
             TABLES_DIR,
             ("q2_baseline_assignments.csv",),
         )
-        deadline.check("正式任务安排读取")
+        deadline.check("Official assignment loading")
 
-        logging.info("阶段2/4：开始Q2Balanced全时域独立审计。")
+        logging.info("Stage 2/4: independent full-horizon Q2Balanced audit started.")
         balanced_logical, balanced_count, balanced_joined = _audit_logical(
             inputs,
             balanced_assignments,
@@ -2078,7 +2082,7 @@ def main(argv: list[str] | None = None) -> int:
             terminal_overlap_count=balanced_terminal,
             profile_compare=balanced_profile_compare,
         )
-        logging.info("阶段2/4：开始Q1PureComputeBaseline同口径独立审计。")
+        logging.info("Stage 2/4: consistent independent Q1PureComputeBaseline audit started.")
         baseline_logical, baseline_count, baseline_joined = _audit_logical(
             inputs,
             baseline_assignments,
@@ -2158,8 +2162,8 @@ def main(argv: list[str] | None = None) -> int:
             "q2_validation_baseline_consistency.csv",
         )
         logging.info(
-            "阶段2/4完成：Q2逻辑违规=%d、Vmax=%.6g、Emax=%.6g；"
-            "基线逻辑违规=%d、Vmax=%.6g、Emax=%.6g。",
+            "Stage 2/4 completed: Q2 logical violations=%d, Vmax=%.6g, Emax=%.6g; "
+            "baseline logical violations=%d, Vmax=%.6g, Emax=%.6g.",
             balanced.logical_count,
             balanced.vmax,
             balanced.emax,
@@ -2168,7 +2172,7 @@ def main(argv: list[str] | None = None) -> int:
             baseline.emax,
         )
 
-        logging.info("阶段3/4：开始LNS消融和精确模型同窗对照。")
+        logging.info("Stage 3/4: LNS ablation and exact same-window comparison started.")
         rolling_windows, rolling_path = _read_rolling_windows(TABLES_DIR)
         solver_path = _locate_file(TABLES_DIR, "q2_solver_log.csv")
         lns = _lns_ablation(rolling_windows, solver_path, args.tolerance)
@@ -2181,13 +2185,13 @@ def main(argv: list[str] | None = None) -> int:
         _write_table(lns, "q2_validation_lns_ablation.csv")
         _write_table(exact, "q2_validation_exact_vs_heuristic.csv")
         logging.info(
-            "阶段3/4完成：正式窗口=%d，LNS结果=%s，精确对照来源=%s。",
+            "Stage 3/4 completed: official windows=%d, LNS results=%s, exact comparison source=%s.",
             len(rolling_windows) if rolling_windows is not None else 0,
-            "已生成" if not lns.empty else "无",
-            rolling_path if rolling_path else "待补",
+            "generated" if not lns.empty else "none",
+            rolling_path if rolling_path else "pending",
         )
 
-        logging.info("阶段4/4：开始K=24/48/72前瞻稳定性检验。")
+        logging.info("Stage 4/4: K=24/48/72 lookahead stability started.")
         lookahead = _lookahead_stability(
             inputs,
             args.experiment_root,
@@ -2207,13 +2211,13 @@ def main(argv: list[str] | None = None) -> int:
         )
         _write_table(overview, "q2_validation_overview.csv")
     except FileNotFoundError as exc:
-        logging.error("问题2新模型检验缺少输入或正式结果：%s", exc)
+        logging.error("Q2 validation is missing inputs or official results: %s", exc)
         return 1
     except ValidationTimeout as exc:
-        logging.error("问题2新模型检验安全停止：%s", exc)
+        logging.error("Q2 validation stopped safely: %s", exc)
         return 2
     except (ValueError, KeyError, TypeError, pd.errors.ParserError) as exc:
-        logging.error("问题2新模型检验执行失败：%s", exc)
+        logging.error("Q2 validation failed: %s", exc)
         return 1
 
     elapsed = time.perf_counter() - started_at
@@ -2229,9 +2233,9 @@ def main(argv: list[str] | None = None) -> int:
         "PENDING" in ";".join(overview["Status"].astype(str).tolist())
     )
     logging.info(
-        "问题2新模型检验完成：核心独立复算=%s；可选精确/K对照=%s；总耗时=%.2fs。",
+        "Q2 validation completed: core independent recomputation=%s; optional exact/K comparisons=%s; total elapsed=%.2fs.",
         "PASS" if core_pass else "FAIL",
-        "存在待补证据" if pending_optional else "已完成",
+        "evidence pending" if pending_optional else "completed",
         elapsed,
     )
     return 0 if core_pass else 1

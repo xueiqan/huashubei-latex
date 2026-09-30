@@ -1,17 +1,17 @@
-"""问题4独立检验入口。
+"""Independent Q4 validation entry point.
 
-本脚本只读取正式Q4 V4结果和已经生成的验证产物，不修改正式模型结果。
-默认执行三条证据链：
+Read formal Q4 V4 results and existing validation artifacts without modifying model results.
+The default validation follows three evidence chains:
 
-1. 对V4主结果做全时域独立硬约束审计和指标重算；
-2. 检查两个代表窗口的完整联合MILP对照是否已经形成；
-3. 独立复核Q2任务种子→V4能源参考顺序基准，并检查同版本Q4情景结果。
+1. Audit hard constraints and recompute metrics independently over the full V4 horizon.
+2. Check complete joint MILP references for two representative windows.
+3. Independently audit the Q2 task seed -> V4 sequential energy reference and same-version scenarios.
 
-完整联合MILP窗口对照计算量较大，但正式检验默认会实际运行两个代表窗口，
-每个窗口默认上限300秒。若只想做快速文件级检查，可显式增加
+Full joint MILP references are expensive. Formal validation runs two representative windows
+with a default limit of 300 seconds each. For a quick audit of existing files, explicitly pass
 ``--skip-reference-windows``。
-验证结果写入 ``outputs/validation/q4_validation_*.csv/json``，不覆盖
-``matheuristic_v4_doccompliant``中的正式结果表。
+Write validation results to ``outputs/validation/q4_validation_*.csv/json`` without overwriting
+formal result tables in ``matheuristic_v4_doccompliant``.
 """
 
 from __future__ import annotations
@@ -59,7 +59,7 @@ else:
 def _configure_logging(level_name: str) -> None:
     level = getattr(logging, level_name.upper(), None)
     if not isinstance(level, int):
-        raise ValueError(f"不支持的日志级别：{level_name}")
+        raise ValueError(f"Unsupported log level: {level_name}")
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
     stream = logging.StreamHandler(sys.stdout)
@@ -112,10 +112,10 @@ $items | ConvertTo-Json -Compress -Depth 4
             check=False,
         )
     except (OSError, subprocess.SubprocessError) as exc:
-        return [], f"无法检查Q4进程状态：{exc!r}"
+        return [], f"Cannot inspect Q4 process state: {exc!r}"
     if completed.returncode != 0:
         return [], (
-            "检查Q4进程状态的PowerShell返回失败："
+            "PowerShell failed while inspecting Q4 process state: "
             f"{completed.stderr.strip() or completed.stdout.strip()}"
         )
     output = completed.stdout.strip()
@@ -124,12 +124,12 @@ $items | ConvertTo-Json -Compress -Depth 4
     try:
         parsed = json.loads(output)
     except json.JSONDecodeError as exc:
-        return [], f"Q4进程状态输出无法解析：{exc!r}"
+        return [], f"Cannot parse Q4 process state output: {exc!r}"
     if isinstance(parsed, dict):
         return [parsed], None
     if isinstance(parsed, list):
         return [item for item in parsed if isinstance(item, dict)], None
-    return [], "Q4进程状态输出类型异常"
+    return [], "Unexpected Q4 process state output type"
 
 
 def _json_default(value: Any) -> Any:
@@ -143,7 +143,7 @@ def _json_default(value: Any) -> Any:
         return value.isoformat()
     if isinstance(value, np.ndarray):
         return value.tolist()
-    raise TypeError(f"无法序列化类型：{type(value)!r}")
+    raise TypeError(f"Cannot serialize type: {type(value)!r}")
 
 
 def _atomic_write_json(path: Path, payload: Any) -> None:
@@ -163,11 +163,11 @@ def _write_csv(frame: pd.DataFrame, path: Path) -> None:
 
 def _read_csv(path: Path, required: tuple[str, ...] = ()) -> pd.DataFrame:
     if not path.is_file():
-        raise FileNotFoundError(f"缺少检验输入文件：{path}")
+        raise FileNotFoundError(f"Missing validation input file: {path}")
     frame = pd.read_csv(path, encoding="utf-8-sig")
     missing = sorted(set(required) - set(frame.columns))
     if missing:
-        raise ValueError(f"{path.name}缺少字段：{missing}")
+        raise ValueError(f"{path.name} is missing columns: {missing}")
     return frame
 
 
@@ -217,7 +217,7 @@ def _strip_checks(payload: dict[str, object]) -> tuple[dict[str, object], pd.Dat
 
 
 def _summary_metrics(summary: pd.DataFrame) -> dict[str, float]:
-    """把不同输出版本的指标列名统一到独立复算口径。"""
+    """Normalize metric columns across output versions for independent recomputation."""
 
     if not {"Metric", "Value"}.issubset(summary.columns):
         return {}
@@ -285,7 +285,7 @@ def _validate_fixed_energy_reference_only(
     """Independently audit one fixed-task V4 energy evaluation."""
 
     if q4_model is None:
-        raise RuntimeError(f"Q4模型模块导入失败：{MODEL_IMPORT_ERROR!r}")
+        raise RuntimeError(f"Q4 model module import failed: {MODEL_IMPORT_ERROR!r}")
     config = q4_model.ModelConfig()
     data = q4_model.load_data()
     paths = q4_model._matheuristic_paths()
@@ -404,12 +404,12 @@ def _load_v4_context(
     if missing:
         _record(
             records,
-            "全时域独立审计",
-            "V4正式结果完整性",
+            "Full-horizon independent audit",
+            "Formal V4 result completeness",
             "FAIL",
             "; ".join(missing),
-            "完成标记、任务表、能源表、指标表、简单复核表和窗口表均存在",
-            "先完成Q4 V4正式运行",
+            "Completion marker, task, energy, metric, simple-check, and window tables all exist",
+            "Complete the formal Q4 V4 run first",
         )
         return None
 
@@ -421,12 +421,12 @@ def _load_v4_context(
     )
     _record(
         records,
-        "全时域独立审计",
-        "V4完成标记和版本",
+        "Full-horizon independent audit",
+        "V4 completion marker and version",
         "PASS" if marker_ok else "FAIL",
         str(required[0]),
-        "complete=true、audit_passed=true且model_version为正式V4",
-        "拒绝把旧版本或未完成断点作为正式结果",
+        "complete=true, audit_passed=true, and model_version identifies formal V4",
+        "Reject old versions and incomplete checkpoints as formal results",
         value={key: marker.get(key) for key in ("complete", "audit_passed", "model_version")},
     )
 
@@ -438,24 +438,24 @@ def _load_v4_context(
     simple_ok = not simple_passed.isna().any() and bool(simple_passed.all())
     _record(
         records,
-        "全时域独立审计",
-        "模型生成的简单复核表",
+        "Full-horizon independent audit",
+        "Model-generated simple-check table",
         "PASS" if simple_ok else "FAIL",
         str(V4_TABLES_DIR / "q4_simple_validation.csv"),
-        "所有简单复核项的Passed均为True",
-        "检查失败项后重新生成正式结果",
+        "Passed is True for every simple check",
+        "Inspect failed checks before regenerating formal results",
         value={"rows": int(len(simple)), "failed": int((~simple_passed.fillna(False)).sum())},
     )
 
     row_count_ok = len(assignments) == len(data.tasks) and len(dispatch) == q4_model.OPERATION_END * len(data.regions)
     _record(
         records,
-        "全时域独立审计",
-        "任务与逐时能源轨迹覆盖",
+        "Full-horizon independent audit",
+        "Task and hourly energy trajectory coverage",
         "PASS" if row_count_ok else "FAIL",
         f"assignments={len(assignments)}, dispatch={len(dispatch)}",
-        f"任务数={len(data.tasks)}且能源轨迹={q4_model.OPERATION_END}×{len(data.regions)}",
-        "补齐缺失任务或小时区域记录",
+        f"Task count={len(data.tasks)} and energy trajectory={q4_model.OPERATION_END} x {len(data.regions)}",
+        "Restore missing task or hour-region records",
         value={"task_rows": int(len(assignments)), "dispatch_rows": int(len(dispatch))},
     )
 
@@ -472,12 +472,12 @@ def _load_v4_context(
         audit_ok = bool(document_audit.get("passed") and audit.get("passed"))
         _record(
             records,
-            "全时域独立审计",
-            "独立硬约束复算",
+            "Full-horizon independent audit",
+            "Independent hard-constraint recomputation",
             "PASS" if audit_ok else "FAIL",
             str(VALIDATION_DIR / "q4_validation_v4_hard_constraint_audit.csv"),
-            "所有独立硬约束检查通过且最大违差不超过容差",
-            "查看failed_checks并修正结果或输入口径",
+            "All independent hard-constraint checks pass and maximum violation is within tolerance",
+            "Inspect failed_checks and correct results or input definitions",
             value={
                 "failed_checks": audit.get("failed_checks", []),
                 "max_violation": audit.get("max_violation"),
@@ -496,25 +496,25 @@ def _load_v4_context(
         metric_ok = all(bool(row["Passed"]) for row in rows)
         _record(
             records,
-            "全时域独立审计",
-            "六项目标独立重算与汇总表一致性",
+            "Full-horizon independent audit",
+            "Six-objective recomputation agrees with the summary table",
             "PASS" if metric_ok else "FAIL",
             str(V4_TABLES_DIR / "q4_objective_summary.csv"),
-            "Cost、Carbon、Latency、Delay、RenewableUnusedRate、Peak均在容差内一致",
-            "不要直接引用内部累计值，先核对明细表和指标口径",
+            "Cost, Carbon, Latency, Delay, RenewableUnusedRate, and Peak agree within tolerance",
+            "Check detailed tables and metric definitions before citing internal accumulated values",
             value={"max_absolute_difference": max((float(row["AbsoluteDifference"]) for row in rows if pd.notna(row["AbsoluteDifference"])), default=float("nan"))},
             tolerance=tolerance,
         )
     except Exception as exc:
-        logging.exception("V4独立审计异常")
+        logging.exception("Independent V4 audit exception")
         _record(
             records,
-            "全时域独立审计",
-            "独立审计执行",
+            "Full-horizon independent audit",
+            "Independent audit execution",
             "FAIL",
             repr(exc),
-            "验证函数能够从V4明细重新计算审计结果",
-            "检查模型输入、输出字段和运行环境",
+            "Validation functions can recompute audit results from V4 detailed records",
+            "Inspect model inputs, output columns, and runtime environment",
         )
         return None
 
@@ -547,12 +547,12 @@ def _validate_sequential_baseline(
     if missing:
         _record(
             records,
-            "顺序基准与协同检验",
-            "Q2任务种子→V4能源顺序基准",
+            "Sequential baseline and joint optimization validation",
+            "Q2 task seed -> V4 sequential energy baseline",
             "WARN",
             "; ".join(missing),
-            "顺序基准完整标记、任务表、能源表和指标表均存在",
-            "生成同口径顺序基准后重新运行检验",
+            "Sequential completion marker, task, energy, and metric tables all exist",
+            "Generate a sequential baseline under the same definitions, then rerun validation",
         )
         return None
 
@@ -586,15 +586,15 @@ def _validate_sequential_baseline(
             clean_audit,
         )
     except Exception as exc:
-        logging.exception("顺序基准独立审计异常")
+        logging.exception("Independent sequential baseline audit exception")
         _record(
             records,
-            "顺序基准与协同检验",
-            "顺序基准独立审计",
+            "Sequential baseline and joint optimization validation",
+            "Independent sequential baseline audit",
             "FAIL",
             repr(exc),
-            "顺序基准也必须满足同一套任务和能源硬约束",
-            "修正顺序基准结果后重算",
+            "The sequential baseline must satisfy the same task and energy hard constraints",
+            "Correct sequential baseline results and recompute",
         )
         return None
 
@@ -611,22 +611,22 @@ def _validate_sequential_baseline(
     all_ok = marker_ok and audit_ok and metric_ok
     _record(
         records,
-        "顺序基准与协同检验",
-        "顺序基准完成标记",
+        "Sequential baseline and joint optimization validation",
+        "Sequential baseline completion marker",
         "PASS" if marker_ok else "FAIL",
         str(paths["marker"]),
-        "complete=true且任务/能源记录数与当前输入一致",
-        "拒绝混用其他版本顺序基准",
+        "complete=true and task/energy row counts agree with current inputs",
+        "Reject sequential baselines from other versions",
         value=marker,
     )
     _record(
         records,
-        "顺序基准与协同检验",
-        "顺序基准硬约束和指标复算",
+        "Sequential baseline and joint optimization validation",
+        "Sequential baseline hard constraints and metric recomputation",
         "PASS" if all_ok else "FAIL",
         str(VALIDATION_DIR / "q4_validation_sequential_independent_audit.json"),
-        "顺序基准审计通过且指标文件与独立重算一致",
-        "检查顺序基准任务表、能源轨迹和指标文件",
+        "Sequential baseline passes audit and metric files agree with independent recomputation",
+        "Inspect sequential task, energy trajectory, and metric files",
         value={"audit_passed": audit_ok, "metric_passed": metric_ok},
         tolerance=tolerance,
     )
@@ -641,13 +641,13 @@ def _validate_sequential_baseline(
 def _select_reference_windows(solver: pd.DataFrame) -> pd.DataFrame:
     required = {"WindowStart", "TotalWindowSeconds"}
     if not required.issubset(solver.columns):
-        raise ValueError(f"q4_window_solver.csv缺少代表窗口选择字段：{sorted(required - set(solver.columns))}")
+        raise ValueError(f"q4_window_solver.csv lacks representative-window selection columns: {sorted(required - set(solver.columns))}")
     frame = solver.copy()
     frame["WindowStart"] = pd.to_numeric(frame["WindowStart"], errors="coerce")
     frame["TotalWindowSeconds"] = pd.to_numeric(frame["TotalWindowSeconds"], errors="coerce")
     frame = frame.dropna(subset=["WindowStart", "TotalWindowSeconds"]).drop_duplicates("WindowStart")
     if frame.empty:
-        raise ValueError("q4_window_solver.csv没有可用窗口")
+        raise ValueError("q4_window_solver.csv contains no usable windows")
     median_time = float(frame["TotalWindowSeconds"].median())
     median_row = frame.iloc[(frame["TotalWindowSeconds"] - median_time).abs().argsort().iloc[0]]
     longest_row = frame.sort_values(["TotalWindowSeconds", "WindowStart"], ascending=[False, True]).iloc[0]
@@ -692,7 +692,7 @@ def _run_reference_windows(
     )
     rows: list[dict[str, object]] = []
     logging.info(
-        "代表窗口完整MILP开始：窗口数=%d，单窗口上限=%.1fs，目标MIP gap=%.4f。",
+        "Representative full MILP started: windows=%d, per-window limit=%.1fs, target MIP gap=%.4f.",
         len(selection),
         time_limit,
         mip_gap,
@@ -701,7 +701,7 @@ def _run_reference_windows(
         tau = int(selected.WindowStart)
         role = str(selected.Role)
         logging.info(
-            "代表窗口完整MILP：%d/%d开始，role=%s，WindowStart=%d。",
+            "Representative full MILP: %d/%d started, role=%s, WindowStart=%d.",
             index,
             len(selection),
             role,
@@ -732,8 +732,8 @@ def _run_reference_windows(
                 }
             )
             logging.info(
-                "代表窗口完整MILP：WindowStart=%d完成，ReferenceStatus=%s，"
-                "FinalConfirmationModel=%s，IndependentAuditPassed=%s，耗时=%s。",
+                "Representative full MILP: WindowStart=%d completed, ReferenceStatus=%s, "
+                "FinalConfirmationModel=%s, IndependentAuditPassed=%s, elapsed=%s.",
                 tau,
                 result.get("ReferenceStatus"),
                 result.get("FinalConfirmationModel"),
@@ -760,7 +760,7 @@ def _run_reference_windows(
                 "Error": repr(exc),
             }
             logging.exception(
-                "代表窗口完整MILP失败：WindowStart=%d，role=%s。",
+                "Representative full MILP failed: WindowStart=%d, role=%s.",
                 tau,
                 role,
             )
@@ -768,7 +768,7 @@ def _run_reference_windows(
     result_frame = pd.DataFrame(rows)
     _write_csv(result_frame, VALIDATION_DIR / "q4_reference_window_comparison.csv")
     logging.info(
-        "代表窗口完整MILP汇总已写出：%s。",
+        "Representative full MILP summary written: %s.",
         VALIDATION_DIR / "q4_reference_window_comparison.csv",
     )
     return result_frame
@@ -788,22 +788,22 @@ def _validate_reference_windows(
     _write_csv(selection, VALIDATION_DIR / "q4_reference_window_selection.csv")
     _record(
         records,
-        "代表窗口完整MILP对照",
-        "代表窗口选择",
+        "Representative full MILP reference",
+        "Representative window selection",
         "PASS",
         str(VALIDATION_DIR / "q4_reference_window_selection.csv"),
-        "选择正式窗口耗时接近中位数和耗时最长的两个窗口",
-        "检查正式窗口日志是否完整",
+        "Select two formal windows: near-median runtime and longest runtime",
+        "Check completeness of formal window logs",
         value=selection.to_dict(orient="records"),
     )
     logging.info(
-        "代表窗口已选择：%s。",
+        "Representative windows selected: %s.",
         selection[["Role", "WindowStart", "FormalWindowSeconds"]].to_dict(orient="records"),
     )
 
     comparison: pd.DataFrame | None = None
     if run_reference:
-        logging.info("正式检验：开始运行两个代表窗口的完整联合MILP。")
+        logging.info("Formal validation: running complete joint MILPs for two representative windows.")
         comparison = _run_reference_windows(
             data,
             context,
@@ -817,12 +817,12 @@ def _validate_reference_windows(
         )
         _record(
             records,
-            "代表窗口完整MILP对照",
-            "两个完整联合MILP窗口",
+            "Representative full MILP reference",
+            "Two complete joint MILP windows",
             "PASS" if completed else "FAIL",
             str(VALIDATION_DIR / "q4_reference_window_comparison.csv"),
-            "两个窗口均实际调用原始Q4完整H+K MILP且窗口审计通过",
-            "检查求解状态、可行解、下界和窗口审计",
+            "Both windows invoke the original complete Q4 H+K MILP and pass the window audit",
+            "Inspect solver status, feasible solutions, lower bounds, and window audits",
             value=comparison.to_dict(orient="records"),
             tolerance=mip_gap,
         )
@@ -832,13 +832,13 @@ def _validate_reference_windows(
             "status": "PASS" if completed else "FAIL",
         }
 
-    logging.info("已跳过代表窗口完整MILP，仅检查已有验证文件。")
+    logging.info("Skipped representative full MILPs; checking existing validation files only.")
     existing = VALIDATION_DIR / "q4_reference_window_comparison.csv"
     legacy = VALIDATION_DIR / "q4_validation_window_summary.csv"
     evidence_path = existing if existing.is_file() else legacy if legacy.is_file() else None
     if evidence_path is None:
         status = "WARN"
-        detail = "尚未找到完整联合MILP窗口结果；默认模式不启动300秒求解。"
+        detail = "No complete joint MILP window results found; this file-only check does not start 300-second solves."
     else:
         comparison = _read_csv(evidence_path)
         if "FinalConfirmationModel" in comparison.columns:
@@ -849,18 +849,18 @@ def _validate_reference_windows(
                 else pd.Series(False, index=comparison.index)
             )
             status = "PASS" if len(comparison) >= 2 and bool((full_milp & audit_ok).all()) else "WARN"
-            detail = "已有窗口文件，但需确认每个窗口均为完整MILP并通过窗口审计。"
+            detail = "Window files exist; confirm that each uses the complete MILP and passes the window audit."
         else:
             status = "WARN"
-            detail = "已有验证性窗口文件，但没有完整MILP确认字段。"
+            detail = "Validation window files exist but lack full MILP confirmation fields."
     _record(
         records,
-        "代表窗口完整MILP对照",
-        "完整联合MILP结果",
+        "Representative full MILP reference",
+        "Complete joint MILP results",
         status,
-        str(evidence_path) if evidence_path else "未找到结果文件",
-        "两个代表窗口均有ORIGINAL_Q4_FULL_HK_MILP结果且IndependentAuditPassed为True",
-        "使用--run-reference-windows实际运行两个300秒窗口",
+        str(evidence_path) if evidence_path else "No result file found",
+        "Both representative windows have ORIGINAL_Q4_FULL_HK_MILP results with IndependentAuditPassed=True",
+        "Use --run-reference-windows to run both 300-second windows",
         value=detail,
     )
     return {
@@ -897,7 +897,7 @@ def _reconstruct_scenario_input(
         "low_variability_renewable",
     }
     if kind not in allowed_kinds:
-        raise ValueError(f"情景{directory.name}的ScenarioKind无效：{kind!r}")
+        raise ValueError(f"Scenario {directory.name} has invalid ScenarioKind: {kind!r}")
 
     name = str(scenario.get("ScenarioName") or directory.name)
     baseline_metrics = {
@@ -906,27 +906,27 @@ def _reconstruct_scenario_input(
         if isinstance(value, (int, float, np.integer, np.floating))
     }
     if "Carbon" not in baseline_metrics:
-        raise ValueError(f"情景{directory.name}缺少可用于重建碳约束的基准Carbon指标")
+        raise ValueError(f"Scenario {directory.name} lacks baseline Carbon needed to reconstruct the carbon constraint")
 
     kwargs: dict[str, object] = {"name": name, "kind": kind}
     if kind == "carbon_constraint":
         for key in ("CarbonLambda", "LowCarbonReference"):
             value = scenario.get(key)
             if value is None:
-                raise ValueError(f"情景{directory.name}缺少{key}元数据")
+                raise ValueError(f"Scenario {directory.name} lacks {key} metadata")
             number = float(value)
             if not math.isfinite(number):
-                raise ValueError(f"情景{directory.name}的{key}不是有限数值：{value!r}")
+                raise ValueError(f"Scenario {directory.name}: {key} is not finite: {value!r}")
             kwargs[
                 "carbon_lambda" if key == "CarbonLambda" else "low_carbon_reference"
             ] = number
     elif kind == "low_variability_renewable":
         value = scenario.get("RenewableSmoothingGamma")
         if value is None:
-            raise ValueError(f"情景{directory.name}缺少RenewableSmoothingGamma元数据")
+            raise ValueError(f"Scenario {directory.name} lacks RenewableSmoothingGamma metadata")
         gamma = float(value)
         if not math.isfinite(gamma):
-            raise ValueError(f"情景{directory.name}的RenewableSmoothingGamma不是有限数值：{value!r}")
+            raise ValueError(f"Scenario {directory.name}: RenewableSmoothingGamma is not finite: {value!r}")
         kwargs["renewable_gamma"] = gamma
 
     spec = q4_model.ScenarioSpec(**kwargs)
@@ -938,15 +938,15 @@ def _reconstruct_scenario_input(
     )
     if not factor_check.get("passed"):
         raise ValueError(
-            f"情景{directory.name}重建后的单因素输入检查失败：{factor_check}"
+            f"Scenario {directory.name}: reconstructed single-factor input check failed: {factor_check}"
         )
 
     expected_changed = sorted(str(item) for item in scenario.get("ChangedColumns", []))
     actual_changed = sorted(str(item) for item in generated_metadata.get("ChangedColumns", []))
     if expected_changed != actual_changed:
         raise ValueError(
-            f"情景{directory.name}ChangedColumns不一致："
-            f"marker={expected_changed}，重建={actual_changed}"
+            f"Scenario {directory.name}: ChangedColumns mismatch: "
+            f"marker={expected_changed}, reconstructed={actual_changed}"
         )
     return scenario_data, {
         "metadata": generated_metadata,
@@ -991,7 +991,7 @@ def _validate_scenarios(
                 data, baseline_context, scenario, directory
             )
             logging.info(
-                "情景独立审计：%s，使用情景输入，kind=%s，改变列=%s。",
+                "Independent scenario audit: %s, using scenario inputs, kind=%s, changed columns=%s.",
                 directory.name,
                 kind,
                 scenario_input["changed_columns"],
@@ -1063,12 +1063,12 @@ def _validate_scenarios(
         status = "PASS"
     _record(
         records,
-        "顺序基准与题设情景一致性",
-        "同版本Q4情景结果",
+        "Sequential baseline and problem-specified scenario consistency",
+        "Same-version Q4 scenario results",
         status,
         str(VALIDATION_DIR / "q4_validation_scenario_summary.csv"),
-        "平价、低碳约束和新能源波动情景均使用V4同版本完成标记并通过独立审计",
-        "不要混用matheuristic_v2；补齐缺失情景后重跑检验",
+        "Parity-price, low-carbon constraint, and renewable-variability scenarios use V4 completion markers and pass independent audits",
+        "Do not mix matheuristic_v2; complete missing scenarios before rerunning validation",
         value={
             "formal_scenario_kinds": sorted(formal_kinds),
             "missing_groups": missing_groups,
@@ -1097,48 +1097,48 @@ def _overall_status(records: list[dict[str, object]]) -> tuple[str, dict[str, in
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="问题4独立模型检验")
+    parser = argparse.ArgumentParser(description="Independent Q4 model validation")
     reference_group = parser.add_mutually_exclusive_group()
     reference_group.add_argument(
         "--run-reference-windows",
         dest="run_reference_windows",
         action="store_true",
         default=True,
-        help="实际运行两个代表窗口的完整联合MILP（默认开启）；每个窗口默认300秒",
+        help="Run complete joint MILPs for two representative windows (enabled by default); 300 seconds per window by default",
     )
     reference_group.add_argument(
         "--skip-reference-windows",
         dest="run_reference_windows",
         action="store_false",
-        help="跳过两个完整MILP窗口，仅做已有文件和结果审计",
+        help="Skip both full MILP windows and audit existing files and results only",
     )
     parser.add_argument(
         "--sequential-only",
         action="store_true",
-        help="只审计已经修复的Q2任务种子到V4能源顺序基准，不检查Q4联合基准和情景",
+        help="Audit only the repaired Q2 task seed -> V4 sequential energy baseline, excluding the joint baseline and scenarios",
     )
     parser.add_argument(
         "--comparison-only",
         action="store_true",
-        help="只独立核验按同一V4能源口径复算的顺序任务方案和既有联合任务方案",
+        help="Independently compare sequential and existing joint task schedules recomputed under identical V4 energy definitions",
     )
     parser.add_argument(
         "--reference-time-limit",
         type=float,
         default=REFERENCE_TIME_LIMIT_SECONDS,
-        help="代表窗口完整MILP单窗口时间上限（秒）",
+        help="Full MILP time limit per representative window (seconds)",
     )
     parser.add_argument(
         "--reference-mip-gap",
         type=float,
         default=REFERENCE_MIP_GAP,
-        help="代表窗口完整MILP相对间隙",
+        help="Relative MIP gap for representative full MILPs",
     )
     parser.add_argument(
         "--tolerance",
         type=float,
         default=DEFAULT_TOLERANCE,
-        help="硬约束和指标重算的绝对容差",
+        help="Absolute tolerance for hard constraints and metric recomputation",
     )
     parser.add_argument(
         "--log-level",
@@ -1151,11 +1151,11 @@ def _build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
     if args.tolerance <= 0.0:
-        raise ValueError("--tolerance必须为正数")
+        raise ValueError("--tolerance must be positive")
     if args.reference_time_limit <= 0.0:
-        raise ValueError("--reference-time-limit必须为正数")
+        raise ValueError("--reference-time-limit must be positive")
     if not 0.0 <= args.reference_mip_gap <= 1.0:
-        raise ValueError("--reference-mip-gap必须位于[0,1]")
+        raise ValueError("--reference-mip-gap must lie within [0,1]")
     _configure_logging(args.log_level)
     VALIDATION_DIR.mkdir(parents=True, exist_ok=True)
     records: list[dict[str, object]] = []
@@ -1173,64 +1173,64 @@ def main(argv: list[str] | None = None) -> int:
     if process_check_error:
         _record(
             records,
-            "运行状态",
-            "检查Q4模型进程",
+            "Runtime state",
+            "Inspect Q4 model processes",
             "FAIL",
             process_check_error,
-            "无法确认Q4是否仍在运行时，禁止读取历史完成标记",
-            "修复进程检查环境后重新运行",
+            "Do not read historical completion markers when Q4 process state cannot be confirmed",
+            "Repair process inspection and rerun",
         )
         report["blocked"] = True
         report["block_reason"] = process_check_error
     elif running_processes:
         _record(
             records,
-            "运行状态",
-            "Q4模型尚未完成",
+            "Runtime state",
+            "Q4 model has not finished",
             "WARN",
-            "检测到仍在运行的model.py进程",
-            "只有不存在Q4模型进程时，才允许读取完成标记和正式结果",
-            "等待Q4模型/情景运行结束后重新运行validation.py",
+            "A running model.py process was detected",
+            "Read completion markers and formal results only when no Q4 model process remains",
+            "Wait for the Q4 model/scenario to finish, then rerun validation.py",
             value=running_processes,
         )
         report["blocked"] = True
-        report["block_reason"] = "Q4模型进程仍在运行，未读取任何历史正式结果"
+        report["block_reason"] = "Q4 model process is still running; no historical formal results were read"
     elif q4_model is None:
         _record(
             records,
-            "运行环境",
-            "导入Q4模型模块",
+            "Runtime environment",
+            "Import Q4 model module",
             "FAIL",
             repr(MODEL_IMPORT_ERROR),
-            "validation.py可以导入同目录model.py及其既有依赖",
-            "检查项目虚拟环境和依赖安装",
+            "validation.py can import local model.py and its existing dependencies",
+            "Inspect the project virtual environment and installed dependencies",
         )
     else:
         if args.comparison_only:
             try:
                 result = _validate_comparison_references_only(args.tolerance)
                 logging.info(
-                    "V4统一口径对比定点检验完成：overall=%s，summary=%s。",
+                    "Targeted comparison under unified V4 definitions completed: overall=%s, summary=%s.",
                     "PASS" if result["passed"] else "FAIL",
                     result["summary"],
                 )
                 return 0 if result["passed"] else 2
             except Exception as exc:
-                logging.exception("V4统一口径对比定点检验异常")
-                logging.error("V4统一口径对比定点检验失败：%s", exc)
+                logging.exception("Targeted unified V4 comparison exception")
+                logging.error("Targeted unified V4 comparison failed: %s", exc)
                 return 2
         if args.sequential_only:
             try:
                 result = _validate_sequential_reference_only(args.tolerance)
                 logging.info(
-                    "顺序基准定点检验完成：overall=%s，metrics=%s。",
+                    "Targeted sequential baseline validation completed: overall=%s, metrics=%s.",
                     "PASS" if result["passed"] else "FAIL",
                     result["metrics"],
                 )
                 return 0 if result["passed"] else 2
             except Exception as exc:
-                logging.exception("顺序基准定点检验异常")
-                logging.error("顺序基准定点检验失败：%s", exc)
+                logging.exception("Targeted sequential baseline validation exception")
+                logging.error("Targeted sequential baseline validation failed: %s", exc)
                 return 2
         try:
             data = q4_model.load_data()
@@ -1274,15 +1274,15 @@ def main(argv: list[str] | None = None) -> int:
                     }
                 )
         except Exception as exc:
-            logging.exception("Q4检验执行异常")
+            logging.exception("Q4 validation exception")
             _record(
                 records,
-                "运行环境",
-                "检验主流程",
+                "Runtime environment",
+                "Main validation workflow",
                 "FAIL",
                 repr(exc),
-                "检验流程应在异常输入下明确失败而不是伪造通过",
-                "根据错误信息修正输入或代码",
+                "Validation must explicitly fail on invalid inputs instead of fabricating a pass",
+                "Correct inputs or code according to the error details",
             )
 
     overall, counts = _overall_status(records)
@@ -1300,14 +1300,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     _atomic_write_json(report_path := VALIDATION_DIR / "q4_validation_report.json", report)
     logging.info(
-        "Q4独立检验完成：overall=%s，PASS=%d，WARN=%d，FAIL=%d。",
+        "Independent Q4 validation completed: overall=%s, PASS=%d, WARN=%d, FAIL=%d.",
         overall,
         counts["PASS"],
         counts["WARN"],
         counts["FAIL"],
     )
-    logging.info("检验汇总：%s", VALIDATION_DIR / "q4_validation_summary.csv")
-    logging.info("检验报告：%s", report_path)
+    logging.info("Validation summary: %s", VALIDATION_DIR / "q4_validation_summary.csv")
+    logging.info("Validation report: %s", report_path)
     return 0 if overall == "PASS" else 1 if overall == "WARN" else 2
 
 

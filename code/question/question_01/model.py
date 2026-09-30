@@ -1,14 +1,16 @@
-"""问题1模型：分层短期预测、基准对照和基础算力调度。
+"""Question 1: hierarchical short-term forecasting, baseline comparison, and compute scheduling.
 
-预测链与调度链严格分开：
+Forecasting and scheduling are separate:
 
-* 正式预测模型：预测区域边际、任务类型边际和系统总量，再做层级一致性恢复；
-* 可选基准模型：24小时同刻朴素基线；
-* 调度模型：只使用2376--2399小时实际到达任务，不使用任何预测值。
+* Main forecast: predict regional and task-type margins and the system total,
+  then reconcile the hierarchy.
+* Optional baseline: a naive forecast from the same hour 24 hours earlier.
+* Scheduling: use only actual arrivals during hours 2376--2399, never forecasts.
 
-调度部分按文档中的两级目标建立0-1模型：先最小化跨区域迁移GPU工作量，再在
-第一目标最优的条件下最小化弹性任务等待时间。精确求解需要用户环境提供
-``scipy.optimize.milp``；本文件不修改项目依赖。
+The binary scheduling model first minimizes interregional migrated GPU workload,
+then minimizes flexible-task waiting time while fixing the first optimum. Exact
+solving requires ``scipy.optimize.milp`` in the existing environment. This module
+does not change project dependencies.
 """
 
 from __future__ import annotations
@@ -102,11 +104,11 @@ CAPACITY_COLUMNS = [
 
 def _read_csv(path: Path, required_columns: Iterable[str]) -> pd.DataFrame:
     if not path.is_file():
-        raise FileNotFoundError(f"找不到模型输入表：{path}")
+        raise FileNotFoundError(f"Model input table not found: {path}")
     frame = pd.read_csv(path, encoding="utf-8-sig")
     missing = [column for column in required_columns if column not in frame.columns]
     if missing:
-        raise ValueError(f"{path.name}缺少模型必需字段：{missing}")
+        raise ValueError(f"{path.name} is missing required model columns: {missing}")
     return frame
 
 
@@ -117,13 +119,13 @@ def _read_model_inputs() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.D
     capacity = _read_csv(Q1_DIR / "region_hour_capacity.csv", CAPACITY_COLUMNS)
 
     if panel.duplicated(["Hour", *SERIES_COLUMNS]).any():
-        raise ValueError("hourly_demand_panel不是唯一的Hour×SourceRegion×TaskType粒度")
+        raise ValueError("hourly_demand_panel must have unique Hour x SourceRegion x TaskType keys")
     if tasks["TaskID"].duplicated().any():
-        raise ValueError("tasks_clean的TaskID不唯一")
+        raise ValueError("tasks_clean contains duplicate TaskID values")
     if candidates.duplicated(["TaskID", "TargetRegion"]).any():
-        raise ValueError("task_candidate_regions存在重复的TaskID×TargetRegion记录")
+        raise ValueError("task_candidate_regions contains duplicate TaskID x TargetRegion records")
     if capacity.duplicated(["Hour", "Region"]).any():
-        raise ValueError("region_hour_capacity存在重复的Hour×Region记录")
+        raise ValueError("region_hour_capacity contains duplicate Hour x Region records")
 
     panel["Hour"] = pd.to_numeric(panel["Hour"], errors="raise").astype("int64")
     panel["Task_Count"] = pd.to_numeric(panel["Task_Count"], errors="raise")
@@ -135,7 +137,7 @@ def _read_model_inputs() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.D
     )
     capacity["Hour"] = pd.to_numeric(capacity["Hour"], errors="raise").astype("int64")
     if not capacity["Hour"].between(TEST_START_HOUR, TAIL_END_HOUR).all():
-        raise ValueError("Q1容量表必须覆盖2376--2405小时，不能含2406任务执行容量")
+        raise ValueError("Q1 capacity must cover hours 2376--2405 and exclude task execution capacity at hour 2406")
     return panel, tasks, candidates, capacity
 
 
@@ -143,7 +145,7 @@ HIERARCHY_LEVELS = ("Region", "TaskType", "System")
 
 
 def _aggregate_hourly_demand(panel: pd.DataFrame, level: str) -> pd.DataFrame:
-    """把18条底层小时序列聚合到区域、任务类型或系统层。"""
+    """Aggregate the 18 bottom-level hourly series by region, task type, or system."""
 
     if level == "Region":
         result = (
@@ -169,7 +171,7 @@ def _aggregate_hourly_demand(panel: pd.DataFrame, level: str) -> pd.DataFrame:
         )
         result["Entity"] = "ALL"
     else:
-        raise ValueError(f"未知需求聚合层级：{level}")
+        raise ValueError(f"Unknown demand aggregation level: {level}")
     result["Entity"] = result["Entity"].astype(str)
     return result[["Hour", "Entity", "Demand"]]
 
@@ -181,7 +183,7 @@ def _hierarchy_entities(panel: pd.DataFrame, level: str) -> list[str]:
         return sorted(panel["TaskType"].astype(str).unique())
     if level == "System":
         return ["ALL"]
-    raise ValueError(f"未知需求聚合层级：{level}")
+    raise ValueError(f"Unknown demand aggregation level: {level}")
 
 
 def _history_mean_parameters(
@@ -190,7 +192,7 @@ def _history_mean_parameters(
     history_start_hour = max(TRAIN_START_HOUR, fit_end_hour - history_window_hours + 1)
     window = history.loc[history["Hour"].between(history_start_hour, fit_end_hour)].copy()
     if window.empty:
-        raise ValueError("局部均值预测缺少有效历史窗口")
+        raise ValueError("Local-mean forecasting has no valid historical window")
 
     parameters: list[dict[str, object]] = []
     level_means: dict[str, pd.DataFrame] = {}
@@ -249,7 +251,7 @@ def _build_cross_level_prior(history: pd.DataFrame) -> tuple[list[str], list[str
         prior = np.full(matrix.shape, 1.0 / matrix.size, dtype=float)
     else:
         prior = matrix / total
-        # 防止历史窗口内某个区域×类型单元为零而导致IPF无法满足正边际。
+        # Avoid zero historical region/type cells that prevent IPF from matching positive margins.
         prior = prior + 1e-12
         prior = prior / prior.sum()
     return regions, task_types, prior
@@ -260,7 +262,7 @@ def _ipf_reconcile(
     column_targets: np.ndarray,
     prior: np.ndarray,
 ) -> np.ndarray:
-    """用迭代比例拟合求解满足区域/类型边际的最小改动交叉矩阵。"""
+    """Use iterative proportional fitting for the least-change matrix matching both margins."""
 
     rows = np.maximum(np.asarray(row_targets, dtype=float), 0.0)
     columns = np.maximum(np.asarray(column_targets, dtype=float), 0.0)
@@ -290,7 +292,7 @@ def _ipf_reconcile(
         if residual <= tolerance:
             break
     else:
-        raise RuntimeError("层级一致性恢复的IPF迭代未在限定次数内收敛")
+        raise RuntimeError("Hierarchical reconciliation IPF did not converge within the iteration limit")
     return matrix
 
 
@@ -301,12 +303,12 @@ def _hierarchical_local_mean_prediction(
     fit_end_hour: int,
     history_window_hours: int,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """预测区域/类型/系统边际，并恢复18个区域×类型交叉单元。"""
+    """Forecast regional, type, and system margins and recover 18 region/type cells."""
 
     history = panel.loc[panel["Hour"].between(TRAIN_START_HOUR, fit_end_hour)].copy()
     target = panel.loc[panel["Hour"].between(target_start_hour, target_end_hour)].copy()
     if history.empty or target.empty:
-        raise ValueError("分层局部均值预测缺少历史或目标小时数据")
+        raise ValueError("Hierarchical local-mean forecasting is missing history or target-hour data")
 
     parameters, level_means = _history_mean_parameters(
         history, fit_end_hour, history_window_hours
@@ -422,7 +424,7 @@ def _same_hour_prediction(
         validate="one_to_one",
     )
     if target["Prediction"].isna().any():
-        raise ValueError("24小时同刻基线缺少t-24历史值")
+        raise ValueError("The 24-hour same-hour baseline is missing t-24 history")
     target["Prediction"] = target["Prediction"].clip(lower=0.0)
     target["Model"] = SAME_HOUR_MODEL
     target["FitEndHour"] = target_start_hour - SAME_HOUR_LAG
@@ -564,7 +566,7 @@ def _build_hierarchy_metrics(hierarchy_predictions: pd.DataFrame) -> pd.DataFram
 
 
 def _build_aggregation_sensitivity(predictions: pd.DataFrame) -> pd.DataFrame:
-    """汇总小时层级与系统日度层级，说明聚合尺度对误差和样本量的影响。"""
+    """Summarize hourly and daily system levels to show aggregation effects on error and sample size."""
 
     main = predictions.loc[predictions["Model"].eq(FORECAST_MODEL)].copy()
     main["DayIndex"] = (main["Hour"] // 24).astype(int)
@@ -652,7 +654,7 @@ def _build_forecast_parameters(
 def _build_rolling_backtest(
     panel: pd.DataFrame, history_window_hours: int
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """在训练区间内复现68个非重叠24小时历史窗口，检验主模型与基准的稳定性。"""
+    """Reproduce 68 nonoverlapping historical 24-hour windows to assess model and baseline stability."""
 
     starts = [
         ROLLING_HISTORY_HOURS + ROLLING_HORIZON_HOURS * index
@@ -661,15 +663,15 @@ def _build_rolling_backtest(
     expected_last_start = TRAIN_END_HOUR - ROLLING_HORIZON_HOURS + 1
     if starts[-1] != expected_last_start:
         raise ValueError(
-            f"滚动窗口配置错误：最后起点应为{expected_last_start}，实际为{starts[-1]}"
+            f"Invalid rolling-window configuration: expected last start {expected_last_start}; actual {starts[-1]}"
         )
 
-    logging.info("滚动回测开始：共%d个24小时窗口。", len(starts))
+    logging.info("Rolling backtest started: %d windows of 24 hours.", len(starts))
     rows: list[dict[str, object]] = []
     for window_id, start in enumerate(starts, start=1):
         if window_id == 1 or window_id % 10 == 0 or window_id == len(starts):
             logging.info(
-                "滚动回测进度：%d/%d，目标区间=%d--%d。",
+                "Rolling backtest progress: %d/%d, target hours=%d--%d.",
                 window_id,
                 len(starts),
                 start,
@@ -710,7 +712,7 @@ def _build_rolling_backtest(
         .reset_index(drop=True)
     )
     logging.info(
-        "滚动回测完成：明细%d行，模型%d个。",
+        "Rolling backtest completed: %d detail rows, %d models.",
         len(details),
         summary["Model"].nunique(),
     )
@@ -739,7 +741,7 @@ class DispatchOption:
 
 def _task_start_hours(task: pd.Series, start_step_hours: float = 1.0) -> list[float]:
     if not math.isfinite(start_step_hours) or start_step_hours <= 0:
-        raise ValueError("开工时刻粒度必须是正数")
+        raise ValueError("Start-time resolution must be positive")
     task_type = str(task["TaskType"])
     arrival = int(task["ArrivalHour"])
     earliest = int(task["EarliestStartHour"])
@@ -766,8 +768,8 @@ def _task_start_hours(task: pd.Series, start_step_hours: float = 1.0) -> list[fl
     ]
     if not valid:
         raise ValueError(
-            f"任务{task['TaskID']}没有满足实时/最早开工/最晚完成/2406终端边界的"
-            f"{start_step_hours}小时粒度开工时刻"
+            f"Task {task['TaskID']} has no start time satisfying real-time, earliest-start, latest-finish, and hour-2406 boundaries at "
+            f"{start_step_hours}-hour resolution"
         )
     return valid
 
@@ -794,7 +796,7 @@ def _build_dispatch_options(
         tasks["ArrivalHour"].between(TEST_START_HOUR, TEST_END_HOUR)
     ].copy()
     if dispatch_tasks.empty:
-        raise ValueError("2376--2399小时没有可供基础调度的实际任务")
+        raise ValueError("No actual arrivals during hours 2376--2399 are available for compute scheduling")
 
     task_ids = set(dispatch_tasks["TaskID"])
     candidate_groups = {
@@ -811,7 +813,7 @@ def _build_dispatch_options(
         task_id = task["TaskID"]
         candidate_rows = candidate_groups.get(task_id)
         if candidate_rows is None or candidate_rows.empty:
-            raise ValueError(f"任务{task_id}没有可行候选区域")
+            raise ValueError(f"Task {task_id} has no feasible candidate region")
         starts = _task_start_hours(task, start_step_hours=start_step_hours)
         duration = float(task["Duration_h"])
         for _, candidate in candidate_rows.sort_values("TargetRegion", kind="stable").iterrows():
@@ -851,7 +853,7 @@ def _build_dispatch_options(
                 option_id += 1
 
     if not options:
-        raise ValueError("没有生成任何任务—区域—开工时刻候选组合")
+        raise ValueError("No task/region/start-time candidate combinations were generated")
     option_frame = pd.DataFrame(
         {
             "TaskID": [option.task_id for option in options],
@@ -870,8 +872,8 @@ def _build_dispatch_constraints(
         from scipy.sparse import coo_matrix
     except ImportError as exc:
         raise RuntimeError(
-            "基础算力调度的精确两级0-1模型需要scipy；当前项目环境未安装scipy，"
-            "请先在比赛环境中确认并安装与Python兼容的scipy。"
+            "Exact two-stage binary compute scheduling requires scipy, which is absent from this environment. "
+            "Verify and install a Python-compatible scipy version in the competition environment first."
         ) from exc
 
     task_ids = [str(task_id) for task_id in dispatch_tasks["TaskID"]]
@@ -879,7 +881,7 @@ def _build_dispatch_constraints(
     capacity = capacity.sort_values(["Hour", "Region"], kind="stable").reset_index(drop=True)
     capacity_keys = list(zip(capacity["Hour"].astype(int), capacity["Region"].astype(str)))
     if len(set(capacity_keys)) != len(capacity_keys):
-        raise ValueError("容量表Hour×Region键不唯一")
+        raise ValueError("Capacity table Hour x Region keys must be unique")
     capacity_row = {key: index for index, key in enumerate(capacity_keys)}
 
     assignment_count = len(task_ids)
@@ -898,14 +900,14 @@ def _build_dispatch_constraints(
 
     for column, option in enumerate(options):
         if option.task_id not in task_row:
-            raise ValueError(f"候选组合包含不在调度任务集中的TaskID：{option.task_id}")
+            raise ValueError(f"Candidates include TaskID values outside the scheduling task set: {option.task_id}")
         row_indices.append(task_row[option.task_id])
         column_indices.append(column)
         values.append(1.0)
         for hour, overlap in option.overlap_by_hour:
             key = (hour, option.target_region)
             if key not in capacity_row:
-                raise ValueError(f"候选组合超出容量表时域或区域：{key}")
+                raise ValueError(f"Candidates exceed the capacity-table time horizon or region set: {key}")
             row_indices.extend([gpu_row[key], power_row[key]])
             column_indices.extend([column, column])
             values.extend(
@@ -943,14 +945,14 @@ def _solve_two_stage_dispatch(
         from scipy.sparse import csr_matrix, vstack
     except ImportError as exc:
         raise RuntimeError(
-            "基础算力调度需要scipy.optimize.milp；当前环境未安装scipy。"
+            "Compute scheduling requires scipy.optimize.milp; scipy is absent from this environment."
         ) from exc
 
     matrix, lower, upper, migration_objective, wait_objective = _build_dispatch_constraints(
         options, dispatch_tasks, capacity
     )
     logging.info(
-        "调度候选已生成：任务%d个、候选组合%d个、约束行%d。",
+        "Scheduling candidates generated: %d tasks, %d combinations, %d constraint rows.",
         len(dispatch_tasks),
         len(options),
         len(upper),
@@ -960,7 +962,7 @@ def _solve_two_stage_dispatch(
     bounds = Bounds(np.zeros(variable_count), np.ones(variable_count))
     base_constraint = LinearConstraint(matrix, lower, upper)
 
-    logging.info("调度第一阶段开始：最小化跨区迁移GPU工作量F1。")
+    logging.info("Scheduling stage 1 started: minimize migrated GPU workload F1.")
     stage_one = milp(
         c=migration_objective,
         integrality=integrality,
@@ -969,10 +971,10 @@ def _solve_two_stage_dispatch(
         options={"disp": False},
     )
     if not stage_one.success or stage_one.x is None:
-        raise RuntimeError(f"第一阶段调度求解失败：{stage_one.message}")
+        raise RuntimeError(f"Scheduling stage 1 failed: {stage_one.message}")
     f1_star = float(np.dot(migration_objective, np.rint(stage_one.x)))
     logging.info(
-        "调度第一阶段完成：status=%d，F1*=%.6f，gap=%s。",
+        "Scheduling stage 1 completed: status=%d, F1*=%.6f, gap=%s.",
         int(stage_one.status),
         f1_star,
         getattr(stage_one, "mip_gap", np.nan),
@@ -982,7 +984,7 @@ def _solve_two_stage_dispatch(
     stage_two_matrix = vstack([matrix, f1_row], format="csr")
     stage_two_lower = np.concatenate([lower, [f1_star - 1e-8]])
     stage_two_upper = np.concatenate([upper, [f1_star + 1e-8]])
-    logging.info("调度第二阶段开始：固定F1=F1*，最小化弹性任务等待F2。")
+    logging.info("Scheduling stage 2 started: fix F1=F1* and minimize flexible-task waiting F2.")
     stage_two = milp(
         c=wait_objective,
         integrality=integrality,
@@ -993,14 +995,14 @@ def _solve_two_stage_dispatch(
         options={"disp": False},
     )
     if not stage_two.success or stage_two.x is None:
-        raise RuntimeError(f"第二阶段调度求解失败：{stage_two.message}")
+        raise RuntimeError(f"Scheduling stage 2 failed: {stage_two.message}")
     selected = np.rint(stage_two.x).astype(int)
     f1_check = float(np.dot(migration_objective, selected))
     if not math.isclose(f1_check, f1_star, rel_tol=0.0, abs_tol=1e-6):
-        raise RuntimeError(f"第二阶段没有保持第一阶段最优迁移目标：{f1_check} != {f1_star}")
+        raise RuntimeError(f"Stage 2 did not preserve the optimal stage-1 migration objective: {f1_check} != {f1_star}")
     f2_star = float(np.dot(wait_objective, selected))
     logging.info(
-        "调度第二阶段完成：status=%d，F2*=%.6f，gap=%s。",
+        "Scheduling stage 2 completed: status=%d, F2*=%.6f, gap=%s.",
         int(stage_two.status),
         f2_star,
         getattr(stage_two, "mip_gap", np.nan),
@@ -1008,7 +1010,7 @@ def _solve_two_stage_dispatch(
     selected_indices = np.flatnonzero(selected == 1)
     counts = pd.Series([options[index].task_id for index in selected_indices]).value_counts()
     if len(counts) != len(dispatch_tasks) or not (counts == 1).all():
-        raise RuntimeError("调度结果未满足每个任务恰好执行一次")
+        raise RuntimeError("The schedule does not execute each task exactly once")
     def _result_value(result: object, name: str) -> float:
         value = getattr(result, name, np.nan)
         try:
@@ -1112,17 +1114,17 @@ def _build_dispatch_resource_profile(
 
 def _validate_dispatch_result(profile: pd.DataFrame, assignments: pd.DataFrame) -> None:
     if assignments["TaskID"].duplicated().any():
-        raise RuntimeError("调度输出中存在重复任务")
+        raise RuntimeError("Scheduling output contains duplicate tasks")
     if not (assignments["NetworkLatency_ms"] <= assignments["MaxLatency_ms"] + 1e-9).all():
-        raise RuntimeError("调度结果存在网络时延约束违规")
+        raise RuntimeError("The schedule violates network latency constraints")
     if not (assignments["FinishHour"] <= TERMINAL_HOUR + 1e-9).all():
-        raise RuntimeError("调度结果占用或越过第2406小时")
+        raise RuntimeError("The schedule occupies or exceeds hour 2406")
     if (profile["GPU_Slack"] < -1e-7).any():
-        raise RuntimeError("调度结果存在GPU容量违规")
+        raise RuntimeError("The schedule violates GPU capacity")
     if (profile["IT_Slack_MW"] < -1e-7).any():
-        raise RuntimeError("调度结果存在IT功率违规")
+        raise RuntimeError("The schedule violates IT power limits")
     if (profile["Facility_Slack_MW"] < -1e-7).any():
-        raise RuntimeError("调度结果存在设施功率违规")
+        raise RuntimeError("The schedule violates facility power limits")
 
 
 def _build_dispatch_summary(
@@ -1173,7 +1175,7 @@ def _build_dispatch_summary(
 
 def _write_table(frame: pd.DataFrame, filename: str) -> None:
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
-    # 保留足够浮点精度，避免检验器从CSV重新汇总时把IPF闭合误判为现实误差。
+    # Retain precision so CSV reaggregation does not mistake IPF rounding for reconciliation errors.
     frame.to_csv(
         TABLES_DIR / filename,
         index=False,
@@ -1188,10 +1190,10 @@ def main() -> int:
         format="%(asctime)s | %(levelname)s | %(message)s",
         force=True,
     )
-    logging.info("Q1模型求解开始：读取共享任务、候选区域、需求面板和容量表。")
+    logging.info("Q1 modeling started: reading shared tasks, candidate regions, demand panel, and capacity.")
     panel, tasks, candidates, capacity = _read_model_inputs()
     logging.info(
-        "输入读取完成：需求面板%d行、任务%d个、候选区域记录%d行、容量记录%d行。",
+        "Inputs loaded: %d demand rows, %d tasks, %d candidate-region rows, %d capacity rows.",
         len(panel),
         len(tasks),
         len(candidates),
@@ -1199,15 +1201,15 @@ def main() -> int:
     )
 
     logging.info(
-        "预测阶段1/7：在2352--2375验证期比较局部均值窗口%s。",
+        "Forecast stage 1/7: compare local-mean windows %s on validation hours 2352--2375.",
         HISTORY_WINDOW_CANDIDATES,
     )
     selected_window_hours, window_selection = _select_history_window(panel)
     logging.info(
-        "验证期窗口选择完成：H*=%d小时，按验证期总体WAPE选择，测试期不参与选模。",
+        "Window selected: H*=%d hours by overall validation WAPE; test data were excluded from selection.",
         selected_window_hours,
     )
-    logging.info("预测阶段2/7：使用H*计算2352--2375验证期分层预测和24小时基准。")
+    logging.info("Forecast stage 2/7: compute hierarchical and 24-hour baseline forecasts for validation hours 2352--2375 using H*.")
     validation_predictions, validation_hierarchy, validation_parameters = _forecast_window(
         panel,
         VALIDATION_START_HOUR,
@@ -1217,8 +1219,8 @@ def main() -> int:
     )
     validation_predictions["Split"] = "validation"
     validation_hierarchy["Split"] = "validation"
-    logging.info("验证期预测完成：%d行。", len(validation_predictions))
-    logging.info("预测阶段3/7：使用0--2375信息计算2376--2399测试期预测。")
+    logging.info("Validation forecasts completed: %d rows.", len(validation_predictions))
+    logging.info("Forecast stage 3/7: predict test hours 2376--2399 using information from hours 0--2375.")
     test_predictions, test_hierarchy, test_parameters = _forecast_window(
         panel,
         TEST_START_HOUR,
@@ -1228,7 +1230,7 @@ def main() -> int:
     )
     test_predictions["Split"] = "test"
     test_hierarchy["Split"] = "test"
-    logging.info("测试期预测完成：%d行。", len(test_predictions))
+    logging.info("Test forecasts completed: %d rows.", len(test_predictions))
     predictions = pd.concat(
         [validation_predictions, test_predictions], ignore_index=True
     )
@@ -1247,12 +1249,12 @@ def main() -> int:
     hierarchy_predictions = pd.concat(
         [validation_hierarchy, test_hierarchy], ignore_index=True
     ).sort_values(["Split", "Level", "Entity", "Hour"], kind="stable")
-    logging.info("预测阶段4/7：汇总底层、区域、任务类型和系统层WAPE、RMSE、MAE。")
+    logging.info("Forecast stage 4/7: aggregate WAPE, RMSE, and MAE at bottom, region, type, and system levels.")
     metrics = _build_metrics(predictions)
     hierarchy_metrics = _build_hierarchy_metrics(hierarchy_predictions)
     parameters = _build_forecast_parameters(validation_parameters, test_parameters)
     aggregation_sensitivity = _build_aggregation_sensitivity(predictions)
-    logging.info("预测阶段5/7：执行68个历史24小时滚动回测窗口。")
+    logging.info("Forecast stage 5/7: run 68 historical 24-hour rolling backtest windows.")
     rolling_details, rolling_summary = _build_rolling_backtest(
         panel, selected_window_hours
     )
@@ -1266,15 +1268,15 @@ def main() -> int:
     _write_table(rolling_details, "forecast_rolling_backtest.csv")
     _write_table(rolling_summary, "forecast_rolling_summary.csv")
     logging.info(
-        "预测阶段6/7完成：已写入底层预测、分层边际、窗口选择、聚合尺度和滚动回测结果。"
+        "Forecast stage 6/7 completed: bottom forecasts, margins, window selection, scale summaries, and backtests saved."
     )
 
-    logging.info("调度阶段1/3：筛选2376--2399小时实际到达任务并生成1小时候选。")
+    logging.info("Scheduling stage 1/3: select actual arrivals during hours 2376--2399 and generate hourly candidates.")
     dispatch_tasks = tasks.loc[
         tasks["ArrivalHour"].between(TEST_START_HOUR, TEST_END_HOUR)
     ].copy()
     _, options = _build_dispatch_options(tasks, candidates)
-    logging.info("调度阶段2/3：调用两级MILP求解器。")
+    logging.info("Scheduling stage 2/3: invoke the two-stage MILP solver.")
     (
         selected,
         f1_star,
@@ -1308,8 +1310,8 @@ def main() -> int:
     _write_table(assignments, "dispatch_assignments.csv")
     _write_table(profile, "dispatch_resource_profile.csv")
     _write_table(summary, "dispatch_summary.csv")
-    logging.info("调度阶段3/3完成：已写入任务分配、资源剖面和求解摘要。")
-    logging.info("预测阶段7/7：问题1分层预测、基准对照和两级基础调度模型已生成结果表。")
+    logging.info("Scheduling stage 3/3 completed: assignments, resource profiles, and solver summary saved.")
+    logging.info("Forecast stage 7/7: Q1 hierarchical forecasts, baseline comparisons, and two-stage schedules are saved.")
     return 0
 
 
