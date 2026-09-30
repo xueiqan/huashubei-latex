@@ -2,6 +2,10 @@
 
 Programs for demand forecasting, computing dispatch, storage optimization, and joint computing-storage-power optimization. See the [repository README](../README.md) for the project overview, paper, and frozen submissions.
 
+## Source license
+
+The [zlib License](LICENSE) permits use, modification, and redistribution of covered original project source, including commercial use. Do not misrepresent its origin or claim that you wrote the original code. Mark altered source versions and retain the license notice in source distributions. Acknowledgment in product documentation is appreciated but is not required. Third-party code, dependencies, data, results, paper assets, and frozen archives retain their respective rights and licenses and are excluded from this code grant.
+
 ## Set up and run
 
 Open this directory in PyCharm and select `.venv/Scripts/python.exe` as the interpreter. The existing local environment was retained during the directory move. For a fresh checkout, run `uv sync --frozen` here to synchronize the environment from `pyproject.toml` and `uv.lock`. Python 3.12 or later is required.

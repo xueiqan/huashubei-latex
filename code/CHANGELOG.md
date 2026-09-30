@@ -2,6 +2,13 @@
 
 Historical entries describe checks performed at the time of each change. They are not new verification claims for the current translated source. Relative paths below are rooted at `code/` unless stated otherwise. No dependency was added by the English revision.
 
+## 2026-09-30 (Source code license)
+
+- Added the standard zlib License in `code/LICENSE` under the repository owner's stated conditions: use, modification, and redistribution are permitted, including commercial use; the origin must not be misrepresented and users must not claim authorship of the original code. Altered source must be marked, and source distributions must preserve the license notice.
+- Updated the root and code READMEs to state the scope and restrictions. The license applies only to original project source authorized by its rights holders; third-party materials, data, results, paper assets, and frozen archives retain their respective rights and licenses.
+- The zlib License is OSI-approved. Product-documentation acknowledgment is appreciated but not required by its standard terms. Program eligibility and selection remain subject to the provider's review.
+- Verification: license scope and required conditions checked; documentation links and Git whitespace checks passed. No algorithms, dependencies, data, historical artifacts, commits, or remote publication changed in this update.
+
 ## 2026-09-30 (English text and filenames)
 
 - Scope: active documentation, this change log, editable LaTeX text, Python comments/docstrings and display messages, run-configuration names, and repository filenames.

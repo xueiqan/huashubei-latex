@@ -142,6 +142,8 @@ The paper uses XeLaTeX with Windows font settings, Times New Roman, and Consolas
 
 ## License and feedback
 
-There is currently no repository-wide LICENSE. Check the ownership and applicable permissions of source code, team papers, problem data, organizer documents, and cited material separately. This README does not grant new permissions for those materials.
+Original project source code is provided under the [zlib License](code/LICENSE), an [OSI-approved open-source license](https://opensource.org/license/zlib). Commercial use, modification, and redistribution are permitted. Do not misrepresent the origin or claim authorship of the original code. Clearly mark altered source versions and retain the license notice in source distributions. Acknowledgment in product documentation is appreciated but is not required by the license.
+
+The code license covers only original source that its copyright holders have authorized under these terms. Third-party code and dependencies, input datasets, computational results, paper text, figures, organizer materials, and frozen archives retain their respective rights and licenses. Check their permissions separately.
 
 Report reproduction issues, inconsistent result definitions, or documentation errors through [Issues](https://github.com/xueiqan/huashubei-latex/issues), or propose improvements in a pull request. Include the commit, question number, command, Python/dependency versions, relevant logs, and expected behavior.
