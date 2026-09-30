@@ -13,59 +13,68 @@
 | 问题三 | 给定IT负荷下的储能、购售电协同优化与能源约束复核 |
 | 问题四 | 算力任务、储能与电力的联合优化；顺序基准对照、情景分析和独立审计 |
 
-每问均包含预处理、模型、检验与绘图模块。当前可浏览的题目程序共24个Python文件；历史源码备份另存于结果目录，不作为默认运行入口。
+每问均包含预处理、模型、检验与绘图模块。当前可浏览的题目程序共24个Python文件；历史源码备份另存于archive/source-backups，不作为默认运行入口。
 
 ## 从哪里开始
 
-- **查看程序**：[huashubei code](huashubei%20code/)。
-- **阅读论文**：[main.pdf](main.pdf)；LaTeX入口为[main.tex](main.tex)，正文位于[sections](sections/)，图片位于[figures](figures/)。
-- **查看提交材料与归档**：[haushubei submit](haushubei%20submit/)。
-- **区分竞赛原版与赛后修订版**：[归档说明](haushubei%20submit/归档/2026华数杯_C题_CCM2601033_20260818/00_归档说明/README_归档说明.md)。
+| 目录 | 内容与入口 |
+| --- | --- |
+| [code/](code/) | Python源码、依赖配置和各题运行数据；[运行说明](code/README.md) |
+| [paper/](paper/) | LaTeX正文、参考文献、论文图库和现有PDF；[编译说明](paper/README.md) |
+| [materials/](materials/) | [赛题及附件](materials/problems/)与[赛方规则文件](materials/rules/) |
+| [archive/](archive/) | 冻结的提交材料、历史结果和源码备份 |
+| [docs/](docs/) | 赛前执行清单及[目录与版本说明](docs/structure.md) |
 
-目录名中的空格以及`haushubei submit`的现有拼写均按仓库实际结构保留。
+阅读论文可直接打开[paper/main.pdf](paper/main.pdf)，编译入口为[paper/main.tex](paper/main.tex)。竞赛原版与赛后修订版的区别见[归档说明](archive/2026华数杯_C题_CCM2601033_20260818/00_归档说明/README_归档说明.md)。
 
 ```text
 huashubei-latex/
 ├── README.md
-├── huashubei code/
+├── code/
+│   ├── README.md
+│   ├── CHANGELOG.md
 │   ├── pyproject.toml
 │   ├── uv.lock
 │   ├── main.py
 │   └── question/
-│       ├── question_01/
-│       ├── question_02/
-│       ├── question_03/
-│       └── question_04/
-│           ├── main.py
-│           ├── preprocess.py
-│           ├── model.py
-│           ├── validation.py
-│           ├── plot.py
-│           ├── data/
-│           └── outputs/
-├── haushubei submit/
-├── main.tex
-├── main.pdf
-├── references.tex
-├── sections/
-└── figures/
+│       └── question_01 … question_04/
+│           ├── main.py / preprocess.py / model.py
+│           ├── validation.py / plot.py
+│           ├── data/          # 运行输入及处理后数据
+│           └── outputs/       # 计算结果、图形、日志与检查点
+├── paper/
+│   ├── main.tex / references.tex / main.pdf
+│   ├── sections/
+│   ├── figures/
+│   └── build/                 # 本地编译产物，不提交
+├── materials/
+│   ├── problems/
+│   └── rules/
+├── archive/
+│   ├── 2026华数杯_C题_CCM2601033_20260818/
+│   ├── submission-copies/
+│   ├── source-backups/question_04/
+│   └── legacy-results/question_01/
+└── docs/
 ```
+
+各题的运行数据和结果保留在对应题目目录中，保持源码、共享输入和检查点的相对路径关系；冻结提交件与旧备份独立存入archive。
 
 ## 运行环境与数据
 
-Python版本要求为3.12及以上。依赖由[pyproject.toml](huashubei%20code/pyproject.toml)声明，[uv.lock](huashubei%20code/uv.lock)记录锁定版本，包括NumPy、pandas、SciPy、HiGHS/highspy、Matplotlib、Seaborn和OpenPyXL。
+Python版本要求为3.12及以上。依赖由[pyproject.toml](code/pyproject.toml)声明，[uv.lock](code/uv.lock)记录锁定版本，包括NumPy、pandas、SciPy、HiGHS/highspy、Matplotlib、Seaborn和OpenPyXL。
 
 在已经安装Git、Python与uv的环境中，下载并进入代码目录：
 
 ```powershell
 git clone https://github.com/xueiqan/huashubei-latex.git
-Set-Location './huashubei-latex/huashubei code'
+Set-Location './huashubei-latex/code'
 uv sync --frozen
 ```
 
-通过网页下载ZIP时，先解压仓库，再进入其中的`huashubei code`目录。也可以用PyCharm打开该目录，选用uv同步出的项目环境，按问题一至问题四依次运行各题的`main.py`。
+通过网页下载ZIP时，先解压仓库，再进入其中的`code`目录。也可以用PyCharm打开该目录，选用uv同步出的项目环境，按问题一至问题四依次运行各题的`main.py`。
 
-问题一读取的6份原始Excel已位于[question/question_01/data/raw](huashubei%20code/question/question_01/data/raw/)：
+问题一读取的6份原始Excel已位于[question/question_01/data/raw](code/question/question_01/data/raw/)：
 
 ```text
 GPU_information.xlsx
@@ -80,7 +89,7 @@ workload_trace.xlsx
 
 ## 运行与复核
 
-建议在单独的工作副本中运行，以保留随仓库提供的历史结果。进入`huashubei code`后，按顺序执行：
+建议在单独的工作副本中运行，以保留随仓库提供的历史结果。进入`code`后，按顺序执行：
 
 ```powershell
 uv run python question/question_01/main.py
@@ -127,7 +136,7 @@ uv run python question/question_04/validation.py --skip-reference-windows
 - 数学启发式结果在通过检验后可说明给定数据、参数和边界下的可行性；不据此宣称全局最优。
 - 当前README依据仓库源码与文件结构整理，尚未完成新环境下的全流程复现验证。
 
-LaTeX主文件指定XeLaTeX，并使用Windows中文字体配置以及Times New Roman/Consolas。编译需要相应TeX环境与字体；仓库已有PDF可直接阅读。主文件中的参赛编号、题名和正文是本项目内容，复用排版时需自行替换。本项目并非赛方发布的官方模板。
+paper/main.tex指定XeLaTeX，并使用Windows中文字体配置以及Times New Roman/Consolas。编译需要相应TeX环境与字体；仓库已有PDF可直接阅读。主文件中的参赛编号、题名和正文是本项目内容，复用排版时需自行替换。本项目并非赛方发布的官方模板。
 
 ## 许可与反馈
 

@@ -311,4 +311,12 @@ TSWLatexianTemp*
 # option is specified. Footnotes are the stored in a file with suffix Notes.bib.
 # Uncomment the next line to have this generated file ignored.
 #*Notes.bib
-huashubei code/question/question_04/outputs.rar
+code/question/question_04/outputs.rar
+
+# Local Python, IDE and LaTeX state
+.venv/
+__pycache__/
+.ruff_cache/
+.idea/
+paper/build/
+code_q2_validation_runs/

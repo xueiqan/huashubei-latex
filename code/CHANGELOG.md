@@ -1,5 +1,14 @@
 # 变更记录
 
+## 2026-09-30（仓库目录拆分）
+
+- 范围：本地仓库目录、根README、code/README、paper/README、docs/structure、.gitignore与Q2的PyCharm运行配置。
+- 整理：活动代码归code，论文归paper，赛题与赛方文件归materials，冻结提交件、旧结果和源码备份归archive，过程说明归docs。各题data/outputs相对位置保留。
+- 保留：迁移前后8554个原有文件的SHA-256全部一致；随后只更新活动文档和配置。算法源码、原始数据、正式结果和冻结归档未改写。
+- 验证：移动后的Python3.12.13及既有依赖导入通过；Q1入口、Q4模型与独立检验的--help通过；现有latexmk/XeLaTeX在paper目录编译成功，生成28页PDF。LaTeX插件输出捕获遇到Windows编码问题，直接使用本机latexmk验证成功。
+- 边界：未重新运行完整求解或情景；PyCharm界面未实测；未新增依赖。本轮本地重构未提交或推送GitHub。
+
+
 ## 2026-08-10（问题4V4统一能源复算与论文结果闭合）
 
 - 范围：`question/question_04/model.py`、`validation.py`、`plot.py`，V4顺序/联合任务方案能源参考表、第一/三组图，以及`D:\下载\qq\huashubei-latex\huashubei-latex`论文源文件。
