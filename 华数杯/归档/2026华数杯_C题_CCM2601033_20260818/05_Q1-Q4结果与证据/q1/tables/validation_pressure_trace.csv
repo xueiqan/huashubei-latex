@@ -1,0 +1,5 @@
+﻿Granularity,Alpha,Feasible,Boundary,Method
+1h,1.0103017308999311,True,constructed_lower_bound,validated_assignment_scaled_without_rescheduling
+0.5h,1.0103017308999311,True,constructed_lower_bound,validated_assignment_scaled_without_rescheduling
+1h,1.6319772942289497,False,local_capacity_upper_bound,regional_total_capacity_conservation
+1h,2.6030741224592315,False,system_capacity_upper_bound,system_total_capacity_conservation

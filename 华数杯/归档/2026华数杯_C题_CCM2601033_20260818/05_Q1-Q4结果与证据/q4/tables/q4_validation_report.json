@@ -1,0 +1,836 @@
+{
+  "started_at": "2026-08-10T15:59:58",
+  "question": "Q4",
+  "model_version": "Q4_MATHEURISTIC_V3_DOCUMENT_COMPLIANT",
+  "tolerance": 1e-06,
+  "reference_windows_requested": true,
+  "reference_time_limit_seconds": 600.0,
+  "v3": {
+    "tables": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\matheuristic_v3_doccompliant\\tables",
+    "independent_metrics": {
+      "Cost": -454308802.64992934,
+      "Carbon": 428.0108439907326,
+      "Latency": 9.96178,
+      "LatencySLA": 0.20958611666666668,
+      "RenewableUnusedRate": 0.2985047707774786,
+      "Peak": 248.6796994391627,
+      "Delay": 0.07928104028170245,
+      "RenewableUtilization": 0.7014952292225214
+    }
+  },
+  "sequential": {
+    "available": true,
+    "independent_metrics": {
+      "Cost": -320485612.26115227,
+      "Carbon": 90555.26633173344,
+      "Latency": 12.94684,
+      "LatencySLA": 0.2414977,
+      "RenewableUnusedRate": 0.31948051171708847,
+      "Peak": 2800.0,
+      "Delay": 0.0836585443381589,
+      "RenewableUtilization": 0.6805194882829115
+    }
+  },
+  "reference_windows": {
+    "status": "PASS",
+    "selection": [
+      {
+        "Role": "MEDIAN_TIME",
+        "WindowStart": 1512,
+        "FormalWindowSeconds": 26.1393887999948,
+        "SelectionCriterion": "closest to formal window-time median"
+      },
+      {
+        "Role": "LONGEST_TIME",
+        "WindowStart": 2232,
+        "FormalWindowSeconds": 44.9646374000004,
+        "SelectionCriterion": "maximum formal window time"
+      }
+    ],
+    "evidence": null
+  },
+  "scenarios": {
+    "status": "PASS",
+    "formal_kinds": [
+      "carbon_constraint",
+      "flat_price",
+      "low_carbon_reference",
+      "low_variability_renewable"
+    ],
+    "missing_groups": [],
+    "legacy_names": []
+  },
+  "completed_at": "2026-08-10T16:21:39",
+  "overall": "PASS",
+  "counts": {
+    "PASS": 10,
+    "WARN": 0,
+    "FAIL": 0
+  },
+  "checks": [
+    {
+      "Test": "全时域独立审计",
+      "Item": "V3完成标记和版本",
+      "Status": "PASS",
+      "Value": {
+        "complete": true,
+        "audit_passed": true,
+        "model_version": "Q4_MATHEURISTIC_V3_DOCUMENT_COMPLIANT"
+      },
+      "Tolerance": null,
+      "Evidence": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\matheuristic_v3_doccompliant\\tables\\.q4_matheuristic_v3_complete.json",
+      "Criterion": "complete=true、audit_passed=true且model_version为正式V3",
+      "IfNotPassed": "拒绝把旧版本或未完成断点作为正式结果"
+    },
+    {
+      "Test": "全时域独立审计",
+      "Item": "模型生成的简单复核表",
+      "Status": "PASS",
+      "Value": {
+        "rows": 47,
+        "failed": 0
+      },
+      "Tolerance": null,
+      "Evidence": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\matheuristic_v3_doccompliant\\tables\\q4_simple_validation.csv",
+      "Criterion": "所有简单复核项的Passed均为True",
+      "IfNotPassed": "检查失败项后重新生成正式结果"
+    },
+    {
+      "Test": "全时域独立审计",
+      "Item": "任务与逐时能源轨迹覆盖",
+      "Status": "PASS",
+      "Value": {
+        "task_rows": 50000,
+        "dispatch_rows": 14436
+      },
+      "Tolerance": null,
+      "Evidence": "assignments=50000, dispatch=14436",
+      "Criterion": "任务数=50000且能源轨迹=2406×6",
+      "IfNotPassed": "补齐缺失任务或小时区域记录"
+    },
+    {
+      "Test": "全时域独立审计",
+      "Item": "独立硬约束复算",
+      "Status": "PASS",
+      "Value": {
+        "failed_checks": [],
+        "max_violation": 3.5762786865234375e-07
+      },
+      "Tolerance": 1e-06,
+      "Evidence": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\validation\\q4_validation_v3_hard_constraint_audit.csv",
+      "Criterion": "所有独立硬约束检查通过且最大违差不超过容差",
+      "IfNotPassed": "查看failed_checks并修正结果或输入口径"
+    },
+    {
+      "Test": "全时域独立审计",
+      "Item": "六项目标独立重算与汇总表一致性",
+      "Status": "PASS",
+      "Value": {
+        "max_absolute_difference": 3.5762786865234375e-07
+      },
+      "Tolerance": 1e-06,
+      "Evidence": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\matheuristic_v3_doccompliant\\tables\\q4_objective_summary.csv",
+      "Criterion": "Cost、Carbon、Latency、Delay、RenewableUnusedRate、Peak均在容差内一致",
+      "IfNotPassed": "不要直接引用内部累计值，先核对明细表和指标口径"
+    },
+    {
+      "Test": "顺序基准与协同检验",
+      "Item": "顺序基准完成标记",
+      "Status": "PASS",
+      "Value": {
+        "complete": true,
+        "signature": "ae563f2efa5716b1416d2294686c51aa5d460fc463afc76ecf23c50252c5ee61",
+        "task_count": 50000,
+        "dispatch_count": 14436
+      },
+      "Tolerance": null,
+      "Evidence": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\matheuristic_v3_doccompliant\\tables\\.q4_sequential_baseline_complete.json",
+      "Criterion": "complete=true且任务/能源记录数与当前输入一致",
+      "IfNotPassed": "拒绝混用其他版本顺序基准"
+    },
+    {
+      "Test": "顺序基准与协同检验",
+      "Item": "顺序基准硬约束和指标复算",
+      "Status": "PASS",
+      "Value": {
+        "audit_passed": true,
+        "metric_passed": true
+      },
+      "Tolerance": 1e-06,
+      "Evidence": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\validation\\q4_validation_sequential_independent_audit.json",
+      "Criterion": "顺序基准审计通过且指标文件与独立重算一致",
+      "IfNotPassed": "检查顺序基准任务表、能源轨迹和指标文件"
+    },
+    {
+      "Test": "代表窗口完整MILP对照",
+      "Item": "代表窗口选择",
+      "Status": "PASS",
+      "Value": [
+        {
+          "Role": "MEDIAN_TIME",
+          "WindowStart": 1512,
+          "FormalWindowSeconds": 26.1393887999948,
+          "SelectionCriterion": "closest to formal window-time median"
+        },
+        {
+          "Role": "LONGEST_TIME",
+          "WindowStart": 2232,
+          "FormalWindowSeconds": 44.9646374000004,
+          "SelectionCriterion": "maximum formal window time"
+        }
+      ],
+      "Tolerance": null,
+      "Evidence": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\validation\\q4_reference_window_selection.csv",
+      "Criterion": "选择正式窗口耗时接近中位数和耗时最长的两个窗口",
+      "IfNotPassed": "检查正式窗口日志是否完整"
+    },
+    {
+      "Test": "代表窗口完整MILP对照",
+      "Item": "两个完整联合MILP窗口",
+      "Status": "PASS",
+      "Value": [
+        {
+          "RunMode": "VALIDATION_ONLY",
+          "ScenarioStatus": "VALIDATION_ONLY",
+          "ScenarioName": "REFERENCE_MEDIAN_TIME",
+          "WindowStart": 1512,
+          "DecisionEnd": 1536,
+          "PlanEnd": 1584,
+          "CandidateTaskCount": 2269,
+          "OriginalTaskCount": 2269,
+          "AggregatedTaskGroupCount": 2269,
+          "VariableCount": 235910,
+          "ConstraintCount": 6391,
+          "SolverStatus": "TIME_LIMIT_FEASIBLE",
+          "MILPAttemptStatus": "TIME_LIMIT_FEASIBLE",
+          "MILPAttemptMessage": "Time limit reached. (HiGHS Status 13: Time limit reached)",
+          "ElapsedSeconds": 601.4164091999992,
+          "MIPGap": 0.20492897768356347,
+          "BestObjective": 17160.161572963996,
+          "BestBound": 13643.547204931714,
+          "Cost": -4451155.364409324,
+          "Carbon": 0.0,
+          "Latency": 6.026615969581749,
+          "LatencySLA": 0.11931717363751586,
+          "RenewableUnusedRate": 0.21754232585441233,
+          "Peak": 0.0,
+          "Delay": 0.01756617609227455,
+          "RenewableUtilization": 0.7824576741455876,
+          "HActualTaskCount": 526,
+          "HRegionCounts": {
+            "RegionA": 118,
+            "RegionB": 96,
+            "RegionC": 89,
+            "RegionD": 88,
+            "RegionE": 73,
+            "RegionF": 62
+          },
+          "HStartHourMin": 1512.0,
+          "HStartHourMax": 1535.0,
+          "StartSOC": [
+            126.826086956512,
+            58.139130434783,
+            88.534782608693,
+            396.229967948392,
+            441.629348655911,
+            440.445583142023
+          ],
+          "EndSOC": [
+            350.0,
+            320.0,
+            300.0,
+            900.0,
+            820.0,
+            421.23044444443707
+          ],
+          "MaxEnergyBalanceError": 2.2737367544323206e-13,
+          "AggregationConsistent": true,
+          "DeferredTaskCount": 712,
+          "RealtimeImmediate": true,
+          "KPredictionExcluded": true,
+          "IndependentAuditPassed": true,
+          "CriticalNeighborhoodSize": 250,
+          "FinalConfirmationModel": "ORIGINAL_Q4_FULL_HK_MILP",
+          "ReferenceRole": "MEDIAN_TIME",
+          "FormalWindowSeconds": 26.1393887999948,
+          "ReferenceTimeLimitSeconds": 600.0,
+          "ReferenceMIPGapTarget": 0.05,
+          "ReferenceStatus": "PASS"
+        },
+        {
+          "RunMode": "VALIDATION_ONLY",
+          "ScenarioStatus": "VALIDATION_ONLY",
+          "ScenarioName": "REFERENCE_LONGEST_TIME",
+          "WindowStart": 2232,
+          "DecisionEnd": 2256,
+          "PlanEnd": 2304,
+          "CandidateTaskCount": 2234,
+          "OriginalTaskCount": 2234,
+          "AggregatedTaskGroupCount": 2234,
+          "VariableCount": 230898,
+          "ConstraintCount": 6356,
+          "SolverStatus": "OPTIMAL",
+          "MILPAttemptStatus": "OPTIMAL",
+          "MILPAttemptMessage": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+          "ElapsedSeconds": 593.3538074999815,
+          "MIPGap": 2.1567320498295595e-09,
+          "BestObjective": 7831.0568233271015,
+          "BestBound": 7831.05680643761,
+          "Cost": -4570793.8,
+          "Carbon": 0.0,
+          "Latency": 6.181364392678868,
+          "LatencySLA": 0.11282861896838603,
+          "RenewableUnusedRate": 0.2181696484078107,
+          "Peak": 0.0,
+          "Delay": 0.04400014847747672,
+          "RenewableUtilization": 0.7818303515921893,
+          "HActualTaskCount": 601,
+          "HRegionCounts": {
+            "RegionD": 132,
+            "RegionA": 110,
+            "RegionB": 105,
+            "RegionE": 89,
+            "RegionF": 85,
+            "RegionC": 80
+          },
+          "HStartHourMin": 2232.0,
+          "HStartHourMax": 2255.0,
+          "StartSOC": [
+            132.608695652174,
+            32.0,
+            174.758695652174,
+            566.85145281488,
+            462.804893189968,
+            424.131594953765
+          ],
+          "EndSOC": [
+            350.0,
+            320.0,
+            294.0167613695607,
+            145.89459452328404,
+            597.6066312724042,
+            696.1426303691763
+          ],
+          "MaxEnergyBalanceError": 2.2737367544323206e-13,
+          "AggregationConsistent": true,
+          "DeferredTaskCount": 607,
+          "RealtimeImmediate": true,
+          "KPredictionExcluded": true,
+          "IndependentAuditPassed": true,
+          "CriticalNeighborhoodSize": 250,
+          "FinalConfirmationModel": "ORIGINAL_Q4_FULL_HK_MILP",
+          "ReferenceRole": "LONGEST_TIME",
+          "FormalWindowSeconds": 44.9646374000004,
+          "ReferenceTimeLimitSeconds": 600.0,
+          "ReferenceMIPGapTarget": 0.05,
+          "ReferenceStatus": "PASS"
+        }
+      ],
+      "Tolerance": 0.05,
+      "Evidence": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\validation\\q4_reference_window_comparison.csv",
+      "Criterion": "两个窗口均实际调用原始Q4完整H+K MILP且窗口审计通过",
+      "IfNotPassed": "检查求解状态、可行解、下界和窗口审计"
+    },
+    {
+      "Test": "顺序基准与题设情景一致性",
+      "Item": "同版本Q4情景结果",
+      "Status": "PASS",
+      "Value": {
+        "formal_scenario_kinds": [
+          "carbon_constraint",
+          "flat_price",
+          "low_carbon_reference",
+          "low_variability_renewable"
+        ],
+        "missing_groups": [],
+        "legacy_scenario_names": []
+      },
+      "Tolerance": null,
+      "Evidence": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\validation\\q4_validation_scenario_summary.csv",
+      "Criterion": "平价、低碳约束和新能源波动情景均使用V3同版本完成标记并通过独立审计",
+      "IfNotPassed": "不要混用matheuristic_v2；补齐缺失情景后重跑检验"
+    }
+  ],
+  "metric_comparison": [
+    {
+      "Scheme": "Q4_V3",
+      "Metric": "Cost",
+      "IndependentValue": -454308802.64992934,
+      "ReportedValue": -454308802.649929,
+      "AbsoluteDifference": 3.5762786865234375e-07,
+      "Passed": true
+    },
+    {
+      "Scheme": "Q4_V3",
+      "Metric": "Carbon",
+      "IndependentValue": 428.0108439907326,
+      "ReportedValue": 428.010843990733,
+      "AbsoluteDifference": 3.979039320256561e-13,
+      "Passed": true
+    },
+    {
+      "Scheme": "Q4_V3",
+      "Metric": "Latency",
+      "IndependentValue": 9.96178,
+      "ReportedValue": 9.96178,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Q4_V3",
+      "Metric": "Delay",
+      "IndependentValue": 0.07928104028170245,
+      "ReportedValue": 0.0792810402817025,
+      "AbsoluteDifference": 5.551115123125783e-17,
+      "Passed": true
+    },
+    {
+      "Scheme": "Q4_V3",
+      "Metric": "RenewableUnusedRate",
+      "IndependentValue": 0.2985047707774786,
+      "ReportedValue": 0.298504770777479,
+      "AbsoluteDifference": 3.885780586188048e-16,
+      "Passed": true
+    },
+    {
+      "Scheme": "Q4_V3",
+      "Metric": "Peak",
+      "IndependentValue": 248.6796994391627,
+      "ReportedValue": 248.679699439163,
+      "AbsoluteDifference": 2.8421709430404007e-13,
+      "Passed": true
+    },
+    {
+      "Scheme": "SequentialBaseline",
+      "Metric": "Cost",
+      "IndependentValue": -320485612.26115227,
+      "ReportedValue": -320485612.261152,
+      "AbsoluteDifference": 2.384185791015625e-07,
+      "Passed": true
+    },
+    {
+      "Scheme": "SequentialBaseline",
+      "Metric": "Carbon",
+      "IndependentValue": 90555.26633173344,
+      "ReportedValue": 90555.2663317335,
+      "AbsoluteDifference": 5.820766091346741e-11,
+      "Passed": true
+    },
+    {
+      "Scheme": "SequentialBaseline",
+      "Metric": "Latency",
+      "IndependentValue": 12.94684,
+      "ReportedValue": 12.94684,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "SequentialBaseline",
+      "Metric": "Delay",
+      "IndependentValue": 0.0836585443381589,
+      "ReportedValue": 0.0836585443381589,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "SequentialBaseline",
+      "Metric": "RenewableUnusedRate",
+      "IndependentValue": 0.31948051171708847,
+      "ReportedValue": 0.319480511717088,
+      "AbsoluteDifference": 4.440892098500626e-16,
+      "Passed": true
+    },
+    {
+      "Scheme": "SequentialBaseline",
+      "Metric": "Peak",
+      "IndependentValue": 2800.0,
+      "ReportedValue": 2800.0,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_0_25_doccompliant",
+      "Metric": "Cost",
+      "IndependentValue": -454981888.7214472,
+      "ReportedValue": -454981888.721447,
+      "AbsoluteDifference": 2.384185791015625e-07,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_0_25_doccompliant",
+      "Metric": "Carbon",
+      "IndependentValue": 297.3596286435978,
+      "ReportedValue": 297.359628643598,
+      "AbsoluteDifference": 2.2737367544323206e-13,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_0_25_doccompliant",
+      "Metric": "Latency",
+      "IndependentValue": 9.01438,
+      "ReportedValue": 9.01438,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_0_25_doccompliant",
+      "Metric": "Delay",
+      "IndependentValue": 0.07779628606477342,
+      "ReportedValue": 0.0777962860647734,
+      "AbsoluteDifference": 1.3877787807814457e-17,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_0_25_doccompliant",
+      "Metric": "RenewableUnusedRate",
+      "IndependentValue": 0.2978992961490944,
+      "ReportedValue": 0.297899296149094,
+      "AbsoluteDifference": 3.885780586188048e-16,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_0_25_doccompliant",
+      "Metric": "Peak",
+      "IndependentValue": 95.53788312915414,
+      "ReportedValue": 95.5378831291542,
+      "AbsoluteDifference": 5.684341886080802e-14,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_0_50_doccompliant",
+      "Metric": "Cost",
+      "IndependentValue": -455036521.94260776,
+      "ReportedValue": -455036521.942608,
+      "AbsoluteDifference": 2.384185791015625e-07,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_0_50_doccompliant",
+      "Metric": "Carbon",
+      "IndependentValue": 209.9725748453527,
+      "ReportedValue": 209.972574845353,
+      "AbsoluteDifference": 2.8421709430404007e-13,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_0_50_doccompliant",
+      "Metric": "Latency",
+      "IndependentValue": 8.99448,
+      "ReportedValue": 8.99448,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_0_50_doccompliant",
+      "Metric": "Delay",
+      "IndependentValue": 0.07779296305005862,
+      "ReportedValue": 0.0777929630500586,
+      "AbsoluteDifference": 1.3877787807814457e-17,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_0_50_doccompliant",
+      "Metric": "RenewableUnusedRate",
+      "IndependentValue": 0.29789032912682284,
+      "ReportedValue": 0.297890329126823,
+      "AbsoluteDifference": 1.6653345369377348e-16,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_0_50_doccompliant",
+      "Metric": "Peak",
+      "IndependentValue": 95.53788312915414,
+      "ReportedValue": 95.5378831291542,
+      "AbsoluteDifference": 5.684341886080802e-14,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_1_00_doccompliant",
+      "Metric": "Cost",
+      "IndependentValue": -2.7786160838871827e-11,
+      "ReportedValue": -2.7786160838871798e-11,
+      "AbsoluteDifference": 2.908056841006738e-26,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_1_00_doccompliant",
+      "Metric": "Carbon",
+      "IndependentValue": -2.7410269609617883e-14,
+      "ReportedValue": -2.74102696096179e-14,
+      "AbsoluteDifference": 1.8932661725304283e-29,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_1_00_doccompliant",
+      "Metric": "Latency",
+      "IndependentValue": 9.96178,
+      "ReportedValue": 9.96178,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_1_00_doccompliant",
+      "Metric": "Delay",
+      "IndependentValue": 0.07928104028170246,
+      "ReportedValue": 0.0792810402817025,
+      "AbsoluteDifference": 4.163336342344337e-17,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_1_00_doccompliant",
+      "Metric": "RenewableUnusedRate",
+      "IndependentValue": 0.43571001811004856,
+      "ReportedValue": 0.435710018110049,
+      "AbsoluteDifference": 4.440892098500626e-16,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:carbon_lambda_1_00_doccompliant",
+      "Metric": "Peak",
+      "IndependentValue": 7.105427357601e-15,
+      "ReportedValue": 7.105427357601e-15,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:flat_price_doccompliant",
+      "Metric": "Cost",
+      "IndependentValue": -453391675.99122924,
+      "ReportedValue": -453391675.991229,
+      "AbsoluteDifference": 2.384185791015625e-07,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:flat_price_doccompliant",
+      "Metric": "Carbon",
+      "IndependentValue": 449.36508592733463,
+      "ReportedValue": 449.365085927335,
+      "AbsoluteDifference": 3.410605131648481e-13,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:flat_price_doccompliant",
+      "Metric": "Latency",
+      "IndependentValue": 9.93068,
+      "ReportedValue": 9.93068,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:flat_price_doccompliant",
+      "Metric": "Delay",
+      "IndependentValue": 0.07950667160590065,
+      "ReportedValue": 0.0795066716059007,
+      "AbsoluteDifference": 5.551115123125783e-17,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:flat_price_doccompliant",
+      "Metric": "RenewableUnusedRate",
+      "IndependentValue": 0.2984074963047941,
+      "ReportedValue": 0.298407496304794,
+      "AbsoluteDifference": 5.551115123125783e-17,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:flat_price_doccompliant",
+      "Metric": "Peak",
+      "IndependentValue": 368.712289583327,
+      "ReportedValue": 368.712289583327,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_carbon_reference_doccompliant",
+      "Metric": "Cost",
+      "IndependentValue": -2.7786160838871827e-11,
+      "ReportedValue": -2.7786160838871898e-11,
+      "AbsoluteDifference": 7.108583389127582e-26,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_carbon_reference_doccompliant",
+      "Metric": "Carbon",
+      "IndependentValue": -2.7410269609617883e-14,
+      "ReportedValue": -2.74102696096179e-14,
+      "AbsoluteDifference": 1.8932661725304283e-29,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_carbon_reference_doccompliant",
+      "Metric": "Latency",
+      "IndependentValue": 9.96178,
+      "ReportedValue": 9.96178,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_carbon_reference_doccompliant",
+      "Metric": "Delay",
+      "IndependentValue": 0.07928104028170245,
+      "ReportedValue": 0.0792810402817025,
+      "AbsoluteDifference": 5.551115123125783e-17,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_carbon_reference_doccompliant",
+      "Metric": "RenewableUnusedRate",
+      "IndependentValue": 0.43571001811004856,
+      "ReportedValue": 0.435710018110049,
+      "AbsoluteDifference": 4.440892098500626e-16,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_carbon_reference_doccompliant",
+      "Metric": "Peak",
+      "IndependentValue": 7.105427357601e-15,
+      "ReportedValue": 7.105427357601e-15,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_0_25_doccompliant",
+      "Metric": "Cost",
+      "IndependentValue": -456017707.4658265,
+      "ReportedValue": -456017707.465827,
+      "AbsoluteDifference": 4.76837158203125e-07,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_0_25_doccompliant",
+      "Metric": "Carbon",
+      "IndependentValue": 242.8861688205046,
+      "ReportedValue": 242.886168820505,
+      "AbsoluteDifference": 3.979039320256561e-13,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_0_25_doccompliant",
+      "Metric": "Latency",
+      "IndependentValue": 9.80578,
+      "ReportedValue": 9.80578,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_0_25_doccompliant",
+      "Metric": "Delay",
+      "IndependentValue": 0.07935669084584347,
+      "ReportedValue": 0.0793566908458435,
+      "AbsoluteDifference": 2.7755575615628914e-17,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_0_25_doccompliant",
+      "Metric": "RenewableUnusedRate",
+      "IndependentValue": 0.29836425361585167,
+      "ReportedValue": 0.298364253615852,
+      "AbsoluteDifference": 3.3306690738754696e-16,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_0_25_doccompliant",
+      "Metric": "Peak",
+      "IndependentValue": 55.724751540317484,
+      "ReportedValue": 55.7247515403175,
+      "AbsoluteDifference": 1.4210854715202004e-14,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_0_50_doccompliant",
+      "Metric": "Cost",
+      "IndependentValue": -457627190.94823146,
+      "ReportedValue": -457627190.948231,
+      "AbsoluteDifference": 4.76837158203125e-07,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_0_50_doccompliant",
+      "Metric": "Carbon",
+      "IndependentValue": 158.00527117734006,
+      "ReportedValue": 158.00527117734,
+      "AbsoluteDifference": 5.684341886080802e-14,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_0_50_doccompliant",
+      "Metric": "Latency",
+      "IndependentValue": 9.82436,
+      "ReportedValue": 9.82436,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_0_50_doccompliant",
+      "Metric": "Delay",
+      "IndependentValue": 0.07928344657841083,
+      "ReportedValue": 0.0792834465784108,
+      "AbsoluteDifference": 2.7755575615628914e-17,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_0_50_doccompliant",
+      "Metric": "RenewableUnusedRate",
+      "IndependentValue": 0.298076205544639,
+      "ReportedValue": 0.298076205544639,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_0_50_doccompliant",
+      "Metric": "Peak",
+      "IndependentValue": 13.175826239999914,
+      "ReportedValue": 13.1758262399999,
+      "AbsoluteDifference": 1.4210854715202004e-14,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_1_00_doccompliant",
+      "Metric": "Cost",
+      "IndependentValue": -456781056.4104705,
+      "ReportedValue": -456781056.41047,
+      "AbsoluteDifference": 4.76837158203125e-07,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_1_00_doccompliant",
+      "Metric": "Carbon",
+      "IndependentValue": 50.848404502188515,
+      "ReportedValue": 50.8484045021885,
+      "AbsoluteDifference": 1.4210854715202004e-14,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_1_00_doccompliant",
+      "Metric": "Latency",
+      "IndependentValue": 9.7729,
+      "ReportedValue": 9.7729,
+      "AbsoluteDifference": 0.0,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_1_00_doccompliant",
+      "Metric": "Delay",
+      "IndependentValue": 0.07927927329292625,
+      "ReportedValue": 0.0792792732929263,
+      "AbsoluteDifference": 5.551115123125783e-17,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_1_00_doccompliant",
+      "Metric": "RenewableUnusedRate",
+      "IndependentValue": 0.2983959262163659,
+      "ReportedValue": 0.298395926216366,
+      "AbsoluteDifference": 1.1102230246251565e-16,
+      "Passed": true
+    },
+    {
+      "Scheme": "Scenario:low_variability_renewable_gamma_1_00_doccompliant",
+      "Metric": "Peak",
+      "IndependentValue": 9.68114477473136e-14,
+      "ReportedValue": 9.68114477473137e-14,
+      "AbsoluteDifference": 1.0097419586828951e-28,
+      "Passed": true
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+﻿Scope,Field,MaxAbsoluteDifference,Tolerance,Status
+operating,RenewableDirectUse_MW,0,0.0002,PASS
+operating,RenewableCharge_MW,0,0.0002,PASS
+operating,RenewableCurtailment_MW,0,0.0002,PASS
+operating,GridPurchase_MW,0,0.0002,PASS
+operating,GridCharge_MW,0,0.0002,PASS
+operating,RenewableExport_MW,0,0.0002,PASS
+operating,NetGridImport_MW,0.00010000000000332,0.0002,PASS
+operating,SOC_MWh,0,0.0002,PASS
+operating,ChargePower_MW,0.00010000000000332,0.0002,PASS
+operating,DischargePower_MW,0,0.0002,PASS
+terminal,SOC_MWh,0,0.0002,PASS

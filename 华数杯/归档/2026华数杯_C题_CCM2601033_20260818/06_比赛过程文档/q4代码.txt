@@ -1,0 +1,1192 @@
+可以。下面这版我按**“直接交给代码手/Codex即可执行”**的方式写，目标不是在旧 Q4 代码上打补丁，而是依据刚确定的 Q4 终稿，**重写主求解架构**。
+
+Q1 的任务可行域、分钟级负荷映射和三级容量约束继续沿用；Q2 已经验证“快速构造 + 局部修复 + LNS-MILP”可以把大规模任务调度从完整 MILP 的分钟级窗口压到十几秒级；Q3 的储能—新能源—购售电模型继续作为能源子问题。   旧 Q4 代码中 `build_window_problem → _heuristic_incumbent → _solve_with_time_extension → 完整H+K MILP` 正是需要替换的主要瓶颈。
+
+---
+
+# Q4 代码重写指导
+
+## 一、总体目标
+
+`model.py` 必须严格实现论文最终模型：
+
+[
+\boxed{
+\text{Q2可行任务种子}
+\rightarrow
+\text{Q3型储能精确响应}
+\rightarrow
+\text{六目标边际任务改进}
+\rightarrow
+\text{局部可行性修复}
+\rightarrow
+\text{算—储—电联合LNS-MILP}
+\rightarrow
+\text{H区提交}
+}
+]
+
+核心原则只有一个：
+
+> **禁止再把每个滚动窗口的全部任务候选构造成几十万变量的完整联合 MILP 后交给 HiGHS 分支定界。**
+
+完整联合 MILP 只允许在后续 `validation.py` 的少量代表窗口中作为精确对照，不得成为正式 101 个滚动窗口的主求解器。
+
+代码仍然只有一条正式主干，不建立另一套与论文不同的“工程版模型”。这也符合现有代码指导中“主模型即论文主线、算法不得另建平行架构”的要求。
+
+---
+
+# 二、旧代码哪些保留，哪些重写
+
+| 旧模块                                 | 处理                            |
+| ----------------------------------- | ----------------------------- |
+| `load_data()`                       | **保留**                        |
+| `_hour_overlaps()`                  | **保留**                        |
+| `_feasible_starts()`                | **保留并复核 Q1/Q2 口径**            |
+| `_exact_task_group_key()`           | **保留**                        |
+| SOC、能源平衡公式                          | **保留数学口径，重新封装**               |
+| `_qos_details()`                    | **保留**                        |
+| `_final_metrics()`                  | **保留并作为正式独立复算**               |
+| `_simple_validation()`              | **保留并加强**                     |
+| 原子 CSV / JSON / pickle 写入           | **保留**                        |
+| 检查点恢复机制                             | **保留思想，换新 namespace/version** |
+| `generate_scenario_data()`          | **保留**                        |
+| `validate_single_factor_scenario()` | **保留**                        |
+| `build_window_problem()`            | **退出主求解路径**                   |
+| `_heuristic_incumbent()`            | **重写**                        |
+| `_solve_with_time_extension()`      | **正式主线禁用**                    |
+| 120→240s完整MILP延长                    | **删除**                        |
+| H-only full MILP fallback           | **删除主线路径**                    |
+| 每窗口重新 `_window_lp_scaling()`        | **删除**                        |
+| 情景中重新跑完整联合MILP                      | **改为调用新滚动求解器**                |
+
+尤其不能继续采用旧代码的：
+
+```text
+完整窗口构模
+→ 启发式 incumbent
+→ 完整 MILP
+→ 超时继续延长
+→ 再 fallback
+```
+
+这套结构。旧代码虽然已经有关键邻域函数，但主流程仍然把完整联合 MILP 作为最终确认器，因此计算量不会发生 Q2 那种数量级变化。
+
+---
+
+# 三、新代码不要只写一个巨大 `build_window_problem`
+
+拆成三个不同规模的数学模型。
+
+### 1. `solve_energy_response()`
+
+只求：
+
+[
+V,C^{RE},C^G,D,B,X,R,S,y
+]
+
+任务安排完全固定。
+
+输入：
+
+```python
+ai_it_profile
+non_ai_profile
+region_hour
+storage_params
+current_soc
+historical_peak
+scaling
+```
+
+输出：
+
+```python
+EnergySolution(
+    dispatch,
+    end_soc,
+    regional_peak,
+    metrics,
+    z,
+    mip_gap,
+    elapsed_seconds,
+)
+```
+
+该模型只有“区域 × 小时”的能源变量。
+
+对于：
+
+[
+H=24,\quad K=48,\quad6\text{个区域},
+]
+
+整数变量主要只有 H 区：
+
+[
+24\times6=144
+]
+
+个充放电状态变量。
+
+**这一部分可以认真求。**
+
+建议：
+
+```python
+ENERGY_MIP_GAP = 0.005
+ENERGY_TIME_LIMIT = 10~20 s
+```
+
+若能够很快求到 optimal，直接记录 optimal。
+
+---
+
+### 2. `build_local_repair_problem()`
+
+只用于资源冲突。
+
+只开放：
+
+[
+20\sim100
+]
+
+个左右真正占用瓶颈资源的任务组。
+
+目标只需要：
+
+[
+\min 0
+]
+
+或最小化相对 incumbent 的改动量。
+
+它只负责：
+
+[
+\boxed{\text{恢复可行性}}
+]
+
+不要把六目标优化又塞进去。
+
+建议单次：
+
+```python
+REPAIR_TIME_LIMIT = 10~15 s
+```
+
+失败后扩大一次邻域；第二次仍失败则撤销引发冲突的任务移动。
+
+**不允许 fallback 到完整窗口 MILP。**
+
+---
+
+### 3. `build_joint_lns_problem()`
+
+这是 Q4 最重要的小规模联合模型。
+
+邻域外任务全部固定，只开放：
+
+[
+i\in\mathcal N_\tau
+]
+
+的任务区域与开工时刻，同时把当前 H 区：
+
+```text
+新能源分流
+储能充放电
+SOC
+购电
+售电
+峰值
+```
+
+全部重新开放。
+
+求：
+
+[
+\min Z_\tau.
+]
+
+这才是真正的：
+
+[
+\boxed{\text{算—储—电联合LNS}}
+]
+
+不是“先调任务再调用 Q3”。
+
+---
+
+# 四、正式滚动主流程
+
+建议主函数命名：
+
+```python
+_run_joint_matheuristic_rollout(...)
+```
+
+每一个 (\tau) 严格按下面执行。
+
+## 阶段 A：构造窗口状态
+
+读取：
+
+```text
+已正式提交任务
+剩余任务
+跨窗口运行任务
+当前 SOC
+历史区域峰值
+上一窗口 K 区提示
+Q2 完整任务参考轨迹
+```
+
+仍使用：
+
+[
+H=24,\qquad K=48.
+]
+
+不要一上来创建几十万列稀疏 MILP 矩阵。
+
+只建立：
+
+* 当前任务状态；
+* 每个任务合法区域；
+* 合法开工时刻；
+* 当前 GPU/AI IT 剖面；
+* K 区压缩预测剖面。
+
+候选可以很多，但只是**Python/NumPy 候选目录**，不是 MILP 变量。
+
+---
+
+## 阶段 B：从 Q2 构造完整“影子任务计划”
+
+正式读取 Q2 最终任务调度结果。
+
+Q2 的任务方案已经通过独立的 GPU、IT、设施容量、时延和任务期限复核，因此非常适合作为 Q4 的可行任务种子。
+
+不要只拿 Q2 当前窗口的结果。
+
+维护一个：
+
+```python
+shadow_schedule
+```
+
+它始终给所有尚未完成任务保留一个具体未来执行方案。
+
+这样每次 Q4 修改 H 区任务后，都还能明确知道：
+
+> 剩余任务按照 shadow schedule 继续执行时是否仍然可行。
+
+这比旧代码 `_future_feasibility_check()` 只证明“每个任务单独还有一个候选”更强。
+
+实际应验证：
+
+[
+\boxed{\text{存在一个已经明确构造出来的未来可行延拓}}
+]
+
+而不只是逐任务独立可行。
+
+K 区 4h 预测负荷就由 shadow schedule 聚合得到，不写入最终 TaskID 表。
+
+---
+
+# 五、首先求一次 Q3 型储能响应
+
+对当前 shadow schedule 生成：
+
+[
+P^{AI}_{rt}
+]
+
+再计算：
+
+[
+F_{rt}
+======
+
+PUE_r
+\left(
+P^{NonAI}*{rt}+P^{AI}*{rt}
+\right).
+]
+
+随后调用：
+
+```python
+solve_energy_response(...)
+```
+
+得到：
+
+[
+C,E,Q,P
+]
+
+以及完整：
+
+[
+SOC,B,X,R,C,D.
+]
+
+任务侧直接得到：
+
+[
+L,J.
+]
+
+这样形成当前联合 incumbent：
+
+```python
+JointIncumbent(
+    task_schedule,
+    dispatch,
+    soc,
+    six_metrics,
+    deviations,
+    z,
+)
+```
+
+**从这一刻开始程序始终必须保有一个完整严格可行解。**
+
+后面的任何优化失败都不能使当前窗口失败。
+
+---
+
+# 六、边际任务改进必须真正使用 Q4 六目标
+
+不能继续使用旧 `_heuristic_incumbent()` 中：
+
+```text
+EDF
++ renewable shortage
++ price
++ carbon
++ latency
+```
+
+这样的排序分数作为最终启发式目标。旧代码的这种启发式主要适合制造 incumbent，没有与六目标增广 min-max 完全一致。
+
+新版应实现：
+
+```python
+_compute_candidate_move_score(...)
+```
+
+对任务从当前：
+
+[
+(r_0,s_0)
+]
+
+移动至：
+
+[
+(r_1,s_1)
+]
+
+计算完整负荷增量：
+
+[
+\Delta F_{rt}
+=============
+
+## F_{rt}^{new}
+
+F_{rt}^{old}.
+]
+
+网络时延增量和 QoS 增量直接精确算：
+
+[
+\Delta L,\qquad\Delta J.
+]
+
+能源侧不要对每个候选重新求一次 MILP。
+
+先对当前能源响应再求一次**LP 松弛**，提取设施负荷约束对应的边际价值：
+
+[
+\lambda_{rt}.
+]
+
+于是：
+
+[
+\widetilde{\Delta Z}^{energy}_{irs}
+===================================
+
+\sum_{r,t}
+\lambda_{rt}\Delta F_{irst}.
+]
+
+综合评分直接对应论文：
+
+[
+\widetilde Z_{irs}
+==================
+
+\max_m
+(d_m^{cur}+\Delta d_{m,irs})
++
+\eta
+\sum_m
+(d_m^{cur}+\Delta d_{m,irs}).
+]
+
+只处理：
+
+[
+\widetilde Z_{irs}<Z^{cur}
+]
+
+的候选。
+
+注意：
+
+[
+\boxed{\text{合法候选不能用TopK提前删掉}}
+]
+
+可以全部生成后排序，但不能因为经验评分直接判某些合法区域/时间“不允许考虑”。
+
+---
+
+# 七、不要每移动一个任务就重求一次储能 MILP
+
+否则计算量又会上去。
+
+建议一轮先根据边际评价产生一批严格满足算力约束的候选移动：
+
+```python
+candidate_moves
+```
+
+按预测改善排序后依次尝试。
+
+然后一次性重新求：
+
+```python
+solve_energy_response()
+```
+
+得到真实
+
+[
+Z^{new}.
+]
+
+若：
+
+[
+Z^{new}<Z^{old},
+]
+
+接受整批。
+
+若没有改善，不要全部放弃，可以对已尝试移动做二分回退：
+
+```text
+全部移动
+↓
+前1/2
+↓
+前1/4
+↓
+……
+```
+
+直到找到真实改善方案或者全部撤销。
+
+这样只需要：
+
+[
+O(\log n)
+]
+
+次数量级的能源响应，而不是为数千个候选逐个求 MILP。
+
+---
+
+# 八、联合 LNS 的邻域必须按“变量数”控制，不只按任务数
+
+Q2 使用约 60 类任务取得了不错效果，但 Q4 每个任务候选数不同，单纯固定“60任务”不够稳定。
+
+应该同时限制：
+
+```python
+LNS_MAX_TASK_GROUPS
+LNS_MAX_INTEGER_OPTION_VARS
+```
+
+建议初值：
+
+```python
+LNS_MAX_TASK_GROUPS = 60
+LNS_MAX_INTEGER_OPTION_VARS = 12000
+LNS_TIME_LIMIT = 15.0
+LNS_TARGET_GAP = 0.02
+LNS_MAX_PASSES = 2
+```
+
+如果 60 个任务展开后已经：
+
+```text
+> 12000个整数候选变量
+```
+
+则自动缩小邻域。
+
+如果只有：
+
+```text
+3000~5000
+```
+
+个整数变量，则可以适当继续加入关键任务。
+
+邻域排序依据应该来自模型，而不是随机：
+
+[
+\text{资源紧约束贡献}
+]
+
+[
+\text{当前最差目标贡献}
+]
+
+[
+\text{新能源/成本/碳敏感时段}
+]
+
+[
+\text{峰值形成时段}
+]
+
+[
+\text{高DelaySensitivity}
+]
+
+[
+\text{时间及区域灵活性}.
+]
+
+---
+
+# 九、LNS结果的精度状态必须区分
+
+这是论文能否写严谨的关键。
+
+如果局部 MILP：
+
+```text
+gap <= 0.02
+```
+
+并且改善 incumbent，则记录：
+
+```text
+LNS_CERTIFIED_LOCAL
+```
+
+论文可写：
+
+> 在固定邻域外任务条件下获得相对误差不超过2%的条件近优解。
+
+如果求解器限时但获得可行改善：
+
+```text
+gap > 0.02
+```
+
+可以接受方案，因为它确实改善了当前全局可行 incumbent，但状态必须写：
+
+```text
+LNS_FEASIBLE_IMPROVEMENT
+```
+
+论文只能称：
+
+> 联合邻域搜索得到进一步改善的可行方案。
+
+不能把它写成“2%近优”。
+
+如果未改善：
+
+```text
+LNS_NO_IMPROVEMENT
+```
+
+直接保留原方案。
+
+所以**是否接受解**和**是否具有局部最优性证书**是两个概念。
+
+---
+
+# 十、窗口时间必须从代码层面硬限制
+
+正式 Q4 不再允许这种逻辑：
+
+```python
+120s
+→ 不够
+→ 240s
+→ 不够
+→ full fallback
+→ 再继续
+```
+
+建议：
+
+```python
+WINDOW_SOFT_TIME_LIMIT = 45.0
+WINDOW_HARD_TIME_LIMIT = 75.0
+
+ENERGY_TIME_LIMIT = 15.0
+REPAIR_TIME_LIMIT = 12.0
+LNS_TIME_LIMIT = 15.0
+LNS_MAX_PASSES = 2
+```
+
+这些属于**计算控制参数**，不是模型参数，不进入数学模型目标。
+
+到达 hard limit 后：
+
+[
+\boxed{\text{立即提交当前最好严格可行 incumbent}}
+]
+
+不报错，不开启完整 MILP。
+
+只有：
+
+> 当前窗口连一个严格可行解都没有
+
+才允许程序失败。
+
+但由于 Q2 shadow schedule 已经提供可行延拓，这种情况原则上应该非常少见。
+
+---
+
+# 十一、定标不要再每窗口重算
+
+当前旧代码的情景执行器存在：
+
+```python
+_window_lp_scaling(...)
+```
+
+即每窗口重新求六个 LP 定标。
+
+正式新版必须删除。
+
+模型规定的是：
+
+[
+\boxed{\text{一次固定定标}}
+]
+
+所以：
+
+```text
+启动
+↓
+检查 calibration cache
+↓
+存在且定义完全一致 → 直接复用
+↓
+不存在 → 只计算一次
+↓
+之后101窗口全部固定
+```
+
+而且**情景分析也继续使用相同尺度**。
+
+否则不同情景自己换了一把尺子，就不能直接比较。
+
+旧 Q4 已经计算过：
+
+```text
+Cost
+Carbon
+Latency
+Delay
+RenewableUnusedRate
+Peak
+```
+
+六指标定标框架，因此若：
+
+* 输入数据 hash 相同；
+* 六指标定义相同；
+* QoS 权重仍为 (3:2:1)；
+* H/K 与压缩定义兼容；
+
+应优先验证并复用旧：
+
+```text
+q4_scaling.csv
+q4_calibration_records.csv
+```
+
+不要因为 solver 重写就把数学定标成果全部扔掉。
+
+但是缓存签名要**与 solver 源代码 hash 解耦**。定标 cache signature 只依赖：
+
+```text
+输入数据
+指标定义版本
+QoS权重
+H/K
+定标规则
+```
+
+不能因为修改一个日志函数就强制重算 24 个 LP。
+
+---
+
+# 十二、以前 Q4 算出来的结果也不要删除
+
+新版本必须使用新的命名空间，例如：
+
+```text
+.q4_matheuristic_v1_checkpoint.pkl
+q4_matheuristic_v1_assignments_progress.csv
+q4_matheuristic_v1_dispatch_progress.csv
+q4_matheuristic_v1_windows_progress.csv
+```
+
+旧：
+
+```text
+.q4_progress_checkpoint*.pkl
+q4_task_assignments.csv
+q4_region_hour_dispatch.csv
+...
+```
+
+全部只读保存。
+
+如果旧 Q4 结果能够通过**最新口径独立审计**，可以作为第二个 incumbent：
+
+[
+\text{Q2种子}
+\quad\text{vs}\quad
+\text{旧Q4可行方案}
+]
+
+在相同六目标定义下重新计算真实 (Z)，选更好的作为起点。
+
+但旧 Q4 结果：
+
+[
+\boxed{\text{绝不能未经重新审计直接作为新模型正式结果}}
+]
+
+因为求解架构和模型口径已经变化。
+
+---
+
+# 十三、顺序基准只算一次
+
+正式建立：
+
+[
+\boxed{
+Q2\text{任务调度}
+\rightarrow
+Q3\text{能源储能优化}
+}
+]
+
+作为 `SequentialBaseline`。
+
+计算一次后写：
+
+```text
+q4_sequential_baseline_assignments.csv
+q4_sequential_baseline_dispatch.csv
+q4_sequential_baseline_metrics.csv
+```
+
+它同时承担三个作用：
+
+```text
+① Q4正式对照基准
+② shadow schedule 初始任务轨迹
+③ 尚未重新优化区域的未来延拓参考
+```
+
+不要在每个窗口重新跑整套 Q2/Q3。
+
+---
+
+# 十四、情景分析不能再换回完整 MILP
+
+现有代码的 `generate_scenario_data()` 和单因素一致性检查非常有价值，可以继续保留。
+
+但：
+
+```python
+run_full_scenario()
+```
+
+内部必须调用：
+
+```python
+_run_joint_matheuristic_rollout(...)
+```
+
+而不是：
+
+```text
+build full H+K
+→ solve full MILP
+```
+
+三个情景共享：
+
+* 相同算法；
+* 相同定标尺度；
+* 相同 H/K；
+* 相同 LNS 设置；
+* 相同 hard time limit。
+
+只更改题目规定的外生条件。
+
+这样才能保证情景之间公平比较，同时避免计算量乘五以后再次失控。
+
+---
+
+# 十五、检查点必须每个 H 窗口立即保存
+
+每个完成窗口保存：
+
+```python
+{
+    "schema_version": ...,
+    "model_version": ...,
+    "input_signature": ...,
+    "next_tau": ...,
+    "assignments": ...,
+    "dispatch": ...,
+    "current_soc": ...,
+    "historical_peak": ...,
+    "shadow_schedule": ...,
+    "warm_hints": ...,
+    "metrics_so_far": ...,
+}
+```
+
+恢复时必须重新核验：
+
+[
+TaskID\text{无重复}
+]
+
+[
+SOC\text{连续}
+]
+
+[
+0\sim\tau-1\text{能源轨迹完整}
+]
+
+[
+GPU/IT/设施硬约束}
+]
+
+以及：
+
+[
+\text{shadow schedule仍能为剩余任务提供完整可行延拓}.
+]
+
+不能因为有 pickle 就直接相信。
+
+旧代码已有较成熟的原子写入和恢复审计逻辑，这一部分应尽量复用。
+
+---
+
+# 十六、最终输出表
+
+正式 `model.py` 至少输出：
+
+```text
+outputs/tables/
+│
+├─ q4_task_assignments.csv
+├─ q4_region_hour_dispatch.csv
+├─ q4_objective_summary.csv
+├─ q4_sequential_baseline_metrics.csv
+├─ q4_scaling.csv
+├─ q4_calibration_records.csv
+├─ q4_window_solver.csv
+├─ q4_lns_diagnostics.csv
+├─ q4_model_configuration.csv
+└─ q4_simple_validation.csv
+```
+
+其中 `q4_window_solver.csv` 建议至少保存：
+
+```text
+WindowStart
+ActiveTaskCount
+LegalCandidateCount
+CommittedTaskCount
+MarginalMoveCount
+RepairCount
+LNSNeighborhoodTaskCount
+LNSIntegerVariableCount
+LNSStatus
+LNSMIPGap
+ZBeforeLNS
+ZAfterLNS
+EnergySolveSeconds
+RepairSeconds
+LNSSeconds
+TotalWindowSeconds
+```
+
+这张表以后就是论文写：
+
+> “算法效率提高多少、LNS实际是否有效”
+
+的真实证据，不能只往控制台打印。
+
+---
+
+# 十七、最终独立核验绝不能简化
+
+完成 50000 个任务后，重新从 `TaskID` 调度表生成整个：
+
+[
+0\sim2405
+]
+
+小时轨迹，不使用滚动内部缓存指标。
+
+重新计算：
+
+[
+C,E,L,J,U,P.
+]
+
+同时核验：
+
+[
+\text{任务唯一执行}
+]
+
+[
+\text{实时任务立即开工}
+]
+
+[
+\text{网络时延}
+]
+
+[
+\text{完成期限}
+]
+
+[
+GPU
+]
+
+[
+IT
+]
+
+[
+Facility
+]
+
+[
+\text{新能源分流守恒}
+]
+
+[
+\text{设施侧能源平衡}
+]
+
+[
+SOC\text{递推及连续性}
+]
+
+[
+SOC\text{上下限}
+]
+
+[
+\text{充放电互斥}
+]
+
+[
+\text{购售电边界}
+]
+
+[
+S_{r,2406}\ge InitialSOC_r.
+]
+
+旧代码的 `_simple_validation()` 和 `independent_hard_constraint_audit()` 已经有很好的基础，应保留并适配新输出。
+
+---
+
+# 十八、推荐的新代码主结构
+
+最终 `model.py` 的逻辑建议整理为：
+
+```python
+def run():
+    data = load_data()
+
+    scaling = load_or_build_fixed_calibration(data)
+
+    q2_seed = load_and_validate_q2_schedule(data)
+
+    sequential = load_or_build_q2_q3_sequential_baseline(
+        data=data,
+        q2_schedule=q2_seed,
+    )
+
+    state = load_or_initialize_q4_checkpoint(
+        sequential=sequential,
+    )
+
+    while state.tau < OPERATION_END:
+
+        window = build_lightweight_window_state(
+            data=data,
+            state=state,
+            shadow_schedule=state.shadow_schedule,
+        )
+
+        incumbent = build_joint_feasible_incumbent(
+            window=window,
+            sequential=sequential,
+        )
+
+        incumbent = solve_energy_response(incumbent)
+
+        marginal_info = solve_energy_lp_marginals(incumbent)
+
+        candidate = improve_tasks_by_joint_marginal_score(
+            incumbent,
+            marginal_info,
+        )
+
+        candidate = repair_if_needed(candidate)
+
+        candidate = exact_energy_reoptimization(candidate)
+
+        incumbent = accept_only_if_improved(
+            incumbent,
+            candidate,
+        )
+
+        for _ in range(LNS_MAX_PASSES):
+            neighborhood = select_joint_lns_neighborhood(incumbent)
+
+            lns_candidate = solve_joint_lns(
+                incumbent,
+                neighborhood,
+            )
+
+            incumbent = accept_only_if_improved(
+                incumbent,
+                lns_candidate,
+            )
+
+        state = commit_H_and_roll(
+            incumbent,
+            state,
+        )
+
+        save_checkpoint(state)
+
+    results = rebuild_full_trajectory_from_taskids(state)
+
+    independent_validate(results)
+
+    write_final_outputs(results)
+```
+
+真正的大变化就是：
+
+```text
+旧：
+几乎所有任务候选
+      ↓
+完整联合MILP
+
+新：
+所有候选只用于快速评分
+      ↓
+少数真正关键候选
+      ↓
+局部联合MILP
+```
+
+---
+
+# 十九、正式验收标准
+
+这版代码完成后，不以“没有报错”作为成功。
+
+至少满足：
+
+[
+\boxed{\text{50000任务全部完成}}
+]
+
+[
+\boxed{\text{全部硬约束独立复算通过}}
+]
+
+[
+\boxed{\text{最终六指标可由明细独立复算}}
+]
+
+[
+\boxed{\text{存在完整Q2→Q3顺序基准}}
+]
+
+[
+\boxed{\text{LNS前后真实 }Z\text{ 有记录}}
+]
+
+[
+\boxed{\text{每个窗口均有真实耗时}}
+]
+
+以及最关键的计算要求：
+
+> **主模型不得因为某个困难窗口自动回退成数百秒乃至上千秒的完整联合 MILP。**
+
+如果局部联合 MILP 难：
+
+[
+\boxed{\text{保留当前严格可行方案并继续滚动}}
+]
+
+而不是再次把整个计算拖死。
+
+---
+
+## 最终给代码手的一句话
+
+> **不要“优化旧 Q4 大 MILP 的求解速度”，而要“改变完整大 MILP 在算法中的角色”。完整数学模型继续定义可行域和目标；Q2 可行任务轨迹提供全局延拓，Q3 储能模型负责精确能源响应，六目标边际启发式承担主体任务搜索，仅在关键任务邻域内联合开放任务和全部储能能源变量进行 MILP 精修。任何局部求解失败均回退到已有严格可行 incumbent，不得回退到全窗口大规模 MILP。所有最终指标与约束从 TaskID 和逐时能源轨迹独立复算。**
+
+这就是这次 Q4 代码重写最核心的实现规范。

@@ -1,0 +1,2 @@
+﻿AlphaLocal_1h_LowerBound,AlphaLocal_0_5h_LowerBound,DeltaAlphaLocalLowerBound,CurrentToLowerBoundMargin,Interpretation
+1.0103017308999311,1.0103017308999311,0.0,0.010301730899931139,两种粒度均包含同一份整数时刻可行构造；尚未求得可重排条件下的精确临界sup

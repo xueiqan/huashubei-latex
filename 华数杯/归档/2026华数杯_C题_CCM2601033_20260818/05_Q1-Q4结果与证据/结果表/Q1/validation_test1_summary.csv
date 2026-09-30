@@ -1,0 +1,2 @@
+﻿SelectedHistoryWindowHours,RollingWindowCount,SelectedWindowValidationWAPE,RollingSelectedWindowRank,DeltaMedian_MainMinusBaseline,DeltaNegativeWindowCount,WilcoxonStatistic,WilcoxonPValue_OneSidedLess,AggregationOrderRatio,AggregationMedianOrder,MainVsBaselineStable,AggregationScaleStable
+72,84,0.7241222317797751,3,-0.23500200364235652,84,0.0,8.553276089142603e-16,1.0,True,True,True

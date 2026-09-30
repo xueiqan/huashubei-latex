@@ -1,0 +1,2 @@
+﻿HistoryWindowHours,WindowCount,Median_Delta_HierarchicalMinusDirect,WilcoxonStatistic_Less,WilcoxonPValue_Less,WilcoxonStatistic_Greater,WilcoxonPValue_Greater,Decision
+72,84,-0.0003049889768887981,1609.0,0.2162500068501244,1609.0,0.7837499931498756,QUALIFIED

@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "failed_checks": [],
+  "max_violation": 1.1004885891452432e-10,
+  "violation_details": {},
+  "independent_metrics": {
+    "Cost": -320485612.26115227,
+    "Carbon": 90555.26633173344,
+    "Latency": 12.94684,
+    "LatencySLA": 0.2414977,
+    "RenewableUnusedRate": 0.31948051171708847,
+    "Peak": 2800.0,
+    "Delay": 0.0836585443381589,
+    "RenewableUtilization": 0.6805194882829115
+  },
+  "solver_metrics": {},
+  "metric_differences": {},
+  "tolerance_used": 1e-06,
+  "baseline_status": "Q2_TASK_SEED_TO_V3_ENERGY_REFERENCE",
+  "scenario_status": "SEQUENTIAL_BASELINE"
+}

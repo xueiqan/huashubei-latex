@@ -1,0 +1,16 @@
+﻿Parameter,Value
+decision_hours,24
+lookahead_hours,48
+block_hours,4
+tie_break_weight,0.001
+mip_relative_gap,0.01
+normal_time_limit_seconds,120.0
+difficult_time_limit_seconds,240.0
+difficult_due_task_threshold,350
+feasibility_tolerance,1e-06
+PythonRequirement,3.12.13
+Solver,scipy.optimize.milp (HiGHS)
+NormalWindowSolveCount,1
+Automatic2HourRefinement,False
+ActualOperationHours,0--2405
+TerminalSOCHour,2406

@@ -1,0 +1,8 @@
+Metric,Value,Unit,Source
+TaskCount,50000,count,q4_task_assignments.csv
+UniqueTaskIDCount,50000,count,q4_task_assignments.csv
+MigratedTaskCount,3672,count,q4_task_assignments.csv
+MigratedTaskRatio,0.07344,ratio,q4_task_assignments.csv
+DuplicateTaskIDCount,0,count,q4_task_assignments.csv
+MaxFinishHour,2405.733333333333,hour,q4_task_assignments.csv
+PositiveOccupancyAtHour2406,0,count,q4_task_assignments.csv

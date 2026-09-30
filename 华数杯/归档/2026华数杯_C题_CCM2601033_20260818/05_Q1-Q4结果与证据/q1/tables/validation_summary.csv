@@ -1,0 +1,14 @@
+﻿Test,Item,Status,Evidence,Criterion,IfNotPassed
+检验一：滚动时间外预测与聚合尺度泛化,验证期窗口选择与历史滚动稳定性,PASS,H*=72; rolling_windows=84; rolling_rank=3/4,H*由官方验证期选择，并在严格前向、互不重叠历史窗口中复核,若滚动排名不稳定，论文中不能把官方验证日选择写成普遍最优
+检验一：滚动时间外预测与聚合尺度泛化,主模型相对24小时同刻基线的成对WAPE,PASS,n=84; median_delta=-0.235002; negative=84; p=8.55328e-16,Wilcoxon单侧检验p<0.05且median(Δ)<0，Δ=WAPE主模型-WAPE基准,若不通过，不能宣称主模型具有稳定样本外优势，应改用滚动稳定模型或基准
+检验一：滚动时间外预测与聚合尺度泛化,底层到区域/类型/系统的聚合尺度排序,PASS,order_ratio=1; median_order=True,选定H*下多数滚动窗口及WAPE中位数均满足底层不优于聚合层、区域/类型不优于系统层,若不通过，只能报告实际观察到的尺度差异，不能概括为聚合普遍提高可预测性
+检验二：分层预测结构恢复有效性,边际闭合与18类结果衔接,PASS,actual_mismatch=0; max_region_diff=6.82121e-13; max_type_diff=6.82121e-13; bottom_region_diff=4.11035e-10,区域边际和任务类型边际必须在数值精度内等于系统边际，18类区域汇总必须等于区域边际,若不通过，分层恢复程序判定失败，不得继续解释18类预测结果
+检验二：分层预测结构恢复有效性,区域—类型历史结构稳定性,PASS,training_adjacent_windows=97; Q95_JS=0.13167; JS_validation=0.0913084,JS_validation≤训练相邻窗口JS距离的经验95%分位数,若不通过，应缩短结构先验窗口或改用动态区域—类型占比，不得继续固定历史结构解释测试期
+检验二：分层预测结构恢复有效性,分层恢复与直接预测18类序列的成对误差,QUALIFIED,n=84; median_delta=-0.000304989; p_less=0.21625; p_greater=0.78375,median(Δ)<0且Wilcoxon单侧p<0.05为显著改善；显著变差才判定失败，否则只能写保持边际一致且无显著损失,若显著变差，论文结论停留在区域+类型+系统层，不强行宣称18类交叉单元预测可靠
+检验三：调度最优性与临界负载,任务唯一执行,PASS,duplicates=0; missing=0; unexpected=0,每个2376--2399小时到达任务恰好执行一次,修复对应任务边界、资源剖面或两级目标证书后再解释本地执行结论
+检验三：调度最优性与临界负载,任务时延/时间边界,PASS,network=0; earliest=0; finish=0; terminal=0; duration=0; realtime=0; occupied_2406=0,满足到达、最早开工、LatestFinish、网络时延和2406终端边界；2406小时占用必须为0,修复对应任务边界、资源剖面或两级目标证书后再解释本地执行结论
+检验三：调度最优性与临界负载,GPU/IT/设施容量,PASS,max_gpu_violation=0.0; max_it_violation=0.0; max_facility_violation=0.0,三层资源约束违反量均为0，且独立重算剖面与模型输出一致,修复对应任务边界、资源剖面或两级目标证书后再解释本地执行结论
+检验三：调度最优性与临界负载,F1严格全局最优证书,PASS,lower_bound=0; constructed_feasible=True; F1=0.0,迁移工作量非负给出F1≥0；存在可行F1=0构造则F1*=0,修复对应任务边界、资源剖面或两级目标证书后再解释本地执行结论
+检验三：调度最优性与临界负载,F2二级目标复算,PASS,F2_recomputed=3.0; F2_reported=3.0,在F1固定为最优后，弹性任务等待量与报告结果一致,修复对应任务边界、资源剖面或两级目标证书后再解释本地执行结论
+检验三：调度最优性与临界负载,临界压力严格上下界,QUALIFIED,constructed_lower=1.0103; local_capacity_upper=1.63198; system_capacity_upper=2.60307,α=1存在已验证可行构造；同步放大后的固定构造给出下界；区域/系统总容量守恒给出不可行上界,当前只报告边界区间；若论文需要精确alpha_local或alpha_feas，必须继续运行长时限临界MILP并记录求解状态
+检验三：调度最优性与临界负载,时间粒度与压力边界交互,QUALIFIED,lower_bound_shift=0; current_margin_to_lower_bound=0.0103017,1h和0.5h共享同一份整数时刻可行构造，因此下界不因粒度改变；精确临界sup仍需单独求解,不能把下界相同写成两种粒度临界点完全相同

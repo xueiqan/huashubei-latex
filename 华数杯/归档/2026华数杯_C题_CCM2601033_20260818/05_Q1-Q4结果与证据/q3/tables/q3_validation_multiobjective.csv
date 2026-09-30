@@ -1,0 +1,16 @@
+﻿Check,Value,Reference,Difference,Tolerance,Status
+Anchor_Cost_reaches_best,-459079276.838633,-459079276.838633,0,4.59080276838633,PASS
+Anchor_Cost_is_minimum_among_anchors,-459079276.838633,-459079276.838633,0,4.59080276838633,PASS
+Anchor_Carbon_reaches_best,0,0,0,1.001e-05,PASS
+Anchor_Carbon_is_minimum_among_anchors,0,0,0,1.001e-05,PASS
+Anchor_Peak_reaches_best,0,0,0,1.001e-05,PASS
+Anchor_Peak_is_minimum_among_anchors,0,0,0,1.001e-05,PASS
+Anchor_Ramp_reaches_best,0,0,0,1.001e-05,PASS
+Anchor_Ramp_is_minimum_among_anchors,0,0,0,1.001e-05,PASS
+Balanced_not_dominated_by_Anchor_Cost,0,0,0,0,PASS
+Balanced_not_dominated_by_Anchor_Carbon,0,0,0,0,PASS
+Balanced_not_dominated_by_Anchor_Peak,0,0,0,0,PASS
+Balanced_not_dominated_by_Anchor_Ramp,0,0,0,0,PASS
+Stage3_preserves_minimax_z,1.97417698895896e-05,1.87417698895895e-05,1.00000000000017e-06,1.0001e-06,PASS
+Stage3_preserves_sum_deviation,3.28802026714533e-05,3.18802026713481e-05,1.00000000010525e-06,1.0001e-06,PASS
+Stage3_does_not_increase_throughput,346120.988399518,347021.148450165,-900.160050646984,0.00348021148450165,PASS

@@ -1,0 +1,8 @@
+﻿Stage,Status,Success,CheckStatus
+anchor_Cost,0,True,PASS
+anchor_Carbon,0,True,PASS
+anchor_Peak,0,True,PASS
+anchor_Ramp,0,True,PASS
+balanced_stage_1_minimax,0,True,PASS
+balanced_stage_2_sum_deviation,0,True,PASS
+balanced_stage_3_min_throughput,0,True,PASS
