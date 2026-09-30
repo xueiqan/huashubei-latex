@@ -95,8 +95,6 @@ uv run python question/question_04/main.py
 preprocess.py → model.py → validation.py → plot.py
 ```
 
-当前代码根目录的`main.py`默认调用同目录的`preprocess.py`，但仓库未包含该文件，因此上述分题入口是本说明采用的运行方式。代码子目录原有README中的“外层共享预处理”描述与当前文件布局不完全一致，请以本说明及实际源码为准。
-
 问题二至问题四的入口在检验或绘图失败后可能只记录警告，并仍返回0。完成复核时需检查日志、检验报告和预期结果文件，不能仅凭进程退出码判断全部阶段通过。
 
 ### 问题四的专项入口
