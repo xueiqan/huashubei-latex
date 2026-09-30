@@ -1,31 +1,31 @@
-# 华数杯C题：多区域数据中心算储电协同优化
+# Huashu Cup Problem C: Coordinated Computing, Storage, and Power Optimization
 
-本仓库整理了2026年第七届华数杯数学建模竞赛C题“面向算电协同的多目标调度优化研究”的Python程序、LaTeX论文、计算结果与复核材料。研究围绕多区域数据中心的算力任务调度、碳排放、网络时延、新能源消纳和储能运行展开。
+Python programs, a LaTeX paper, computational results, and verification materials for Problem C of the 2026 Seventh Huashu Cup Mathematical Modeling Competition. The project studies multiobjective scheduling across regional data centers, including computing workloads, carbon emissions, network latency, renewable energy utilization, and battery storage.
 
-项目可用于学习数学建模的完整计算流程，以及研究算力、储能与电力之间的多目标权衡。仓库包含竞赛提交时的冻结材料和赛后修订内容，使用时应核对代码与结果版本。
+Use this repository to study the modeling workflow and the tradeoffs between computing, storage, and electricity. It contains both frozen competition submissions and later revisions; match each result to its source version.
 
-## 研究内容
+## Research tasks
 
-| 问题 | 主要内容 |
+| Task | Focus |
 | --- | --- |
-| 问题一 | 分层需求预测、基础算力调度与压力边界检验 |
-| 问题二 | 成本、碳排放、网络时延和新能源利用的多目标调度；精确求解与启发式对照 |
-| 问题三 | 给定IT负荷下的储能、购售电协同优化与能源约束复核 |
-| 问题四 | 算力任务、储能与电力的联合优化；顺序基准对照、情景分析和独立审计 |
+| Q1 | Hierarchical demand forecasting, basic computing dispatch, and stress-boundary checks |
+| Q2 | Multiobjective dispatch for cost, carbon, latency, and renewable utilization; exact versus heuristic comparisons |
+| Q3 | Storage and electricity trading under a fixed IT load, with independent energy-constraint checks |
+| Q4 | Joint computing, storage, and power optimization; sequential-baseline comparisons, scenarios, and independent audits |
 
-每问均包含预处理、模型、检验与绘图模块。当前可浏览的题目程序共24个Python文件；历史源码备份另存于archive/source-backups，不作为默认运行入口。
+The active code contains 24 Python files. Each question provides preprocessing, modeling, validation, and plotting stages. Historical source backups are stored in `archive/source-backups/`.
 
-## 从哪里开始
+## Start here
 
-| 目录 | 内容与入口 |
+| Directory | Contents and entry points |
 | --- | --- |
-| [code/](code/) | Python源码、依赖配置和各题运行数据；[运行说明](code/README.md) |
-| [paper/](paper/) | LaTeX正文、参考文献、论文图库和现有PDF；[编译说明](paper/README.md) |
-| [materials/](materials/) | [赛题及附件](materials/problems/)与[赛方规则文件](materials/rules/) |
-| [archive/](archive/) | 冻结的提交材料、历史结果和源码备份 |
-| [docs/](docs/) | 赛前执行清单及[目录与版本说明](docs/structure.md) |
+| [code/](code/) | Python source, dependencies, inputs, and results; [run guide](code/README.md) |
+| [paper/](paper/) | English LaTeX source, references, figures, and the preserved historical PDF; [build guide](paper/README.md) |
+| [materials/](materials/) | Original [problem statements and attachments](materials/problems/) and [competition rules](materials/rules/) |
+| [archive/](archive/) | Frozen submissions, historical results, and source backups |
+| [docs/](docs/) | [Repository layout](docs/structure.md) and the [historical competition checklist](docs/competition-checklist.md) |
 
-阅读论文可直接打开[paper/main.pdf](paper/main.pdf)，编译入口为[paper/main.tex](paper/main.tex)。竞赛原版与赛后修订版的区别见[归档说明](archive/2026华数杯_C题_CCM2601033_20260818/00_归档说明/README_归档说明.md)。
+The current paper source is [paper/main.tex](paper/main.tex). Build it to read the English revision in `paper/build/main.pdf`. The preserved [paper/main.pdf](paper/main.pdf) predates the English translation. See the [original archive guide](archive/2026%E5%8D%8E%E6%95%B0%E6%9D%AF_C%E9%A2%98_CCM2601033_20260818/00_%E5%BD%92%E6%A1%A3%E8%AF%B4%E6%98%8E/README_%E5%BD%92%E6%A1%A3%E8%AF%B4%E6%98%8E.md) for the distinction between the competition submission and later revisions.
 
 ```text
 huashubei-latex/
@@ -37,34 +37,34 @@ huashubei-latex/
 │   ├── uv.lock
 │   ├── main.py
 │   └── question/
-│       └── question_01 … question_04/
+│       └── question_01 ... question_04/
 │           ├── main.py / preprocess.py / model.py
 │           ├── validation.py / plot.py
-│           ├── data/          # 运行输入及处理后数据
-│           └── outputs/       # 计算结果、图形、日志与检查点
+│           ├── data/          # Raw and processed inputs
+│           └── outputs/       # Tables, figures, logs, and checkpoints
 ├── paper/
+│   ├── README.md
 │   ├── main.tex / references.tex / main.pdf
 │   ├── sections/
 │   ├── figures/
-│   └── build/                 # 本地编译产物，不提交
+│   └── build/                 # Local builds, ignored by Git
 ├── materials/
 │   ├── problems/
 │   └── rules/
 ├── archive/
-│   ├── 2026华数杯_C题_CCM2601033_20260818/
 │   ├── submission-copies/
 │   ├── source-backups/question_04/
 │   └── legacy-results/question_01/
 └── docs/
 ```
 
-各题的运行数据和结果保留在对应题目目录中，保持源码、共享输入和检查点的相对路径关系；冻结提交件与旧备份独立存入archive。
+Question-specific inputs and outputs remain beside their source files to preserve shared-data and checkpoint paths. Frozen evidence is kept separately in `archive/`.
 
-## 运行环境与数据
+## Environment and data
 
-Python版本要求为3.12及以上。依赖由[pyproject.toml](code/pyproject.toml)声明，[uv.lock](code/uv.lock)记录锁定版本，包括NumPy、pandas、SciPy、HiGHS/highspy、Matplotlib、Seaborn和OpenPyXL。
+Python 3.12 or later is required. [pyproject.toml](code/pyproject.toml) declares the dependencies and [uv.lock](code/uv.lock) locks their versions: NumPy, pandas, SciPy, HiGHS/highspy, Matplotlib, Seaborn, and OpenPyXL.
 
-在已经安装Git、Python与uv的环境中，下载并进入代码目录：
+With Git, Python, and uv available:
 
 ```powershell
 git clone https://github.com/xueiqan/huashubei-latex.git
@@ -72,9 +72,9 @@ Set-Location './huashubei-latex/code'
 uv sync --frozen
 ```
 
-通过网页下载ZIP时，先解压仓库，再进入其中的`code`目录。也可以用PyCharm打开该目录，选用uv同步出的项目环境，按问题一至问题四依次运行各题的`main.py`。
+For a ZIP download, extract it and enter `code/`. In PyCharm, open that directory and select its project interpreter, then run each question's `main.py` in order.
 
-问题一读取的6份原始Excel已位于[question/question_01/data/raw](code/question/question_01/data/raw/)：
+Q1 reads six original Excel attachments from [question/question_01/data/raw/](code/question/question_01/data/raw/):
 
 ```text
 GPU_information.xlsx
@@ -85,11 +85,11 @@ storage_information.xlsx
 workload_trace.xlsx
 ```
 
-保留原始文件名、工作表和数据内容。问题一生成`question/question_01/data/processed/shared/`中的共享输入，后续问题在此基础上处理各自的建模输入。
+Keep their filenames, worksheets, and contents intact. Q1 generates shared inputs under `question/question_01/data/processed/shared/`; subsequent questions derive their own inputs from that shared layer.
 
-## 运行与复核
+## Run and validate
 
-建议在单独的工作副本中运行，以保留随仓库提供的历史结果。进入`code`后，按顺序执行：
+Run in a separate working copy if you need to preserve the supplied historical results. From `code/`:
 
 ```powershell
 uv run python question/question_01/main.py
@@ -98,24 +98,24 @@ uv run python question/question_03/main.py
 uv run python question/question_04/main.py
 ```
 
-这些命令会启动实际计算，各题流程为：
+These commands perform actual computations. The per-question workflow is:
 
 ```text
-preprocess.py → model.py → validation.py → plot.py
+preprocess.py -> model.py -> validation.py -> plot.py
 ```
 
-问题二至问题四的入口在检验或绘图失败后可能只记录警告，并仍返回0。完成复核时需检查日志、检验报告和预期结果文件，不能仅凭进程退出码判断全部阶段通过。
+Q2-Q4 entry points may log a warning after a validation or plotting failure and still exit with status 0. Check the logs, validation reports, and expected outputs before treating a run as complete.
 
-### 问题四的专项入口
+### Q4 commands
 
-查看参数：
+Inspect the available options:
 
 ```powershell
 uv run python question/question_04/model.py --help
 uv run python question/question_04/validation.py --help
 ```
 
-源码提供了结构自检、既有基准审计和独立检验入口：
+Additional checks:
 
 ```powershell
 uv run python question/question_04/model.py --self-test
@@ -123,23 +123,25 @@ uv run python question/question_04/model.py --baseline-audit
 uv run python question/question_04/validation.py --skip-reference-windows
 ```
 
-结构自检不等于完整求解。基准审计和独立检验需要对应版本的完整结果；缺少文件时应根据报错补齐。最后一条命令跳过代表窗口MILP对照，仍会审计已有结果。默认运行`validation.py`还会求解代表窗口，耗时取决于求解设置和机器性能。
+The self-test checks local structure and algorithm behavior; it is not a full solve. Baseline auditing and independent validation require complete results from the matching version. `--skip-reference-windows` skips representative-window MILP comparisons while auditing existing outputs. Default validation also solves representative windows; runtime depends on solver settings and hardware. See the [Q4 runbook](code/question/question_04/q4-runbook.md) for the detailed sequence.
 
-## 结果与版本边界
+## Results and evidence boundaries
 
-各题结果位于各自的`outputs/`，包括结果表、图形、日志、检验报告及部分历史版本目录。问题四的模型和检验程序当前以`matheuristic_v4_doccompliant`为主要命名空间，仓库同时保留V3结果与竞赛支撑材料。
+Each question's `outputs/` contains tables, figures, logs, reports, and historical version directories. Current Q4 source primarily uses `matheuristic_v4_doccompliant`; V3 results and competition evidence are also retained.
 
-- 竞赛提交ZIP是冻结版本，不代表当前展开源码的最新版本。
-- 当前快照中的V4目录包含顺序方案与既有联合任务方案的能源复算材料，未见V4全量联合运行的完成标记；这些材料不能替代完整V4联合运行结果。
-- 归档检验报告记录的是对应历史运行，不能直接作为修改后源码在新环境中通过检验的证明。
-- 论文数值应追溯到同版本结果表与独立核验材料，不从图片估读，不混用不同版本的基准与联合方案。
-- 数学启发式结果在通过检验后可说明给定数据、参数和边界下的可行性；不据此宣称全局最优。
-- 当前README依据仓库源码与文件结构整理，尚未完成新环境下的全流程复现验证。
+- Submitted ZIP files are frozen versions and may differ from the current expanded source.
+- The inspected V4 snapshot contains sequential-plan and fixed joint-task energy recomputations, without a completion marker for a full V4 joint search. These are different kinds of evidence.
+- Archived validation reports describe historical runs; they do not prove that modified source passes in a new environment.
+- Trace paper values to tables and independent checks from the same version. Do not estimate values from plots or mix baseline and joint results across versions.
+- Validated heuristic results establish feasibility under the stated data, parameters, and boundaries; they do not establish global optimality.
+- A complete fresh-environment reproduction has not been performed.
 
-paper/main.tex指定XeLaTeX，并使用Windows中文字体配置以及Times New Roman/Consolas。编译需要相应TeX环境与字体；仓库已有PDF可直接阅读。主文件中的参赛编号、题名和正文是本项目内容，复用排版时需自行替换。本项目并非赛方发布的官方模板。
+Active documentation, editable paper text, source comments, command help, and display messages are maintained in English. Original organizer files, input data, historical outputs, frozen archives, and their required filenames remain unchanged. Existing figure assets can still contain Chinese labels; translated plotting source applies to future figure generation.
 
-## 许可与反馈
+The paper uses XeLaTeX with Windows font settings, Times New Roman, and Consolas. See its build guide for prerequisites. This is a project paper, not an official competition template; replace the team number, title, and content when reusing its layout.
 
-当前仓库尚未提供统一LICENSE。程序、团队论文、赛题数据、赛方文件及引用资料应分别核对权利归属和适用授权；本说明不替这些材料设定新的许可。
+## License and feedback
 
-欢迎通过[Issues](https://github.com/xueiqan/huashubei-latex/issues)反馈复现问题、结果口径差异和文档错误，或提交改进程序与说明的Pull Request。反馈时请附代码提交版本、问题编号、运行命令、Python及依赖版本、相关日志和预期行为，便于复核。
+There is currently no repository-wide LICENSE. Check the ownership and applicable permissions of source code, team papers, problem data, organizer documents, and cited material separately. This README does not grant new permissions for those materials.
+
+Report reproduction issues, inconsistent result definitions, or documentation errors through [Issues](https://github.com/xueiqan/huashubei-latex/issues), or propose improvements in a pull request. Include the commit, question number, command, Python/dependency versions, relevant logs, and expected behavior.
