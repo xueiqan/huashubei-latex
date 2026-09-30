@@ -1,0 +1,8 @@
+﻿Scheme,Metric,Value
+Q2_to_Q3_SequentialBaseline,Cost,-317881527.264187
+Q2_to_Q3_SequentialBaseline,Carbon,29.3105299118612
+Q2_to_Q3_SequentialBaseline,Latency,12.94684
+Q2_to_Q3_SequentialBaseline,LatencySLA,0.2414977
+Q2_to_Q3_SequentialBaseline,RenewableUnusedRate,0.335851304455069
+Q2_to_Q3_SequentialBaseline,Peak,29.3105299118612
+Q2_to_Q3_SequentialBaseline,Delay,0.0836585443381589

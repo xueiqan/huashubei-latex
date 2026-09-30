@@ -1,0 +1,11 @@
+{
+  "complete": true,
+  "audit_passed": true,
+  "model_version": "Q4_MATHEURISTIC_V3_DOCUMENT_COMPLIANT",
+  "input_signature": "41571aa9ceda99710afc3b7abd9d207fce4fe77091924baed33369955d0b86d4",
+  "task_count": 50000,
+  "dispatch_count": 14436,
+  "scenario": {
+    "OptimizationMode": "six_objective_minimax"
+  }
+}

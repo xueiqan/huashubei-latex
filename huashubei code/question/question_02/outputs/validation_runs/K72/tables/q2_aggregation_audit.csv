@@ -1,0 +1,2 @@
+﻿OriginalTaskCount,ExactTaskClassCount,SingletonClassCount,MaxClassSize,MeanClassSize,TaskCompressionRatio,RealtimeTaskCount,FullyFixedTaskCount,OriginalTaskLevelOptionCount,AggregatedOptionCount,OptionReductionRate,AggregationType
+50000,49991,49982,2,1.00018003240583,1.00018003240583,16724,488,233375201,233357942,7.39538731023837e-05,exact_attribute_equivalence

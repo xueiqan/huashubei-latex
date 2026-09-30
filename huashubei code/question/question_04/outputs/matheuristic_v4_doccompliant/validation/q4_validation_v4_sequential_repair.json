@@ -1,0 +1,47 @@
+{
+  "passed": true,
+  "failed_checks": [],
+  "max_violation": 5.960464477539063e-08,
+  "violation_details": {},
+  "independent_metrics": {
+    "Cost": -453230687.19525504,
+    "Carbon": 30.123317350237176,
+    "Latency": 12.94684,
+    "LatencySLA": 0.2414977,
+    "RenewableUnusedRate": 0.2986145560553602,
+    "Peak": 66.57086707234724,
+    "Delay": 0.0836585443381589,
+    "RenewableUtilization": 0.7013854439446399
+  },
+  "solver_metrics": {
+    "Cost": -453230687.195255,
+    "Carbon": 30.1233173502372,
+    "Latency": 12.94684,
+    "RenewableUnusedRate": 0.29861455605536,
+    "Peak": 66.5708670723472,
+    "Delay": 0.0836585443381589
+  },
+  "metric_differences": {
+    "Cost": -5.960464477539063e-08,
+    "Carbon": -2.4868995751603507e-14,
+    "Latency": 0.0,
+    "Delay": 0.0,
+    "RenewableUnusedRate": 1.6653345369377348e-16,
+    "Peak": 4.263256414560601e-14
+  },
+  "tolerance_used": 1e-06,
+  "baseline_status": "Q2_TASK_SEED_TO_V4_ENERGY_REFERENCE_REPAIRED",
+  "scenario_status": "SEQUENTIAL_REFERENCE_ONLY",
+  "model_version": "Q4_MATHEURISTIC_V4_PHYSICAL_TIEBREAK_DOCUMENT_COMPLIANT",
+  "scope": "sequential_reference_only",
+  "reported_metrics": {
+    "Cost": -453230687.195255,
+    "Carbon": 30.1233173502372,
+    "Latency": 12.94684,
+    "RenewableUnusedRate": 0.29861455605536,
+    "Peak": 66.5708670723472,
+    "Delay": 0.0836585443381589
+  },
+  "audit_checks": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\matheuristic_v4_doccompliant\\validation\\q4_validation_v4_sequential_repair_audit.csv",
+  "metric_checks": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\matheuristic_v4_doccompliant\\validation\\q4_validation_v4_sequential_repair_metrics.csv"
+}

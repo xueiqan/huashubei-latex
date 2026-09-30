@@ -1,0 +1,7 @@
+{
+  "Status": "PRESERVED",
+  "Reason": "rolling_terminal_soc_infeasible_before_certified_lambda1_reuse",
+  "Checkpoint": "E:\\python project\\huashubei\\question\\question_04\\outputs\\scenarios\\carbon_lambda_1_00_doccompliant\\matheuristic_v3_doccompliant\\tables\\.q4_matheuristic_v3_checkpoint.pkl",
+  "NextTau": 2400,
+  "InputSignature": "fe8ba3f8f019a807aeb1d99e6a6d4d954cc2d77e0b7e0342f30bd20d8308063f"
+}

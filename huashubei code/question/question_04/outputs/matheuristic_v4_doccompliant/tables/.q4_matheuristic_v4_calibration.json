@@ -1,0 +1,6 @@
+{
+  "calibration_signature": "832e9b87115c87eb33bbb120af0b42f065374829b873e9f31a33d9398f507827",
+  "metric_definition_version": "six_metrics_non_degenerate_scaling_v4_document_compliant",
+  "source": "REPRESENTATIVE_WINDOWS_CONTINUOUS_LB_AND_FEASIBLE_REFERENCE",
+  "reference_task_seed": "Q2_SHADOW_TASK_SCHEDULE_RECOMPUTED_WITH_V4_ENERGY"
+}

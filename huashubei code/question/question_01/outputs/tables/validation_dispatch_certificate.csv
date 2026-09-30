@@ -1,0 +1,6 @@
+﻿Check,Status,Observed,Rule
+任务唯一执行,PASS,duplicates=0; missing=0; unexpected=0,每个2376--2399小时到达任务恰好执行一次
+任务时延/时间边界,PASS,network=0; earliest=0; finish=0; terminal=0; duration=0; realtime=0; occupied_2406=0,满足到达、最早开工、LatestFinish、网络时延和2406终端边界；2406小时占用必须为0
+GPU/IT/设施容量,PASS,max_gpu_violation=0.0; max_it_violation=0.0; max_facility_violation=0.0,三层资源约束违反量均为0，且独立重算剖面与模型输出一致
+F1严格全局最优证书,PASS,lower_bound=0; constructed_feasible=True; F1=0.0,迁移工作量非负给出F1≥0；存在可行F1=0构造则F1*=0
+F2二级目标复算,PASS,F2_recomputed=3.0; F2_reported=3.0,在F1固定为最优后，弹性任务等待量与报告结果一致

@@ -1,0 +1,77 @@
+﻿Stage,Status,Message,MIPGap,MIPDualBound,ElapsedSeconds,ObjectiveValue,WindowID,Mode,CandidateMode,RecoveryAttempt,SolverTimeLimitSeconds
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.132481700013159,0,0,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0.68669659999432,0,0,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,3,0.551211799989687,3,0,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: Time limit reached),0.99846402372236,0.000858290115328383,62.8723018000019,0.558791257275936,0,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,0,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.136812300013844,0,1,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0.778591799986316,0,1,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,688,0.900397399993381,688,1,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: Time limit reached),0.99139493514269,0.0153284578392282,61.6030212999904,1.78132972771334,1,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,1,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.130114200001117,0,2,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0.594133200007491,0,2,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1651,0.997043799987296,1651,2,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: Time limit reached),0.999725315702206,0.000119654799166304,65.9533931000042,0.435608442591861,2,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,2,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.146397100004833,0,3,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0.76031289997627,0,3,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.000755857898715042,2644,1.23691010000766,2646,3,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: model_status is Time limit reached; primal_status is None); feasibility_retry_status=0; objective_optimality_not_proven,,,77.8733989999746,1000000,3,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,3,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.164715599996271,0,4,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,1.59301389998291,0,4,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.000944956295771321,4229,2.6046398000035,4233,4,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: model_status is Time limit reached; primal_status is None); feasibility_retry_status=0; objective_optimality_not_proven,,,82.0501899000083,1000000,4,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,4,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.13578260000213,0,5,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0.705523899989203,0,5,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,943,1.25014950000332,943,5,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: model_status is Time limit reached; primal_status is None); feasibility_retry_status=0; objective_optimality_not_proven,,,75.5112304000359,1000000,5,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,5,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.13650590000907,0,6,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0.779955100006191,0,6,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,776,1.45994830000564,776,6,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: Time limit reached),0.999852989359302,0.000371575250788089,61.3063629000098,2.52753983674097,6,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,6,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.223697500012349,0,7,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,1.12050659998204,0,7,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,899,1.08149360000971,899,7,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: model_status is Time limit reached; primal_status is None); feasibility_retry_status=0; objective_optimality_not_proven,,,82.040445599996,1000000,7,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,7,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.161276800004998,0,8,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,2.06018830000539,0,8,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.000457456541628545,2185,2.53245289999177,2186,8,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: Time limit reached),0.999997225127299,2.60387069531999e-06,60.1987900999957,0.938374828780771,8,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,8,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.146615999983624,0,9,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0.985223199997563,0,9,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.000325520833333333,3071,2.02403610001784,3072,9,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: model_status is Time limit reached; primal_status is None); feasibility_retry_status=0; objective_optimality_not_proven,,,80.9727546999929,1000000,9,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,9,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.138676100003067,0,10,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0.751704299997073,0,10,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.000648298217179903,3083,1.28569049999351,3085,10,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: Time limit reached),0.999984005925275,1.15513140207862e-05,62.4486715999956,0.722224587487692,10,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,10,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.135076200007461,0,11,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0.747474899981171,0,11,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,3194,1.54151910002111,3194,11,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: model_status is Time limit reached; primal_status is None); feasibility_retry_status=0; objective_optimality_not_proven,,,77.1758791999891,1000000,11,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,11,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.124497900018468,0,12,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0.640069300017785,0,12,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1202,1.15641779999714,1202,12,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: Time limit reached),0.999871902685792,0.000103504589798728,63.7093504000222,0.808015300229395,12,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,12,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.215622699994128,0,13,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0.858999599993695,0,13,balanced,compressed_6,0,60
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1020,1.31558250001399,1020,13,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: Time limit reached),0.998570006012581,0.00139429982754512,67.0721145999851,0.975038944088036,13,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,13,balanced,compressed_6,0,60
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.143220099998871,0,14,balanced,compressed_6,0,60
+balanced_reference_baseline_local_feasibility,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.323823800019454,0,14,balanced,compressed_6,0,60
+balanced_reference_baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,59.5,16.003647400008,59.5,14,balanced,compressed_6,0,60
+balanced_reference_baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,837,7.17089940002188,837,14,balanced,compressed_6,0,60
+balanced_max_deviation,1,Time limit reached. (HiGHS Status 13: Time limit reached),0.98115511562764,0.313754070725281,61.8544818999944,16.6492966752011,14,balanced,compressed_6,0,60
+balanced_sum_deviation_skipped,1,stage_B_nonoptimal; secondary_refinement_not_run,,,0,,14,balanced,compressed_6,0,60

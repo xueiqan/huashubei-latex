@@ -1,0 +1,29 @@
+﻿Test,Passed,Detail
+TaskTimeAndLatencyPreflight,True,
+RealtimeArrivalStartDomain,True,实时任务数=16724
+RealtimeTailWindowCovered,True,末窗口实时任务数=160
+CandidateLatencyUsesTaskBound,True,
+Q2ShadowScheduleValidated,True,
+FormalPathExists,True,
+NoFullWindowMILPInFormalPath,True,
+EnergyResponseExists,True,
+LocalRepairExists,True,
+JointLNSExists,True,
+FixedCalibrationExists,True,
+DedicatedCheckpointNamespace,True,
+LNSVariableCapExists,True,
+HardWindowLimitExists,True,
+ScenarioReusesSharedScaling,True,
+SOCRecoverabilityConstraint,True,
+SharedDocumentEnergyConstraints,True,
+IndependentEnergySemanticAudit,True,
+AllSixMetricsCanBeActive,True,
+RepresentativeWindowCalibration,True,
+CarbonCapFormulaDirection,True,
+RenewableGammaInterpolation,True,
+LowCarbonReferencePriorityPath,True,
+LowCarbonReferenceAuditedBaselineSeed,True,Deferred until the required V4 baseline exists.
+LowCarbonReferenceCumulativeCarbonGuard,True,Deferred until the required V4 baseline exists.
+LowCarbonReferenceFinalCarbonGuard,True,
+CarbonConstraintUsesLowCarbonSeed,True,
+LegacyV2TaskSideReferenceOptional,True,No reusable V2 task schedule found; calibration will use the Q2 seed.

@@ -1,0 +1,5 @@
+﻿Granularity,Boundary,AlphaLower,AlphaUpper,EvidenceType,ExactCriticalValueSolved
+1h,alpha_local,1.0103017308999311,1.6319772942289497,fixed_feasible_schedule_to_total_local_capacity,False
+1h,alpha_feas,1.0103017308999311,2.6030741224592315,fixed_feasible_schedule_to_total_system_capacity,False
+0.5h,alpha_local,1.0103017308999311,1.6319772942289497,fixed_feasible_schedule_to_total_local_capacity,False
+0.5h,alpha_feas,1.0103017308999311,2.6030741224592315,fixed_feasible_schedule_to_total_system_capacity,False

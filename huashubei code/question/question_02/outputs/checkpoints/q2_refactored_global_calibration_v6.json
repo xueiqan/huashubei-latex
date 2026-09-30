@@ -1,0 +1,62 @@
+{
+  "schema_version": 6,
+  "task_signature": "b1584edca54b700cd14a6994fe41a264e76359848a4aa09ce6b8603815a8118a",
+  "ideal_lb": {
+    "Cost": -452965797.61408097,
+    "Carbon": 0.0,
+    "MeanLatency": 5.0,
+    "RenewableUnusedRate": 0.30419044069326073
+  },
+  "baseline_value": {
+    "Cost": -419683423.12927735,
+    "Carbon": 8.850562453334021,
+    "MeanLatency": 5.0,
+    "RenewableUnusedRate": 0.3208402317972064
+  },
+  "reference_value": {
+    "Cost": -419683423.12927735,
+    "Carbon": 8.850562453334021,
+    "MeanLatency": 11.887201272031623,
+    "RenewableUnusedRate": 0.3208402317972064
+  },
+  "scale": {
+    "Cost": 33282374.484803617,
+    "Carbon": 8.850562453334021,
+    "MeanLatency": 6.887201272031623,
+    "RenewableUnusedRate": 0.016649791103945655
+  },
+  "active_metrics": [
+    "Cost",
+    "Carbon",
+    "MeanLatency",
+    "RenewableUnusedRate"
+  ],
+  "payoff_matrix": {
+    "Cost": {
+      "Cost": -452965797.61408097,
+      "Carbon": 4.825574251299258e-12,
+      "MeanLatency": 7.2666071759473825,
+      "RenewableUnusedRate": 0.3088644363392419
+    },
+    "Carbon": {
+      "Cost": -423312074.05201685,
+      "Carbon": 0.0,
+      "MeanLatency": 5.296077959093961,
+      "RenewableUnusedRate": 0.31953215874048574
+    },
+    "MeanLatency": {
+      "Cost": -420940884.45060945,
+      "Carbon": 8.850562453334021,
+      "MeanLatency": 5.0,
+      "RenewableUnusedRate": 0.32042859639337007
+    },
+    "RenewableUnusedRate": {
+      "Cost": -452964989.7166023,
+      "Carbon": 8.037786471959406e-10,
+      "MeanLatency": 11.887201272031623,
+      "RenewableUnusedRate": 0.3066660839056098
+    }
+  },
+  "calibration_method": "column_generation_with_dual_certificate",
+  "created_at": "2026-08-09T17:11:47"
+}

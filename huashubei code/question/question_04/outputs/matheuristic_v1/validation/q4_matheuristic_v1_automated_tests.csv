@@ -1,0 +1,12 @@
+﻿Test,Passed,Detail
+Q2ShadowScheduleValidated,True,
+FormalPathExists,True,
+NoFullWindowMILPInFormalPath,True,
+EnergyResponseExists,True,
+LocalRepairExists,True,
+JointLNSExists,True,
+FixedCalibrationExists,True,
+DedicatedCheckpointNamespace,True,
+LNSVariableCapExists,True,
+HardWindowLimitExists,True,
+ScenarioReusesSharedScaling,True,

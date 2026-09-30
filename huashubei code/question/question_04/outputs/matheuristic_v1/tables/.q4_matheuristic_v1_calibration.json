@@ -1,0 +1,5 @@
+{
+  "calibration_signature": "824d4da94db4e8ed3de7c005ac818647f21012764d237f80678c30ae3f95ef5b",
+  "metric_definition_version": "six_metrics_fixed_scaling_v1",
+  "source": "LEGACY_Q4_FIXED_CALIBRATION_REUSED"
+}

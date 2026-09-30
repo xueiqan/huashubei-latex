@@ -1,0 +1,346 @@
+﻿Mode,WindowID,Stage,Status,Message,MIPGap,MIPDualBound,ObjectiveValue,ElapsedSeconds,TimeLimitUsedSeconds
+baseline,0,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,5.12023850000696,900
+baseline,0,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0.669767441860465,0.669767441860465,0.830868400007603,900
+baseline,1,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.95354089999455,900
+baseline,1,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1,1,1.12830300000496,900
+baseline,2,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,3,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,4,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,5,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,6,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,7,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,8,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,5.11096790000738,900
+baseline,8,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,9.53385889128831,9.53385889128831,0.919671199997538,900
+baseline,9,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,5.21273510000901,900
+baseline,9,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.00420454545325186,10.9537500000121,10.9999999999978,5.37112979999802,900
+baseline,10,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,11,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,12,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,13,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,5.17350160000206,900
+baseline,13,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0.0209366391184571,0.020936639118457,0.887121499996283,900
+baseline,14,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),4.31462094967573e-14,4.61111111111097,4.61111111111116,5.03902620000008,900
+baseline,14,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,2.23187701817691,2.23187701817691,9.06146969999827,900
+baseline,15,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.94130749999022,900
+baseline,15,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,3.17203389830509,3.17203389830509,0.994742000009865,900
+baseline,16,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,5.06805159999931,900
+baseline,16,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,2,2,1.64590419999149,900
+baseline,17,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,18,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,19,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.30799020000268,900
+baseline,19,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0.2004,0.2004,0.73266870000225,900
+baseline,20,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.74291600000288,900
+baseline,20,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1,1,1.3997362999944,900
+baseline,21,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.72995829999854,900
+baseline,21,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,2.83441290222704,2.83441290222704,0.813817900008871,900
+baseline,22,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.55184220000228,900
+baseline,22,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,4.99999999999983,4.99999999999983,5.05985930000315,900
+baseline,23,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,24,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,25,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,26,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,27,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,28,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.77922099998978,900
+baseline,28,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0.205031446540881,0.205031446540881,0.8288409000088,900
+baseline,29,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.60473530000309,900
+baseline,29,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1,1,0.802669299999252,900
+baseline,30,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,31,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,32,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,33,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,34,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.44239060000109,900
+baseline,34,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0.0790909090909082,0.0790909090909084,0.779341899993597,900
+baseline,35,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,5.20662329999323,900
+baseline,35,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1,1,1.25019189999148,900
+baseline,36,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,430.106944444445,430.106944444445,5.7462755000015,900
+baseline,36,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,10.6004075999954,900
+baseline,37,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.45472650000011,900
+baseline,37,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,2.91111111111111,2.91111111111111,0.88817909998761,900
+baseline,38,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.51642310000898,900
+baseline,38,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,3.42664315398075,3.42664315398075,0.843384299994796,900
+baseline,39,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,5.02688180000405,900
+baseline,39,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1.99999999999999,1.99999999999999,2.1414347999962,900
+baseline,40,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.41555389999121,900
+baseline,40,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0.0861823361823375,0.0861823361823374,0.776731599995401,900
+baseline,41,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.70820989999629,900
+baseline,41,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0.999999999999999,0.999999999999999,1.38404860001174,900
+baseline,42,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,43,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,44,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,45,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.76525209999818,900
+baseline,45,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0.0723163841807906,0.0723163841807907,0.790069199996651,900
+baseline,46,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.54158990000724,900
+baseline,46,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1,1,0.77004850000958,900
+baseline,47,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,48,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.46149950000108,900
+baseline,48,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1.51406779661017,1.51406779661017,0.843720599994413,900
+baseline,49,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,5.06013030000031,900
+baseline,49,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,2.99999999999999,2.99999999999999,2.61858880000364,900
+baseline,50,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,51,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,52,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,53,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,54,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,55,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1.60000000000005,1.60000000000005,4.41170229999989,900
+baseline,55,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.44662259999313,900
+baseline,56,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.6480700999964,900
+baseline,56,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1,1,0.87953180000477,900
+baseline,57,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,1,0,0
+baseline,58,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,59,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,60,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,61,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,62,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,63,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,64,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,65,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,66,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,67,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,68,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.73215650000202,900
+baseline,68,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,3.48144223170539,3.48144223170539,0.854674299989711,900
+baseline,69,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.56116969999857,900
+baseline,69,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,4.99999999999906,4.99999999999906,2.97771919998922,900
+baseline,70,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,71,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,72,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,73,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,74,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,5.1427313000022,900
+baseline,74,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0.211417322834645,0.211417322834645,0.869634799993946,900
+baseline,75,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,5.67755570000736,900
+baseline,75,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1,1,1.39031050000631,900
+baseline,76,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,77,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,78,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,79,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.32832950000011,900
+baseline,79,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1.20936329588015,1.20936329588015,0.777144599996973,900
+baseline,80,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.49115519999759,900
+baseline,80,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,2,2,0.900014900005772,900
+baseline,81,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,82,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.92982699999993,900
+baseline,82,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,4.41030852616218,4.41030852616218,0.838101700006519,900
+baseline,83,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,5.24405399999523,900
+baseline,83,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,6,6,1.62165380000079,900
+baseline,84,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,85,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,86,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.55821439999272,900
+baseline,86,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0.0422764227642274,0.0422764227642275,0.788223099996685,900
+baseline,87,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.47712849998788,900
+baseline,87,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1,1,1.70037120000052,900
+baseline,88,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,89,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,90,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,91,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,92,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,93,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,94,baseline_analytic_zero_migration_earliest,0,analytic_zero_migration_earliest_start_optimum,0,0,0,0,0
+baseline,95,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,5.44950300001074,900
+baseline,95,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1.11469816272966,1.11469816272966,0.860059700004058,900
+baseline,96,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,25.0613888888889,25.0613888888889,5.2809605999937,900
+baseline,96,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1.99999996730413,1.99999996730413,9.51984229999653,900
+baseline,97,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,4.68353809999826,900
+baseline,97,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1.61120448179272,1.61120448179272,0.952934100001585,900
+baseline,98,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,5.24069500000041,900
+baseline,98,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,3.41479570791527,3.41479570791527,1.06972620000306,900
+baseline,99,baseline_migration,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,0,1.98682370000461,900
+baseline,99,baseline_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,3,3,0.636957900002017,900
+balanced,0,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.02740575881803,1.5835708000086,0
+balanced,0,large_neighborhood_milp_refinement,0,feasible,0,,1.02740575881803,1.81181290000677,20
+balanced,1,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.16291461252745,3.67170520000218,0
+balanced,1,large_neighborhood_milp_refinement,0,feasible,0,,1.16291461252745,2.47801409999374,20
+balanced,2,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.06620344473128,4.12584030001017,0
+balanced,2,large_neighborhood_milp_refinement,0,feasible,0,,1.06620344473128,2.67491990000417,20
+balanced,3,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.06620344473128,2.57029419999162,0
+balanced,3,large_neighborhood_milp_refinement,0,feasible,0,,1.06620344473128,0.203148100001272,20
+balanced,4,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.06620344473128,2.87085779999325,0
+balanced,4,large_neighborhood_milp_refinement,0,feasible,0,,1.06620344473128,0.500769099991885,20
+balanced,5,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.25227123729812,2.99974610000208,0
+balanced,5,large_neighborhood_milp_refinement,0,feasible,0,,1.25227123729812,2.01725879999867,20
+balanced,6,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,2.0789564120271,3.08250839999528,0
+balanced,6,large_neighborhood_milp_refinement,0,feasible,0,,2.0789564120271,0.720000799992704,20
+balanced,7,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.71900230511974,3.17897880000237,0
+balanced,7,large_neighborhood_milp_refinement,0,feasible,0,,1.71900230511974,1.19402789999731,20
+balanced,8,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,2.04588626486385,3.23061369999778,0
+balanced,8,large_neighborhood_milp_refinement,0,feasible,0,,2.04588626486385,1.01427460000559,20
+balanced,9,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,2.14744000083987,3.32317509999848,0
+balanced,9,large_neighborhood_milp_refinement,0,feasible,0,,2.14744000083987,1.0631929999945,20
+balanced,10,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.06620344473128,3.4618172999908,0
+balanced,10,large_neighborhood_milp_refinement,0,feasible,0,,1.06620344473128,0.398933799995575,20
+balanced,11,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.06620344473128,3.4393010000058,0
+balanced,11,large_neighborhood_milp_refinement,0,feasible,0,,1.06620344473128,0.439290399997844,20
+balanced,12,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.06620344473128,3.43150979999336,0
+balanced,12,large_neighborhood_milp_refinement,0,feasible,0,,1.06620344473128,0.581702900002711,20
+balanced,13,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.90772075575193,3.42606670000532,0
+balanced,13,large_neighborhood_milp_refinement,0,feasible,0,,1.90772075575193,1.18383139999059,20
+balanced,14,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,2.88465449620685,4.15539699999499,0
+balanced,14,large_neighborhood_milp_refinement,0,feasible,0,,2.88465449620685,0.659822700006771,20
+balanced,15,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.79786573252579,3.60712940001395,0
+balanced,15,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,2.39202230000228,20
+balanced,16,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,3.49181340000359,0
+balanced,16,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,0.632765299989842,20
+balanced,17,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,3.83593129999645,0
+balanced,17,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,0.605133299992303,20
+balanced,18,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,2.03199634930027,3.83903089999512,0
+balanced,18,large_neighborhood_milp_refinement,0,feasible,0,,2.03199634930027,2.28750449999643,20
+balanced,19,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,4.31707340000139,0
+balanced,19,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,1.11097170000721,20
+balanced,20,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.84454505647577,5.01283880000119,0
+balanced,20,large_neighborhood_milp_refinement,0,feasible,0,,1.84454505647577,1.93033239999204,20
+balanced,21,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,5.35334789998888,0
+balanced,21,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,0.759797599996091,20
+balanced,22,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,2.36805957885757,5.05082099999709,0
+balanced,22,large_neighborhood_milp_refinement,0,feasible,0,,2.36805957885757,1.71120119999978,20
+balanced,23,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,5.38332700000319,0
+balanced,23,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,0.818818300002022,20
+balanced,24,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,5.12560120000853,0
+balanced,24,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,0.811070499999914,20
+balanced,25,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,5.22000669999397,0
+balanced,25,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,1.17322910000803,20
+balanced,26,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,5.42713149999327,0
+balanced,26,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,1.14997569999832,20
+balanced,27,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,5.43742889999703,0
+balanced,27,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,0.889848599996185,20
+balanced,28,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,5.70990909999819,0
+balanced,28,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,4.11518639999849,20
+balanced,29,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,5.47004509999533,0
+balanced,29,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,0.782213099999353,20
+balanced,30,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,3.82463760000246,0
+balanced,30,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,0.600844800006598,20
+balanced,31,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,2.21795562020531,3.79765690000204,0
+balanced,31,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,0.544883499998832,20
+balanced,32,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,3.8476926000003,0
+balanced,32,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,0.809076699995785,20
+balanced,33,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,3.7695773000014,0
+balanced,33,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,0.512820700008888,20
+balanced,34,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,2.0310555154594,3.68669930000033,0
+balanced,34,large_neighborhood_milp_refinement,0,feasible,0,,1.43570495315155,2.97583130000567,20
+balanced,35,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27697069288193,3.71411570000055,0
+balanced,35,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,0.56848680000985,20
+balanced,36,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.27853966396462,4.38794190000044,0
+balanced,36,large_neighborhood_milp_refinement,0,feasible,0,,1.27697069288193,0.981898300000466,20
+balanced,37,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.28506190692308,3.62351210000634,0
+balanced,37,large_neighborhood_milp_refinement,0,feasible,0,,1.28332535247555,2.32842950000486,20
+balanced,38,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.28937425366988,3.64331620000303,0
+balanced,38,large_neighborhood_milp_refinement,0,feasible,0,,1.28711208658856,1.77643500000704,20
+balanced,39,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.33684776368517,3.7894884999987,0
+balanced,39,large_neighborhood_milp_refinement,0,feasible,0,,1.31626471217181,2.85100579999562,20
+balanced,40,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29339911063356,3.89778959999967,0
+balanced,40,large_neighborhood_milp_refinement,0,feasible,7.42444894613767e-05,,1.29130246797282,1.48108459998912,20
+balanced,41,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29393053114175,3.89432269999816,0
+balanced,41,large_neighborhood_milp_refinement,0,feasible,0,,1.293262625585,3.633107200003,20
+balanced,42,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29418607761563,3.71495839999989,0
+balanced,42,large_neighborhood_milp_refinement,0,feasible,0.000116791731144931,,1.29294028855545,2.93134729999292,20
+balanced,43,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29462457213332,3.73883259999275,0
+balanced,43,large_neighborhood_milp_refinement,0,feasible,3.81562881553413e-05,,1.29380856577921,2.03441430001112,20
+balanced,44,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29605330923731,3.55057810001017,0
+balanced,44,large_neighborhood_milp_refinement,0,feasible,0,,1.29601555805367,2.3490129999991,20
+balanced,45,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29634660689484,3.65304190000461,0
+balanced,45,large_neighborhood_milp_refinement,0,feasible,3.45714788080731e-05,,1.29598651868164,2.11514840000018,20
+balanced,46,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29656149824788,3.62691180000547,0
+balanced,46,large_neighborhood_milp_refinement,0,feasible,8.74042443193455e-05,,1.29659924943152,2.26241819999996,20
+balanced,47,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29611429191858,3.57618640000874,0
+balanced,47,large_neighborhood_milp_refinement,0,feasible,0,,1.29611429191858,2.14549339999212,20
+balanced,48,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29660215336872,3.54768069999409,0
+balanced,48,large_neighborhood_milp_refinement,0,feasible,0.0327986214279366,,1.34039089052015,1.01396399999794,20
+balanced,49,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,7.60574932749849,4.48141059999762,0
+balanced,49,large_neighborhood_milp_refinement,0,feasible,0.000113715993078515,,1.32757264364119,3.67274790001102,20
+balanced,50,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29959901656246,3.63292449999426,0
+balanced,50,large_neighborhood_milp_refinement,0,feasible,5.83027682174087e-05,,1.29876268264793,2.63168780000706,20
+balanced,51,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29939283702103,3.85235480000847,0
+balanced,51,large_neighborhood_milp_refinement,0,feasible,1.80428010764981e-05,,1.29862619759937,1.46437820000574,20
+balanced,52,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29744139122046,3.75986950000515,0
+balanced,52,large_neighborhood_milp_refinement,0,feasible,3.80480031508391e-05,,1.29749075815291,1.83831840001221,20
+balanced,53,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30094644342476,3.74563959999068,0
+balanced,53,large_neighborhood_milp_refinement,0,feasible,0.000129160979428257,,1.29952061025797,1.52993449999485,20
+balanced,54,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29848100073921,3.75737829999707,0
+balanced,54,large_neighborhood_milp_refinement,0,feasible,2.23699133603277e-05,,1.29814414402364,2.0410697000043,20
+balanced,55,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.6723256229726,3.67169810000632,0
+balanced,55,large_neighborhood_milp_refinement,0,feasible,0,,1.6723256229726,1.13966820000496,20
+balanced,56,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29789150148696,3.55121740000322,0
+balanced,56,large_neighborhood_milp_refinement,0,feasible,5.81842011512537e-05,,1.29796700385424,1.85259629999928,20
+balanced,57,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29780438337086,3.61174690000189,0
+balanced,57,large_neighborhood_milp_refinement,0,feasible,3.60345115697068e-05,,1.29785084636611,1.95241900000838,20
+balanced,58,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29866975665742,3.56384889999754,0
+balanced,58,large_neighborhood_milp_refinement,0,feasible,2.97896859163328e-05,,1.29848100073921,1.82187649999105,20
+balanced,59,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29761272351545,3.56586339999922,0
+balanced,59,large_neighborhood_milp_refinement,0,feasible,4.47561461374831e-05,,1.29767080225951,3.81849380000494,20
+balanced,60,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29778986368484,3.60228649999772,0
+balanced,60,large_neighborhood_milp_refinement,0,feasible,6.85620232720631e-06,,1.29779857549645,1.94950569998764,20
+balanced,61,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29904146061944,3.66137980000349,0
+balanced,61,large_neighborhood_milp_refinement,0,feasible,7.60138345166798e-05,,1.29889335982207,1.66755329999432,20
+balanced,62,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29786246211492,3.61578490000102,0
+balanced,62,large_neighborhood_milp_refinement,0,feasible,3.04717997294557e-05,,1.29786246211493,1.86665579999681,20
+balanced,63,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29894853462893,3.66406000001007,0
+balanced,63,large_neighborhood_milp_refinement,0,feasible,0.000163199971383946,,1.29894272675453,2.13961509999353,20
+balanced,64,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29856811885531,3.75045029999455,0
+balanced,64,large_neighborhood_milp_refinement,0,feasible,0.000109650603926763,,1.29831547631863,1.66754579999542,20
+balanced,65,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29918084960519,3.69337949999317,0
+balanced,65,large_neighborhood_milp_refinement,0,feasible,5.86283185035643e-05,,1.29880043383157,1.43241940000735,20
+balanced,66,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29993877721524,3.56435309999506,0
+balanced,66,large_neighborhood_milp_refinement,0,feasible,0.00050007494926925,,1.29982552366431,0.73406229999091,20
+balanced,67,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29842001805794,3.83175420000043,0
+balanced,67,large_neighborhood_milp_refinement,0,feasible,5.81477265345235e-05,,1.29845776924159,2.94467200001236,20
+balanced,68,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29869589209225,3.95880220000981,0
+balanced,68,large_neighborhood_milp_refinement,0,feasible,3.41960055430257e-16,,1.29865814090861,2.12065569999686,20
+balanced,69,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29822255032813,3.8347131999908,0
+balanced,69,large_neighborhood_milp_refinement,0,feasible,0.000275089627778251,,1.29842872986955,6.75101089999953,20
+balanced,70,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,5.62263589421568,3.7987129999965,0
+balanced,70,large_neighborhood_milp_refinement,0,feasible,0,,5.62263589421568,0.618849299993599,20
+balanced,71,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30054860402791,3.82189269999799,0
+balanced,71,large_neighborhood_milp_refinement,0,feasible,1.34823473075678e-06,,1.30010139769862,2.51709599999595,20
+balanced,72,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,2.74948582292208,3.7529438000056,0
+balanced,72,large_neighborhood_milp_refinement,0,feasible,0,,2.74948582292208,0.637082800007192,20
+balanced,73,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29823126213973,3.72023120000085,0
+balanced,73,large_neighborhood_milp_refinement,0,feasible,0.000116327713063942,,1.29809768102839,2.48897819999547,20
+balanced,74,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30642036505285,4.54047799999535,0
+balanced,74,large_neighborhood_milp_refinement,0,feasible,2.17510086120213e-05,,1.30432662632932,2.03219679999165,20
+balanced,75,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30056602765113,3.68105740001192,0
+balanced,75,large_neighborhood_milp_refinement,0,feasible,0.000218555042214529,,1.29993587327803,1.38976099999854,20
+balanced,76,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.77998629392098,3.64897819999896,0
+balanced,76,large_neighborhood_milp_refinement,0,feasible,0,,1.77998629392098,1.31374690000666,20
+balanced,77,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29899209368698,3.7887117999926,0
+balanced,77,large_neighborhood_milp_refinement,0,feasible,0.000116234104426558,,1.29914309842155,3.84974109999894,20
+balanced,78,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30040340716775,5.0756468000036,0
+balanced,78,large_neighborhood_milp_refinement,0,feasible,5.51136821349387e-07,,1.30040340716775,2.03598809998948,20
+balanced,79,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29915181023316,3.88244079999276,0
+balanced,79,large_neighborhood_milp_refinement,0,feasible,0,,1.29907630786588,1.77809720000369,20
+balanced,80,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.29979358035507,3.69254119999823,0
+balanced,80,large_neighborhood_milp_refinement,0,feasible,7.59841059120441e-05,,1.29940154883264,1.41605829999025,20
+balanced,81,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.4899501986032,3.77010429999791,0
+balanced,81,large_neighborhood_milp_refinement,0,feasible,0,,1.4899501986032,1.53218999999808,20
+balanced,82,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30737285645551,4.58672070001194,0
+balanced,82,large_neighborhood_milp_refinement,0,feasible,6.89354062420036e-05,,1.30486966258632,3.06282099999953,20
+balanced,83,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,2.58036270830032,3.79747819999466,0
+balanced,83,large_neighborhood_milp_refinement,0,feasible,0,,2.19028972967664,0.544744600003469,20
+balanced,84,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30285142623008,3.74943949999579,0
+balanced,84,large_neighborhood_milp_refinement,0,feasible,0.000260776534569292,,1.30288046560211,0.667031500008306,20
+balanced,85,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30308083726913,3.66590079999878,0
+balanced,85,large_neighborhood_milp_refinement,0,feasible,3.40819180056169e-16,,1.30300533490185,1.97964330000104,20
+balanced,86,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30265105456305,3.80676140000287,0
+balanced,86,large_neighborhood_milp_refinement,0,feasible,4.45830481869626e-05,,1.30270913330712,1.2866412000003,20
+balanced,87,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30303727821108,3.61619460000657,0
+balanced,87,large_neighborhood_milp_refinement,0,feasible,0,,1.30283981048126,1.58749499999976,20
+balanced,88,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30272946086754,3.43699610000476,0
+balanced,88,large_neighborhood_milp_refinement,0,feasible,6.01825537459633e-05,,1.30280786717203,1.57415590000164,20
+balanced,89,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30420466096678,3.48855009999534,0
+balanced,89,large_neighborhood_milp_refinement,0,feasible,0,,1.30366743258419,0.85812829999486,20
+balanced,90,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30446601531507,3.46800860000076,0
+balanced,90,large_neighborhood_milp_refinement,0,feasible,8.56135146170694e-05,,1.30329572862217,1.19436370000767,20
+balanced,91,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30452990193355,3.91568410000764,0
+balanced,91,large_neighborhood_milp_refinement,0,feasible,0.000144507931327234,,1.30405365623222,1.95393150000018,20
+balanced,92,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30262201519102,3.90314349999244,0
+balanced,92,large_neighborhood_milp_refinement,0,feasible,0,,1.30262201519102,1.86834510001063,20
+balanced,93,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30261911125382,3.89591629999632,0
+balanced,93,large_neighborhood_milp_refinement,0,feasible,0.000245184902850344,,1.30282529079525,1.0464512000035,20
+balanced,94,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30350771603801,3.97247160000552,0
+balanced,94,large_neighborhood_milp_refinement,0,feasible,0.000117247460062963,,1.30325797743853,1.75084680000145,20
+balanced,95,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.303321864057,3.75616820000869,0
+balanced,95,large_neighborhood_milp_refinement,0,feasible,0.000245109508242598,,1.30322603412929,0.848877399999765,20
+balanced,96,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,3.79713473833051,3.7787920999981,0
+balanced,96,large_neighborhood_milp_refinement,0,feasible,0,,2.684582825547,0.439370899999631,20
+balanced,97,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30355708297046,3.97189210000215,0
+balanced,97,large_neighborhood_milp_refinement,0,feasible,8.68753605875925e-05,,1.30363258533775,3.05617409999832,20
+balanced,98,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.53635651410467,3.77562580000085,0
+balanced,98,large_neighborhood_milp_refinement,0,feasible,0,,1.35514714933761,2.76998989999993,20
+balanced,99,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.3089845416033,1.74703910000972,0
+balanced,99,large_neighborhood_milp_refinement,0,feasible,5.76801061312312e-05,,1.3089845416033,2.56260160000238,20
+balanced,100,rolling_minmax_marginal_greedy,0,strict_feasible_constructed,,,1.30902229278695,0.145575399990776,0
+balanced,100,large_neighborhood_milp_refinement,0,feasible,0.000110910978411071,,1.30912973846346,0.471570699999575,20

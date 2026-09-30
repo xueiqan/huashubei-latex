@@ -1,0 +1,11 @@
+{
+  "schema_version": 3,
+  "task_signature": "b1584edca54b700cd14a6994fe41a264e76359848a4aa09ce6b8603815a8118a",
+  "mode": "balanced",
+  "status": "RUNNING",
+  "next_tau": 216,
+  "next_window_id": 9,
+  "decision_window": 24,
+  "lookahead": 48,
+  "updated_at": "2026-08-09T17:44:55"
+}

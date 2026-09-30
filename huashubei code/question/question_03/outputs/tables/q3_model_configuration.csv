@@ -1,0 +1,2 @@
+﻿StartHour,OperationalEndHour,TerminalHour,OperationalHourCount,RegionCount,VariableCount,BinaryVariableCount,BaseConstraintCount,AuditTolerance,BalanceTolerance,Note
+0,2405,2406,2406,6,144367,14436,187668,1e-05,1e-06,2406小时只用于终端SOC状态结算；正式多目标方案为三级均衡择优结果。

@@ -1,0 +1,32 @@
+{
+  "status": "COMPLETED",
+  "window_id": 9,
+  "tau": 216,
+  "decision_window": 24,
+  "lookahead": 48,
+  "method": "greedy_plus_lns_only",
+  "exact_milp_called": false,
+  "history_root": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_02\\outputs\\validation_runs\\exact_vs_heuristic",
+  "history_windows": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "history_task_count": 4164,
+  "task_signature": "b1584edca54b700cd14a6994fe41a264e76359848a4aa09ce6b8603815a8118a",
+  "reference_exact_z": 1.0,
+  "reference_heuristic_z": 3.934044695116315,
+  "relative_delta": 2.934044695116315,
+  "elapsed_seconds": 35.54270929998893,
+  "source_exact_row": {
+    "WindowID": 9,
+    "ZStar": 1.0,
+    "ElapsedSeconds": 650.492939899996
+  }
+}

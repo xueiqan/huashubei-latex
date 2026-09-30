@@ -1,0 +1,7 @@
+﻿Region,Total_GPU,Available_GPU,Max_IT_Power_MW,PUE,Max_Facility_Power_MW
+RegionA,700,630,420,1.35,567.0
+RegionB,650,585,410,1.35,553.5
+RegionC,600,540,405,1.38,558.9
+RegionD,1600,1472,720,1.28,921.6
+RegionE,1100,1012,560,1.25,700.0
+RegionF,1050,966,540,1.27,685.8

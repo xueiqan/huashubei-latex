@@ -1,0 +1,17 @@
+﻿Scheme,Metric,IndependentValue
+SequentialTaskSchedule,Cost,-453230687.19525504
+SequentialTaskSchedule,Carbon,30.123317350237176
+SequentialTaskSchedule,Latency,12.94684
+SequentialTaskSchedule,LatencySLA,0.2414977
+SequentialTaskSchedule,RenewableUnusedRate,0.2986145560553602
+SequentialTaskSchedule,Peak,66.57086707234724
+SequentialTaskSchedule,Delay,0.0836585443381589
+SequentialTaskSchedule,RenewableUtilization,0.7013854439446399
+JointTaskSchedule,Cost,-453887338.8664122
+JointTaskSchedule,Carbon,71.20054696770457
+JointTaskSchedule,Latency,9.96178
+JointTaskSchedule,LatencySLA,0.20958611666666668
+JointTaskSchedule,RenewableUnusedRate,0.29835689704180435
+JointTaskSchedule,Peak,97.18279375999037
+JointTaskSchedule,Delay,0.07928104028170245
+JointTaskSchedule,RenewableUtilization,0.7016431029581957

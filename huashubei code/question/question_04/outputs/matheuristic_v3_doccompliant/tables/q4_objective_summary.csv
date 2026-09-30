@@ -1,0 +1,10 @@
+﻿Scheme,Metric,Value
+Q4JointMatheuristic,Cost,-454308802.649929
+Q4JointMatheuristic,Carbon,428.010843990733
+Q4JointMatheuristic,Latency_ms,9.96178
+Q4JointMatheuristic,LatencySLA,0.209586116666647
+Q4JointMatheuristic,QoSLoss,0.0792810402817025
+Q4JointMatheuristic,QoS,0.920718959718298
+Q4JointMatheuristic,RenewableUnusedRate,0.298504770777479
+Q4JointMatheuristic,RenewableUtilization,0.701495229222521
+Q4JointMatheuristic,Peak,248.679699439163

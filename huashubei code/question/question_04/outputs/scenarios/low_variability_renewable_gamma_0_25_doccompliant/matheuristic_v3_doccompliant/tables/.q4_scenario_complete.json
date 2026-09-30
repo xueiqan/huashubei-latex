@@ -1,0 +1,35 @@
+{
+  "complete": true,
+  "audit_passed": true,
+  "model_version": "Q4_MATHEURISTIC_V3_DOCUMENT_COMPLIANT",
+  "input_signature": "2711a7c4537b5106cb7718134f7b8f05a22595441708a87e9f9cdf96a23ce8ce",
+  "task_count": 50000,
+  "dispatch_count": 14436,
+  "scenario": {
+    "ScenarioName": "low_variability_renewable_gamma_0_25_doccompliant",
+    "ScenarioKind": "low_variability_renewable",
+    "ScenarioDefinitionVersion": "Q4_SCENARIO_V3_DOCUMENT_COMPLIANT",
+    "CarbonCap": null,
+    "ChangedColumns": [
+      "AvailableRenewable_MW"
+    ],
+    "RenewableSmoothingGamma": 0.25,
+    "StructuralInputsUnchanged": true,
+    "SingleFactorCheck": {
+      "passed": true,
+      "scenario_kind": "low_variability_renewable",
+      "changed_columns": [
+        "AvailableRenewable_MW"
+      ],
+      "expected_changed_columns": [
+        "AvailableRenewable_MW"
+      ],
+      "structural_inputs_unchanged": true,
+      "hour_region_unchanged": true,
+      "scenario_invariants_passed": true
+    },
+    "OptimizationMode": "six_objective_minimax"
+  },
+  "scenario_name": "low_variability_renewable_gamma_0_25_doccompliant",
+  "scenario_kind": "low_variability_renewable"
+}

@@ -1,0 +1,15 @@
+﻿Check,Value
+RepairBranchCheckpoint,E:\python project\huashubei\question\question_04\outputs\tables\.q4_progress_checkpoint_window48_repair.pkl
+last_completed_tau,72
+next_tau,96
+solver_windows,"[0, 24, 48, 72]"
+window48_mode,HOnlyBalanced
+window72_mode,HOnlyBalanced
+assigned_task_count,1685
+duplicate_task_id_count,0
+overdue_unstarted_at96_count,0
+fixed_gpu_violation_96_120,0.0
+fixed_ai_facility_violation_96_120,0.0
+resume_state_validation,PASS
+formal_original_checkpoint_modified,False
+stopped_before_window96,True

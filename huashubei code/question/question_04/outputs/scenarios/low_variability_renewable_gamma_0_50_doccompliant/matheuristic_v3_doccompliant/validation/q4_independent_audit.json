@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "failed_checks": [],
+  "max_violation": 1.2789769243681803e-11,
+  "violation_details": {},
+  "independent_metrics": {
+    "Cost": -457627190.94823146,
+    "Carbon": 158.00527117733998,
+    "Latency": 9.82436,
+    "LatencySLA": 0.2086822333333142,
+    "RenewableUnusedRate": 0.298076205544639,
+    "Peak": 13.175826239999878,
+    "Delay": 0.07928344657841083,
+    "RenewableUtilization": 0.701923794455361
+  },
+  "solver_metrics": {
+    "Cost": -457627190.94823146,
+    "Carbon": 158.00527117733998,
+    "Latency": 9.82436,
+    "Delay": 0.07928344657841083,
+    "RenewableUnusedRate": 0.298076205544639,
+    "Peak": 13.175826239999878
+  },
+  "metric_differences": {
+    "Cost": 0.0,
+    "Carbon": 0.0,
+    "Latency": 0.0,
+    "Delay": 0.0,
+    "RenewableUnusedRate": 0.0,
+    "Peak": 0.0
+  },
+  "tolerance_used": 1e-06,
+  "baseline_status": "Q2_SHADOW_TASK_SEED_V3_ENERGY_REFERENCE",
+  "scenario_status": "MATHEURISTIC_COMPLETE"
+}

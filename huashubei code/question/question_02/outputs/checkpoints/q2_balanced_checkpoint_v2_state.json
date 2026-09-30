@@ -1,0 +1,15 @@
+{
+  "schema_version": 2,
+  "mode": "balanced",
+  "status": "RUNNING",
+  "task_count": 50000,
+  "task_signature": "750dda34419464a3f9f4d408dbd67ab465471583ca697cf3e489318a0ddeb472",
+  "next_tau": 24,
+  "next_window_id": 1,
+  "error": null,
+  "failed_window_start": null,
+  "candidate_mode": "exact",
+  "recovery_attempt": 0,
+  "solver_time_limit_seconds": 60.0,
+  "updated_at": "2026-08-08T22:37:45"
+}

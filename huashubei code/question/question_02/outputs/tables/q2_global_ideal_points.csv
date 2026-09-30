@@ -1,0 +1,5 @@
+﻿Objective,IdealLowerBound,BaselineValue,ReferenceValue,Scale,ActiveInMinMax,CalibrationMethod,CacheReused
+Cost,-452965797.614081,-419683423.129277,-419683423.129277,33282374.4848036,1,exact_column_generation,True
+Carbon,0,8.85056245333402,8.85056245333402,8.85056245333402,1,exact_column_generation,True
+MeanLatency,5,5,11.8872012720316,6.88720127203162,1,exact_column_generation,True
+RenewableUnusedRate,0.304190440693261,0.320840231797206,0.320840231797206,0.0166497911039457,1,exact_column_generation,True

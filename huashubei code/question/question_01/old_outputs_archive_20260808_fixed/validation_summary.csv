@@ -1,0 +1,21 @@
+﻿CheckGroup,CheckItem,Status,Observed,Rule,Evidence
+复合泊松结构,训练面板完整性,PASS,series=18; rows=42336; expected_rows=42336; incomplete_series=0,每条SourceRegion×TaskType序列必须覆盖0--2351每个小时且键唯一,先验证面板完整性，再计算离散指数和24小时块参数
+复合泊松结构,18条序列任务数离散性,COMPUTED,series=18; chi2=True; reject_at_5pct=1,输出phi=s²/均值、Q=(T-1)phi及可用时的95%卡方区间；不以phi=1机械判定,检验结果写入validation_poisson_dispersion.csv，论文结论需依据表中序列分布
+复合泊松结构,24小时块参数稳定性,COMPUTED,series=18; both_inside_empirical95=17; validation_complete=True,以训练期0--2351的24小时块经验95%区间检查2352--2375参数，不设5%/10%人为波动阈值,lambda和mu分别由任务数与GPU需求独立聚合，结果写入parameter_stability表
+24h时间外预测,预测键完整性,PASS,duplicate=0; missing=0; extra=0,验证和测试各包含2个时间窗×3个模型×全部SourceRegion×TaskType序列×24小时,forecast_predictions.csv的Split、Model、序列和Hour键独立核验
+24h时间外预测,实际值与预测值合法性,PASS,actual_missing=0; actual_mismatch=0; nonfinite_prediction=0; negative_prediction=0,实际值必须来自对应面板；预测值必须为有限非负数,验证器重新按Hour×SourceRegion×TaskType连接原始面板
+24h时间外预测,训练边界与时间泄漏,PASS,fit_end_mismatch=0; fit_leak_count=0,验证只使用0--2351；测试只使用0--2375；预测小时必须严格晚于FitEndHour,依据每个模型的明确历史边界逐行审计，未采用随机K折
+24h时间外预测,指标独立复算,PASS,rows=114; max_abs_diff=2.842170943040401e-14,WAPE为主指标，RMSE和MAE为辅助指标；报告值必须与逐行独立复算一致,validation.py不调用model.py的指标函数，重新计算全部序列和ALL汇总
+24h时间外预测,模型与24小时同刻基线比较,COMPUTED,已输出validation_forecast_comparison.csv,不设置人为提升百分比；依据WAPE、RMSE、MAE的支配关系观察主模型与基线,验证期用于模型判断，测试期只保留独立评价，不由验证器换模
+24h时间外预测,复合泊松参数独立复算,PASS,rows=36; max_abs_diff=1.4210854715202004e-14,lambda=训练期每小时任务数均值，mu=总GPU需求/总任务数，预测均值=lambda×mu,不调用model.py的拟合函数，重新按输入面板计算并比对参数表
+24h时间外预测,68个连续历史滚动窗口,PASS,window_bad=0; duplicate=0; nonfinite=0,"窗口起点为720+24j，j=0,...,67，最后窗口为2328--2351；每窗包含3个模型",滚动回测仅作稳定性证据，不替代官方验证/测试划分
+调度可行性与最优性,每个任务恰好执行一次,PASS,duplicate_task_ids=0; missing_task_ids=0; unexpected_task_ids=0,每个2376--2399小时到达任务满足sum x=1,依据tasks_clean中的实际任务全集与输出TaskID集合独立比较
+调度可行性与最优性,任务字段与候选区域,PASS,task_field_mismatch=0; illegal_region=0; candidate_source_mismatch=0; network_violation=0; candidate_latency_mismatch=0; migration_flag_mismatch=0,分配区域必须在候选区域表中，网络时延不得超过任务上限，输出任务字段须与输入一致,候选区域键和任务输入均从shared结果重新读取，不信任摘要列
+调度可行性与最优性,实时启动、期限和2406小时边界,PASS,realtime_delay=0; before_arrival=0; before_earliest=0; deadline=0; occupy_2406=0; duration_mismatch=0; wait_mismatch=0,"实时任务StartHour=ArrivalHour；所有任务StartHour>=EarliestStartHour，且FinishHour<=min(LatestFinishHour,2406)；持续时间不可抢占","FinishHour=2406表示在[StartHour,2406)内完成，不计作占用第2406小时；只有FinishHour>2406计违规"
+调度可行性与最优性,实际重叠时长容量复算,PASS,"invalid_capacity_keys=0; GPU(max=0.0, rows=0); IT(max=0.0, rows=0); Facility(max=0.0, rows=0)","按rho=max(0,min(Finish,h+1)-max(Start,h))重算2376--2405每个Hour×Region的资源使用",validation.py独立循环任务区间，不读取dispatch_resource_profile中的已计算使用量
+调度可行性与最优性,模型容量表与独立复算一致性,PASS,rows=180; max_abs_diff=1.0049916454590857e-10,模型输出剖面只能作为记录，必须与独立重算结果一致,同时保留独立剖面和逐键差异表，避免自己读取自己生成的容量结论
+调度可行性与最优性,两级目标独立复算,PASS,F1_recomputed=0.0; F1_reported=0.0; F2_recomputed=3.0; F2_reported=3.0,F1按输入任务的GPU×Duration重算；F2按输入最早时刻与输出StartHour重算,不使用summary中的目标值作为唯一证据
+调度可行性与最优性,两级求解最优性证书,PASS,"Stage1Status=0; Stage2Status=0; certificate_fields=True; values={'Stage1MIPGap': 0.0, 'Stage2MIPGap': 0.0, 'Stage1MIPDualBound': 0.0, 'Stage2MIPDualBound': 3.000000000000001}",只有两阶段求解状态均为0且保存了求解器间隙/界字段，才允许论文使用‘最小/最优/F*’措辞,状态0表示scipy.optimize.milp成功终止；若环境未提供间隙或界，结果仍需降级表述
+调度可行性与最优性,调度硬约束总证书,PASS,hard_ok=True; stage_status_ok=True,所有违反数和最大违反量必须为0；最优性与可行性分开报告,硬约束证书由任务级、候选级、小时级独立审计组成
+调度可行性与最优性,全本地可行性基线,PASS,status=FEASIBLE; feasible=True; primary_F1=0.0,若全本地可行，则主解F1必须为0；若不可行，只能说明全本地基线未通过，不能自动证明模型最优,该基线只增加TargetRegion=SourceRegion限制，不改变其他约束
+开工时间粒度敏感性,1小时与0.5小时全时域比较,COMPUTED,F1_1h=0.0; F1_0.5h=0.0; F1_stable=True; F2_1h=3.0; F2_0.5h=2.0; F2_stable=False; half_hour_hard_ok=True,先比较F1，再比较F2；不设置5%/10%人为稳定阈值，覆盖完整2376--2405时域,0.5小时方案使用与主模型相同的两级求解接口和实际重叠容量审计

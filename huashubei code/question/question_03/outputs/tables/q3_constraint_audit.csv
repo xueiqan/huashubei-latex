@@ -1,0 +1,16 @@
+﻿Check,MaxViolation,Status
+RenewableBalanceResidual_MW,3.69482222595252e-13,PASS
+EnergyBalanceResidual_MW,6.04717221923481e-16,PASS
+SOCRecurrenceResidual_MWh,4.54747350886464e-13,PASS
+InitialSOCViolation_MWh,0,PASS
+TerminalSOCDeficit_MWh,0,PASS
+SOCLowerViolation_MWh,0,PASS
+SOCUpperViolation_MWh,0,PASS
+ChargePowerViolation_MW,1.70530256582424e-13,PASS
+DischargePowerViolation_MW,0,PASS
+ChargeDischargeOverlap_MW,-0,PASS
+GridImportViolation_MW,0,PASS
+SellLimitViolation_MW,0,PASS
+GridExportViolation_MW,0,PASS
+GridChargeSourceViolation_MW,0,PASS
+DirectRenewableLoadViolation_MW,0,PASS

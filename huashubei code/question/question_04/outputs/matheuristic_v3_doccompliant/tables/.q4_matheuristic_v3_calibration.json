@@ -1,0 +1,6 @@
+{
+  "calibration_signature": "20ecc3ae5bf171f43770c6103d4f3646bc5e58ad851e5bad7b95f86d897c2434",
+  "metric_definition_version": "six_metrics_fixed_scaling_v2_document_compliant",
+  "source": "REPRESENTATIVE_WINDOWS_CONTINUOUS_LB_AND_FEASIBLE_REFERENCE",
+  "reference_task_seed": "V2_TASK_SCHEDULE_RECOMPUTED_WITH_V3_ENERGY:E:\\python project\\huashubei\\question\\question_04\\outputs\\matheuristic_v2\\tables\\q4_task_assignments.csv"
+}

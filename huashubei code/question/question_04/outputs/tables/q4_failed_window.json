@@ -1,0 +1,12 @@
+{
+  "WindowStart": 72,
+  "Reason": "NormalHK: 窗口72没有得到可行解：The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None)；HOnlyBalanced: 窗口72没有得到可行解：The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None)；HOnlyFeasibility: 窗口72没有得到可行解：The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None)",
+  "Mode": {
+    "H": 24,
+    "K": 0,
+    "BlockHours": 4,
+    "RecoveryMode": "FailedAfterHOnlyFeasibility"
+  },
+  "ModelSignature": "501eb584780e99d1a265c233efc0340d06fd9c84dc3062847e19c0b938c1e25d",
+  "CheckpointPreserved": "E:\\python project\\huashubei\\question\\question_04\\outputs\\tables\\.q4_progress_checkpoint.pkl"
+}

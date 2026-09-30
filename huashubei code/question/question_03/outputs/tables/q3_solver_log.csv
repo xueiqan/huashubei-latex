@@ -1,0 +1,8 @@
+﻿Stage,Status,Success,Message,ElapsedSeconds,MIPGap,MIPDualBound,VariableCount,BinaryVariableCount,ConstraintCount,Cost,Carbon,Peak,Ramp,Throughput
+anchor_Cost,0,True,Optimization terminated successfully. (HiGHS Status 7: Optimal),24.6955524999939,1.03868151376115e-15,-459079276.838633,144367,14436,187668,-459079276.838633,4.4343551053316e-16,2800,570,353640.426966896
+anchor_Carbon,0,True,Optimization terminated successfully. (HiGHS Status 7: Optimal),4.58045639999909,inf,-9.89530235528946e-10,144367,14436,187668,0,0,2800,570,1993.51546355965
+anchor_Peak,0,True,Optimization terminated successfully. (HiGHS Status 7: Optimal),5.97686970001087,0,0,144367,14436,187668,-185311758.920593,76962.74144296,0,570,2114.04932662645
+anchor_Ramp,0,True,Optimization terminated successfully. (HiGHS Status 7: Optimal),8.70635449999827,0,0,144367,14436,187668,1351716032.92017,1425357.37858024,2800,0,2223.80814641958
+balanced_stage_1_minimax,0,True,Optimization terminated successfully. (HiGHS Status 7: Optimal),122.526880199992,0,1.87417698895894e-05,144367,14436,187668,-459045339.329621,0,0,0.010682808837066,365605.354017357
+balanced_stage_2_sum_deviation,0,True,Optimization terminated successfully. (HiGHS Status 7: Optimal),1493.1627783,0,-0.253491681717633,144367,14436,187668,-459057296.621484,0,0,0.0112528088370697,347021.148450165
+balanced_stage_3_min_throughput,0,True,Optimization terminated successfully. (HiGHS Status 7: Optimal),104.482240199985,0,346120.988399518,144367,14436,187668,-459055485.826174,0,0,0.0112528088370661,346120.988399518

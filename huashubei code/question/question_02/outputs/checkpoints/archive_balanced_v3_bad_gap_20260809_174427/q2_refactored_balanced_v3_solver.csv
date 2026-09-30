@@ -1,0 +1,10 @@
+﻿Mode,WindowID,Stage,Status,Message,MIPGap,MIPDualBound,ObjectiveValue,ElapsedSeconds,TimeLimitUsedSeconds
+balanced,0,balanced_global_scaled_minmax,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1,1,379.654628200005,900
+balanced,1,balanced_global_scaled_minmax,1,Time limit reached. (HiGHS Status 13: Time limit reached),0.999999,1,1000000,181.1626407,180
+balanced,2,balanced_global_scaled_minmax,1,Time limit reached. (HiGHS Status 13: Time limit reached),0.999998563758871,1.43624112934716,1000000,181.279633499995,180
+balanced,3,balanced_global_scaled_minmax,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1.99125862661023,1.99125862661023,82.6820296000005,180
+balanced,4,balanced_global_scaled_minmax,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1.99125862661023,1.99125862661023,87.9794017999957,180
+balanced,5,balanced_global_scaled_minmax,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1.99125862661023,1.99125862661023,93.2968414999996,180
+balanced,6,balanced_global_scaled_minmax,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1.99125862661023,1.99125862661023,99.1852276999998,180
+balanced,7,balanced_global_scaled_minmax,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1.99125862661023,1.99125862661023,112.634653099994,180
+balanced,8,balanced_global_scaled_minmax,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1.99125862661023,1.99125862661023,129.127450199994,180

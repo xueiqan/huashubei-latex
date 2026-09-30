@@ -1,0 +1,11 @@
+{
+  "SolutionMethod": "CERTIFIED_AUDITED_LOW_CARBON_REFERENCE_REUSE_AT_LAMBDA_1",
+  "MathematicalEquivalence": "Ecap(lambda=1)=E_LC",
+  "LowCarbonReferenceTables": "E:\\python project\\huashubei\\question\\question_04\\outputs\\scenarios\\low_carbon_reference_doccompliant\\matheuristic_v3_doccompliant\\tables",
+  "LowCarbonReferenceInputSignature": "5f4e1056a5859d8e771d26b7ead210209890c22df165437138cb57c8c7db4a96",
+  "CarbonCap": 0.0,
+  "CertifiedCarbon": -2.7410269609617883e-14,
+  "TerminalSOCConstraint": "revalidated_by_independent_audit",
+  "FailedRollingCheckpointPreserved": true,
+  "IndependentAudit": "E:\\python project\\huashubei\\question\\question_04\\outputs\\scenarios\\carbon_lambda_1_00_doccompliant\\matheuristic_v3_doccompliant\\validation\\q4_independent_audit.json"
+}

@@ -1,0 +1,8 @@
+{
+  "complete": true,
+  "model_version": "Q4_MATHEURISTIC_V4_PHYSICAL_TIEBREAK_DOCUMENT_COMPLIANT",
+  "signature": "70b74e2d8326b29c561af7ebe45ba36064775577d06fe0908dc1fe59adb22897",
+  "source_schedule": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\matheuristic_v3_doccompliant\\tables\\q4_task_assignments.csv",
+  "task_count": 50000,
+  "dispatch_count": 14436
+}

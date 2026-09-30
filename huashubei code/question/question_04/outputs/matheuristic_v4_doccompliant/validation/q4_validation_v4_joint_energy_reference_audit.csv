@@ -1,0 +1,68 @@
+﻿Check,MaxViolation,Tolerance,Passed,Details
+TaskUniqueExecution,0.0,0.0,True,
+TaskIntegerStart,0.0,1e-06,True,
+TaskTypeInputConsistency,0.0,0.0,True,
+TaskArrivalInputConsistency,0.0,1e-06,True,
+TaskDurationInputConsistency,3.552713678800501e-15,1e-06,True,
+TaskFinishMapping,3.4865443865328416e-12,1e-06,True,
+TaskMaxLatencyInputConsistency,0.0,1e-06,True,
+TaskEarliestStart,0.0,1e-06,True,
+TaskLatestFinish,0.0,1e-06,True,
+RealTimeImmediateStart,0.0,1e-06,True,
+NetworkLatency,0.0,1e-06,True,
+TaskCandidateRegion,0.0,0.0,True,
+TaskCandidateLatencyConsistency,0.0,1e-06,True,
+TerminalTaskBoundary,0.0,1e-06,True,
+InputRegionHourMatch,0.0,0.0,True,
+AIITLoadRecompute,2.1032064978498966e-12,1e-06,True,
+NonAIITInputConsistency,0.0,1e-06,True,
+PUEInputConsistency,0.0,1e-06,True,
+TotalITLoadMapping,2.1600499167107046e-12,1e-06,True,
+FacilityLoadMapping,2.7284841053187847e-12,1e-06,True,
+GPUCapacity,4.547473508864641e-12,1e-06,True,
+ITCapacity,0.0,1e-06,True,
+FacilityCapacity,0.0,1e-06,True,
+AvailableRenewable_MWInputConsistency,0.0,1e-06,True,
+ElectricityPrice_CNY_per_MWhInputConsistency,0.0,1e-06,True,
+SellPrice_CNY_per_MWhInputConsistency,0.0,1e-06,True,
+CarbonIntensity_tCO2_per_MWhInputConsistency,0.0,1e-06,True,
+Available_GPUInputConsistency,0.0,1e-06,True,
+Max_IT_Power_MWInputConsistency,0.0,1e-06,True,
+Max_Facility_Power_MWInputConsistency,0.0,1e-06,True,
+RenewableBalance,1.135127547513548e-10,1e-06,True,
+FacilityLoadBalance,3.835680217889603e-09,1e-06,True,
+RenewableDirectUseLimit,2.1316282072803006e-11,1e-06,True,
+GridChargeSourceLimit,2.93027824227465e-11,1e-06,True,
+NetGridImportDefinition,4.547473508864641e-13,1e-06,True,
+CarbonEmissionDefinition,4.263256414560601e-14,1e-06,True,
+SOCRecurrence,2.431491452625778e-09,1e-06,True,
+SOCContinuity,0.0,1e-06,True,
+SOCBounds,2.3987922759260982e-11,1e-06,True,
+InitialSOC,0.0,1e-06,True,
+StorageChargePower,4.3996806198265404e-11,1e-06,True,
+ChargePowerDefinition,0.0,1e-06,True,
+StorageDischargePower,8.020037967071403e-10,1e-06,True,
+GridImportBoundary,0.0,1e-06,True,
+GridExportBoundary,0.0,1e-06,True,
+ChargeDischargeExclusion,0.0,1e-06,True,
+TerminalSOC,0.0,1e-06,True,
+NoMissingTask,0.0,1e-06,True,[]
+NoDuplicateTask,0.0,1e-06,True,[]
+NoUnknownOrKForecastTask,0.0,1e-06,True,[]
+KPredictionExcludedFromActual,0.0,1e-06,True,[]
+Terminal2406Boundary,0.0,1e-06,True,[]
+Nonnegative_GridPurchase_MW,2.93027824227465e-11,1e-06,True,
+Nonnegative_GridSell_MW,0.0,1e-06,True,
+Nonnegative_RenewableDirectUse_MW,0.0,1e-06,True,
+Nonnegative_RenewableCharge_MW,0.0,1e-06,True,
+Nonnegative_GridCharge_MW,0.0,1e-06,True,
+Nonnegative_DischargePower_MW,0.0,1e-06,True,
+Nonnegative_RenewableCurtailment_MW,4.6298964662128096e-11,1e-06,True,
+CompleteOperationHours,0.0,1e-06,True,"{'missing': [], 'extra': []}"
+UniqueHourRegion,0.0,1e-06,True,0
+MetricRecomputation_Cost,2.384185791015625e-07,1e-06,True,{'reported_minus_recomputed': -2.384185791015625e-07}
+MetricRecomputation_Carbon,2.842170943040401e-14,1e-06,True,{'reported_minus_recomputed': -2.842170943040401e-14}
+MetricRecomputation_Latency,0.0,1e-06,True,{'reported_minus_recomputed': 0.0}
+MetricRecomputation_Delay,5.551115123125783e-17,1e-06,True,{'reported_minus_recomputed': -5.551115123125783e-17}
+MetricRecomputation_RenewableUnusedRate,3.3306690738754696e-16,1e-06,True,{'reported_minus_recomputed': 3.3306690738754696e-16}
+MetricRecomputation_Peak,2.842170943040401e-14,1e-06,True,{'reported_minus_recomputed': -2.842170943040401e-14}

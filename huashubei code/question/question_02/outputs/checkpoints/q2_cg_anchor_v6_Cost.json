@@ -1,0 +1,17 @@
+{
+  "schema_version": 6,
+  "task_signature": "b1584edca54b700cd14a6994fe41a264e76359848a4aa09ce6b8603815a8118a",
+  "metric": "Cost",
+  "metrics": {
+    "Cost": -452965797.61408097,
+    "Carbon": 4.825574251299258e-12,
+    "MeanLatency": 7.2666071759473825,
+    "RenewableUnusedRate": 0.3088644363392419
+  },
+  "iterations": 28,
+  "final_min_reduced_cost": -4.82032191939652e-09,
+  "elapsed_seconds": 539.585679900003,
+  "ideal_lower_bound": -452965797.61408097,
+  "certified_abs_gap": 0.0,
+  "convergence_status": "exact_reduced_cost_converged"
+}

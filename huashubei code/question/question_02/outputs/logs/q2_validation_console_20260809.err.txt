@@ -1,0 +1,22 @@
+2026-08-09 21:48:49,042 | INFO | 问题2新检验日志初始化：文件=D:\PyCharm\PyCharm2026.2\Project\huashubei\question\question_02\outputs\logs\question_02_validation.log，级别=INFO。
+2026-08-09 21:48:49,044 | INFO | 问题2新模型检验启动：不调用model.py/MILP；预算=600.0s；容差=1e-06；资源重算每1000条反馈；对照根目录=D:\PyCharm\PyCharm2026.2\Project\huashubei\question\question_02\outputs\validation_runs。
+2026-08-09 21:48:49,046 | INFO | 阶段1/4：开始读取Q2新模型检验输入。
+2026-08-09 21:48:49,240 | INFO | 阶段1/4：原始输入读取完成：逐时=14442、任务=50000、候选=242342、区域边界=6。
+2026-08-09 21:48:49,305 | INFO | 时域口径：发现6条Hour=2406输入记录；验证资源剖面只使用0--2405，Hour=2406不作为占用时段。
+2026-08-09 21:48:49,385 | INFO | 阶段1/4完成：任务=50000，候选=242342，区域=6，资源键=14436，允许LatestFinishHour=2406的任务=33277。
+2026-08-09 21:48:49,540 | INFO | 已读取D:\PyCharm\PyCharm2026.2\Project\huashubei\question\question_02\outputs\tables\q2_assignments.csv：记录=50000。
+2026-08-09 21:48:49,604 | INFO | 已读取D:\PyCharm\PyCharm2026.2\Project\huashubei\question\question_02\outputs\tables\q2_baseline_assignments.csv：记录=50000。
+2026-08-09 21:48:49,604 | INFO | 阶段2/4：开始Q2Balanced全时域独立审计。
+2026-08-09 21:48:49,604 | INFO | 检验1/4-Q2Balanced：开始任务级硬约束审计，安排=50000、期望任务=50000。
+2026-08-09 21:48:49,652 | INFO | 检验1/4-Q2Balanced逻辑审计：任务重复执行完成，违规数=0。
+2026-08-09 21:48:49,652 | INFO | 检验1/4-Q2Balanced逻辑审计：任务未知ID完成，违规数=0。
+2026-08-09 21:48:49,652 | INFO | 检验1/4-Q2Balanced逻辑审计：任务漏排完成，违规数=0。
+2026-08-09 21:48:49,731 | INFO | 检验1/4-Q2Balanced逻辑审计：候选区域完成，违规数=0。
+2026-08-09 21:48:49,732 | INFO | 检验1/4-Q2Balanced逻辑审计：候选时延一致性完成，违规数=0。
+2026-08-09 21:48:49,734 | INFO | 检验1/4-Q2Balanced逻辑审计：任务字段一致性-TaskType_assign完成，违规数=0。
+2026-08-09 21:48:49,737 | INFO | 检验1/4-Q2Balanced逻辑审计：任务字段一致性-SourceRegion_assign完成，违规数=0。
+2026-08-09 21:48:49,749 | INFO | 检验1/4-Q2Balanced逻辑审计：任务字段一致性-ArrivalHour_assign完成，违规数=0。
+2026-08-09 21:48:49,749 | INFO | 检验1/4-Q2Balanced逻辑审计：任务数值一致性-GPU_Demand完成，违规数=0。
+2026-08-09 21:48:49,749 | INFO | 检验1/4-Q2Balanced逻辑审计：任务数值一致性-Duration_h完成，违规数=0。
+2026-08-09 21:48:49,749 | INFO | 检验1/4-Q2Balanced逻辑审计：任务数值一致性-Task_Full_IT_Power_MW完成，违规数=0。
+2026-08-09 21:48:49,755 | ERROR | 问题2新模型检验执行失败：int() argument must be a string, a bytes-like object or a real number, not 'Series'

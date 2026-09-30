@@ -1,0 +1,29 @@
+{
+  "ScenarioName": "flat_price_doccompliant",
+  "ScenarioKind": "flat_price",
+  "ScenarioDefinitionVersion": "Q4_SCENARIO_V3_DOCUMENT_COMPLIANT",
+  "CarbonCap": null,
+  "ChangedColumns": [
+    "ElectricityPrice_CNY_per_MWh",
+    "SellPrice_CNY_per_MWh"
+  ],
+  "StructuralInputsUnchanged": true,
+  "SingleFactorCheck": {
+    "passed": true,
+    "scenario_kind": "flat_price",
+    "changed_columns": [
+      "ElectricityPrice_CNY_per_MWh",
+      "SellPrice_CNY_per_MWh"
+    ],
+    "expected_changed_columns": [
+      "ElectricityPrice_CNY_per_MWh",
+      "SellPrice_CNY_per_MWh"
+    ],
+    "structural_inputs_unchanged": true,
+    "hour_region_unchanged": true,
+    "scenario_invariants_passed": true
+  },
+  "Algorithm": "Q4_MATHEURISTIC_V3_DOCUMENT_COMPLIANT",
+  "OptimizationMode": "six_objective_minimax",
+  "SharedFixedCalibration": true
+}

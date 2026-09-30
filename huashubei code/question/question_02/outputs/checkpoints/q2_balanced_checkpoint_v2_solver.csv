@@ -1,0 +1,6 @@
+﻿Stage,Status,Message,MIPGap,MIPDualBound,ElapsedSeconds,ObjectiveValue,WindowID,Mode,CandidateMode,RecoveryAttempt,SolverTimeLimitSeconds,WithinConfiguredMIPGap
+balanced_reference_baseline_local_earliest_check,2,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None),,,0.629115200019442,0,0,balanced,exact,1,120,
+balanced_reference_baseline_local_feasibility,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,10.4775809999846,0,0,balanced,exact,1,120,
+balanced_reference_baseline_local_wait,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,1,8.7316752000188,1,0,balanced,exact,1,120,
+balanced_max_deviation,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0,0,8.13628139998764,0,0,balanced,exact,1,120,True
+balanced_sum_deviation,0,Optimization terminated successfully. (HiGHS Status 7: Optimal),0.000271730946431416,49.574045874133,7.42195009998977,-0.238315501066268,0,balanced,exact,1,120,True

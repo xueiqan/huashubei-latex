@@ -1,0 +1,17 @@
+{
+  "schema_version": 6,
+  "task_signature": "b1584edca54b700cd14a6994fe41a264e76359848a4aa09ce6b8603815a8118a",
+  "metric": "MeanLatency",
+  "metrics": {
+    "Cost": -420940884.45060945,
+    "Carbon": 8.850562453334021,
+    "MeanLatency": 5.0,
+    "RenewableUnusedRate": 0.32042859639337007
+  },
+  "iterations": 1,
+  "final_min_reduced_cost": 0.0,
+  "elapsed_seconds": 15.976343399997859,
+  "ideal_lower_bound": 5.0,
+  "certified_abs_gap": 0.0,
+  "convergence_status": "exact_reduced_cost_converged"
+}

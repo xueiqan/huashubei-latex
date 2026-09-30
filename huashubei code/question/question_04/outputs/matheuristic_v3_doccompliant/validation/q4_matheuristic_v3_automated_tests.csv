@@ -1,0 +1,31 @@
+﻿Test,Passed,Detail
+TaskTimeAndLatencyPreflight,True,
+RealtimeArrivalStartDomain,True,实时任务数=16724
+RealtimeTailWindowCovered,True,末窗口实时任务数=160
+CandidateLatencyUsesTaskBound,True,
+Q2ShadowScheduleValidated,True,
+FormalPathExists,True,
+NoFullWindowMILPInFormalPath,True,
+EnergyResponseExists,True,
+LocalRepairExists,True,
+JointLNSExists,True,
+FixedCalibrationExists,True,
+DedicatedCheckpointNamespace,True,
+LNSVariableCapExists,True,
+HardWindowLimitExists,True,
+ScenarioReusesSharedScaling,True,
+SOCRecoverabilityConstraint,True,
+SharedDocumentEnergyConstraints,True,
+IndependentEnergySemanticAudit,True,
+DegenerateMetricsAreReportOnly,True,
+RepresentativeWindowCalibration,True,
+CarbonCapFormulaDirection,True,
+RenewableGammaInterpolation,True,
+LowCarbonReferencePriorityPath,True,
+LowCarbonReferenceAuditedBaselineSeed,True,Deferred until the required V3 baseline exists.
+LowCarbonReferenceCumulativeCarbonGuard,True,Deferred until the required V3 baseline exists.
+LowCarbonReferenceFinalCarbonGuard,True,
+CarbonConstraintUsesLowCarbonSeed,True,
+LegacyV2TaskSideReferenceReusable,True,V2_TASK_SCHEDULE_RECOMPUTED_WITH_V3_ENERGY:E:\python project\huashubei\question\question_04\outputs\matheuristic_v2\tables\q4_task_assignments.csv
+LegacyV2SemanticViolationDetected,True,"GridChargeSourceLimit,RenewableDirectUseLimit"
+ObjectTypedCheckpointFinalValidation,True,

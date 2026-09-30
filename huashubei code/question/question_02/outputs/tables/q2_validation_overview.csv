@@ -1,0 +1,6 @@
+﻿Layer,Status,Evidence
+全时域独立复算与守恒,PASS,q2_validation_constraint_audit.csv及独立重算资源剖面
+同口径基线与机制一致性,PASS_SCOPE_REPORTED,q2_validation_baseline_consistency.csv
+LNS消融,PASS_REPORTED,q2_validation_lns_ablation.csv
+精确模型同窗对照,REPORTED_OVER_5_PERCENT,q2_validation_exact_vs_heuristic.csv
+滚动前瞻K=24/48/72,PASS_DIRECTION_STABLE,q2_validation_lookahead.csv

@@ -1,0 +1,56 @@
+﻿[
+    {
+        "Name":  "q4_task_assignments.csv",
+        "Length":  5392830,
+        "LastWriteTime":  "2026-08-09T19:16:46.2414467+08:00",
+        "SHA256":  "F8EEB31C7F28E0821D3567E45187F292C28A80920C13CF53E14FB2239F88AF05"
+    },
+    {
+        "Name":  "q4_region_hour_dispatch.csv",
+        "Length":  2714627,
+        "LastWriteTime":  "2026-08-09T19:16:46.4504036+08:00",
+        "SHA256":  "CC97562263A61C48CB8B86C060207A12D51DA9BEE20070B0085DEC0C0704AC65"
+    },
+    {
+        "Name":  "q4_objective_summary.csv",
+        "Length":  286,
+        "LastWriteTime":  "2026-08-09T19:16:46.4579365+08:00",
+        "SHA256":  "7E16FA2080A67A5A8A1ED90267C359B997D0B60B4F79AC83C98F50FE0257777D"
+    },
+    {
+        "Name":  "q4_window_solver.csv",
+        "Length":  37444,
+        "LastWriteTime":  "2026-08-09T19:16:46.4619297+08:00",
+        "SHA256":  "14585CAD60E1B1CF4A3C7175ADAE2BADA8FEB1260130B837B1CAB7D34D6E19B2"
+    },
+    {
+        "Name":  "q4_scaling.csv",
+        "Length":  248,
+        "LastWriteTime":  "2026-08-09T19:16:46.4649289+08:00",
+        "SHA256":  "37BC8EDAF6BA5DCB9A48918B46F50B19B031A9D7C9E6437432B5D84AE04018AA"
+    },
+    {
+        "Name":  "q4_model_configuration.csv",
+        "Length":  426,
+        "LastWriteTime":  "2026-08-09T19:16:46.4929304+08:00",
+        "SHA256":  "CB74FB0724B2464A3EA49D44EFCD05C00A1EB4BD7C42812002B630817B632268"
+    },
+    {
+        "Name":  "q4_simple_validation.csv",
+        "Length":  880,
+        "LastWriteTime":  "2026-08-09T19:16:46.9500311+08:00",
+        "SHA256":  "77F4DDF99DBAD6BB2628E0FD7335561AA8E6A83FCD565FD6587E657E6F3E27B0"
+    },
+    {
+        "Name":  "q4_calibration_records.csv",
+        "Length":  6359,
+        "LastWriteTime":  "2026-08-09T19:16:46.4679298+08:00",
+        "SHA256":  "785DEB727B672739FA0434C9E2C545EB493EE8878400697E4DDED025D17955BB"
+    },
+    {
+        "Name":  "q4_forecast_profile.csv",
+        "Length":  596934,
+        "LastWriteTime":  "2026-08-09T19:16:46.4899284+08:00",
+        "SHA256":  "A8B173506D8FCC7F63FE38B5A8F3672AEC1D1D62035CB53670599E8A91040E3A"
+    }
+]

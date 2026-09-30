@@ -1,0 +1,8 @@
+﻿Scheme,Metric,Value
+Q2_TaskSeed_to_V3_EnergyReference,Cost,-333288821.887385
+Q2_TaskSeed_to_V3_EnergyReference,Carbon,90555.2663317335
+Q2_TaskSeed_to_V3_EnergyReference,Latency,12.94684
+Q2_TaskSeed_to_V3_EnergyReference,LatencySLA,0.2414977
+Q2_TaskSeed_to_V3_EnergyReference,RenewableUnusedRate,0.319486000048815
+Q2_TaskSeed_to_V3_EnergyReference,Peak,2800
+Q2_TaskSeed_to_V3_EnergyReference,Delay,0.0836585443381589

@@ -1,0 +1,762 @@
+{
+  "WindowStart": 72,
+  "DiagnosticOnly": true,
+  "FormalCheckpointModified": false,
+  "Checkpoint": {
+    "last_completed_tau": 48,
+    "next_tau": 72,
+    "signature": "501eb584780e99d1a265c233efc0340d06fd9c84dc3062847e19c0b938c1e25d",
+    "solver_windows": [
+      0,
+      24,
+      48
+    ]
+  },
+  "TaskStatus": {
+    "AssignedTaskCount": 1293,
+    "CompletedTaskCount": 1255,
+    "ActiveTaskCount": 38,
+    "UnstartedTaskCount": 48707,
+    "DuplicateAssignedTaskIDCount": 0,
+    "PendingContainsAssignedTaskCount": 0,
+    "ActiveTasks": [
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "2616",
+        "SourceWindow": 48,
+        "Region": "RegionE",
+        "StartHour": 67.0,
+        "FinishHour": 72.05,
+        "RemainingRunTime_h": 0.04999999999999716,
+        "GPU_Demand": 2.0,
+        "ITPower_MW": 0.16
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "44034",
+        "SourceWindow": 48,
+        "Region": "RegionA",
+        "StartHour": 67.0,
+        "FinishHour": 72.58333333333333,
+        "RemainingRunTime_h": 0.5833333333333286,
+        "GPU_Demand": 5.0,
+        "ITPower_MW": 0.4
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "33597",
+        "SourceWindow": 48,
+        "Region": "RegionF",
+        "StartHour": 70.0,
+        "FinishHour": 72.2,
+        "RemainingRunTime_h": 0.20000000000000284,
+        "GPU_Demand": 3.0,
+        "ITPower_MW": 0.24
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "17606",
+        "SourceWindow": 48,
+        "Region": "RegionA",
+        "StartHour": 71.0,
+        "FinishHour": 72.65,
+        "RemainingRunTime_h": 0.6500000000000057,
+        "GPU_Demand": 4.0,
+        "ITPower_MW": 0.32
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "3980",
+        "SourceWindow": 48,
+        "Region": "RegionC",
+        "StartHour": 71.0,
+        "FinishHour": 72.73333333333333,
+        "RemainingRunTime_h": 0.7333333333333343,
+        "GPU_Demand": 4.0,
+        "ITPower_MW": 0.32
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "40219",
+        "SourceWindow": 48,
+        "Region": "RegionB",
+        "StartHour": 71.0,
+        "FinishHour": 72.6,
+        "RemainingRunTime_h": 0.5999999999999943,
+        "GPU_Demand": 6.0,
+        "ITPower_MW": 0.48
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "6047",
+        "SourceWindow": 48,
+        "Region": "RegionF",
+        "StartHour": 67.0,
+        "FinishHour": 73.31666666666666,
+        "RemainingRunTime_h": 1.3166666666666629,
+        "GPU_Demand": 6.0,
+        "ITPower_MW": 0.48
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "9047",
+        "SourceWindow": 48,
+        "Region": "RegionA",
+        "StartHour": 67.0,
+        "FinishHour": 73.38333333333334,
+        "RemainingRunTime_h": 1.38333333333334,
+        "GPU_Demand": 1.0,
+        "ITPower_MW": 0.08
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "12139",
+        "SourceWindow": 48,
+        "Region": "RegionC",
+        "StartHour": 68.0,
+        "FinishHour": 74.16666666666667,
+        "RemainingRunTime_h": 2.1666666666666714,
+        "GPU_Demand": 4.0,
+        "ITPower_MW": 0.32
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "7118",
+        "SourceWindow": 48,
+        "Region": "RegionA",
+        "StartHour": 68.0,
+        "FinishHour": 74.23333333333333,
+        "RemainingRunTime_h": 2.2333333333333343,
+        "GPU_Demand": 5.0,
+        "ITPower_MW": 0.4
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "36854",
+        "SourceWindow": 48,
+        "Region": "RegionB",
+        "StartHour": 69.0,
+        "FinishHour": 74.91666666666667,
+        "RemainingRunTime_h": 2.9166666666666714,
+        "GPU_Demand": 6.0,
+        "ITPower_MW": 0.48
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "32100",
+        "SourceWindow": 48,
+        "Region": "RegionC",
+        "StartHour": 70.0,
+        "FinishHour": 74.46666666666667,
+        "RemainingRunTime_h": 2.4666666666666686,
+        "GPU_Demand": 5.0,
+        "ITPower_MW": 0.4
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "10944",
+        "SourceWindow": 48,
+        "Region": "RegionB",
+        "StartHour": 69.0,
+        "FinishHour": 75.1,
+        "RemainingRunTime_h": 3.0999999999999943,
+        "GPU_Demand": 3.0,
+        "ITPower_MW": 0.24
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "12051",
+        "SourceWindow": 48,
+        "Region": "RegionA",
+        "StartHour": 70.0,
+        "FinishHour": 76.41666666666667,
+        "RemainingRunTime_h": 4.416666666666671,
+        "GPU_Demand": 5.0,
+        "ITPower_MW": 0.4
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "33311",
+        "SourceWindow": 48,
+        "Region": "RegionB",
+        "StartHour": 71.0,
+        "FinishHour": 76.78333333333333,
+        "RemainingRunTime_h": 4.783333333333331,
+        "GPU_Demand": 2.0,
+        "ITPower_MW": 0.16
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "7713",
+        "SourceWindow": 48,
+        "Region": "RegionF",
+        "StartHour": 66.0,
+        "FinishHour": 72.61666666666666,
+        "RemainingRunTime_h": 0.61666666666666,
+        "GPU_Demand": 20.0,
+        "ITPower_MW": 2.0
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "19411",
+        "SourceWindow": 48,
+        "Region": "RegionB",
+        "StartHour": 67.0,
+        "FinishHour": 73.25,
+        "RemainingRunTime_h": 1.25,
+        "GPU_Demand": 111.0,
+        "ITPower_MW": 17.76
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "31623",
+        "SourceWindow": 48,
+        "Region": "RegionA",
+        "StartHour": 67.0,
+        "FinishHour": 72.38333333333334,
+        "RemainingRunTime_h": 0.38333333333333997,
+        "GPU_Demand": 102.0,
+        "ITPower_MW": 16.32
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "41137",
+        "SourceWindow": 48,
+        "Region": "RegionC",
+        "StartHour": 67.0,
+        "FinishHour": 73.33333333333333,
+        "RemainingRunTime_h": 1.3333333333333286,
+        "GPU_Demand": 5.0,
+        "ITPower_MW": 0.5
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "9505",
+        "SourceWindow": 48,
+        "Region": "RegionC",
+        "StartHour": 67.0,
+        "FinishHour": 72.6,
+        "RemainingRunTime_h": 0.5999999999999943,
+        "GPU_Demand": 85.0,
+        "ITPower_MW": 13.6
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "15713",
+        "SourceWindow": 48,
+        "Region": "RegionC",
+        "StartHour": 68.0,
+        "FinishHour": 74.01666666666667,
+        "RemainingRunTime_h": 2.0166666666666657,
+        "GPU_Demand": 97.0,
+        "ITPower_MW": 15.52
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "23063",
+        "SourceWindow": 48,
+        "Region": "RegionA",
+        "StartHour": 68.0,
+        "FinishHour": 73.03333333333333,
+        "RemainingRunTime_h": 1.0333333333333314,
+        "GPU_Demand": 9.0,
+        "ITPower_MW": 0.9
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "32800",
+        "SourceWindow": 48,
+        "Region": "RegionC",
+        "StartHour": 68.0,
+        "FinishHour": 72.71666666666667,
+        "RemainingRunTime_h": 0.7166666666666686,
+        "GPU_Demand": 22.0,
+        "ITPower_MW": 2.2
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "9389",
+        "SourceWindow": 48,
+        "Region": "RegionC",
+        "StartHour": 68.0,
+        "FinishHour": 72.83333333333333,
+        "RemainingRunTime_h": 0.8333333333333286,
+        "GPU_Demand": 84.0,
+        "ITPower_MW": 13.44
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "18891",
+        "SourceWindow": 48,
+        "Region": "RegionB",
+        "StartHour": 69.0,
+        "FinishHour": 75.45,
+        "RemainingRunTime_h": 3.450000000000003,
+        "GPU_Demand": 104.0,
+        "ITPower_MW": 16.64
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "27484",
+        "SourceWindow": 48,
+        "Region": "RegionA",
+        "StartHour": 69.0,
+        "FinishHour": 75.55,
+        "RemainingRunTime_h": 3.549999999999997,
+        "GPU_Demand": 15.0,
+        "ITPower_MW": 1.5
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "27725",
+        "SourceWindow": 48,
+        "Region": "RegionA",
+        "StartHour": 69.0,
+        "FinishHour": 75.6,
+        "RemainingRunTime_h": 3.5999999999999943,
+        "GPU_Demand": 79.0,
+        "ITPower_MW": 12.64
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "37321",
+        "SourceWindow": 48,
+        "Region": "RegionD",
+        "StartHour": 69.0,
+        "FinishHour": 74.1,
+        "RemainingRunTime_h": 2.0999999999999943,
+        "GPU_Demand": 71.0,
+        "ITPower_MW": 11.36
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "44659",
+        "SourceWindow": 48,
+        "Region": "RegionA",
+        "StartHour": 69.0,
+        "FinishHour": 72.4,
+        "RemainingRunTime_h": 0.4000000000000057,
+        "GPU_Demand": 105.0,
+        "ITPower_MW": 16.8
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "8510",
+        "SourceWindow": 48,
+        "Region": "RegionC",
+        "StartHour": 69.0,
+        "FinishHour": 75.5,
+        "RemainingRunTime_h": 3.5,
+        "GPU_Demand": 12.0,
+        "ITPower_MW": 1.2000000000000002
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "22532",
+        "SourceWindow": 48,
+        "Region": "RegionA",
+        "StartHour": 70.0,
+        "FinishHour": 74.2,
+        "RemainingRunTime_h": 2.200000000000003,
+        "GPU_Demand": 16.0,
+        "ITPower_MW": 1.6
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "33888",
+        "SourceWindow": 48,
+        "Region": "RegionB",
+        "StartHour": 70.0,
+        "FinishHour": 74.31666666666666,
+        "RemainingRunTime_h": 2.316666666666663,
+        "GPU_Demand": 15.0,
+        "ITPower_MW": 1.5
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "37457",
+        "SourceWindow": 48,
+        "Region": "RegionC",
+        "StartHour": 70.0,
+        "FinishHour": 72.36666666666666,
+        "RemainingRunTime_h": 0.36666666666666003,
+        "GPU_Demand": 20.0,
+        "ITPower_MW": 2.0
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "43243",
+        "SourceWindow": 48,
+        "Region": "RegionE",
+        "StartHour": 70.0,
+        "FinishHour": 73.66666666666667,
+        "RemainingRunTime_h": 1.6666666666666714,
+        "GPU_Demand": 87.0,
+        "ITPower_MW": 13.92
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "48439",
+        "SourceWindow": 48,
+        "Region": "RegionB",
+        "StartHour": 70.0,
+        "FinishHour": 74.31666666666666,
+        "RemainingRunTime_h": 2.316666666666663,
+        "GPU_Demand": 121.0,
+        "ITPower_MW": 19.36
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "49655",
+        "SourceWindow": 48,
+        "Region": "RegionA",
+        "StartHour": 70.0,
+        "FinishHour": 73.21666666666667,
+        "RemainingRunTime_h": 1.2166666666666686,
+        "GPU_Demand": 23.0,
+        "ITPower_MW": 3.68
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "36576",
+        "SourceWindow": 48,
+        "Region": "RegionC",
+        "StartHour": 71.0,
+        "FinishHour": 72.18333333333334,
+        "RemainingRunTime_h": 0.18333333333333712,
+        "GPU_Demand": 61.0,
+        "ITPower_MW": 9.76
+      },
+      {
+        "RecordType": "ActiveTask",
+        "TaskID": "8919",
+        "SourceWindow": 48,
+        "Region": "RegionF",
+        "StartHour": 71.0,
+        "FinishHour": 72.68333333333334,
+        "RemainingRunTime_h": 0.6833333333333371,
+        "GPU_Demand": 124.0,
+        "ITPower_MW": 19.84
+      }
+    ]
+  },
+  "TimeWindow": {
+    "OverdueUnstartedTaskCount": 0,
+    "OverdueTaskIDs": [],
+    "MustStartIn72To96Count": 187,
+    "NoLegalCandidateRegionCount": 0,
+    "NoLegalHStartForMandatoryCount": 0,
+    "RealtimeImmediateStartViolationCount": 0,
+    "PerTaskDetailsLocation": "q4_window72_diagnosis.csv RecordType=PendingTaskWindow"
+  },
+  "Resource": {
+    "FixedGPUOverloadCount": 0,
+    "FixedAICapacityOverloadCount": 1,
+    "MinimumNecessaryGPUOverloadCount": 0,
+    "MinimumNecessaryITOverloadCount": 1,
+    "MinimumNecessaryFacilityOverloadCount": 1,
+    "HourlyDetailsLocation": "q4_window72_diagnosis.csv RecordType=ResourceHour"
+  },
+  "Storage": [
+    {
+      "RecordType": "Storage",
+      "Region": "RegionA",
+      "SOCAt72_MWh": 350.0,
+      "SOCEndHour71_MWh": 350.0,
+      "MinSOC_MWh": 35.0,
+      "MaxSOC_MWh": 350.0,
+      "SOCWithinBounds": true,
+      "SOCStateContinuous": true,
+      "RecoverableSOCLowerAt96_MWh": 35.0,
+      "MaxChargePower_MW": 100.0,
+      "MaxDischargePower_MW": 100.0,
+      "HasNaN": false,
+      "HasNegativeInvalidValue": false
+    },
+    {
+      "RecordType": "Storage",
+      "Region": "RegionB",
+      "SOCAt72_MWh": 303.65434733695645,
+      "SOCEndHour71_MWh": 303.65434733695645,
+      "MinSOC_MWh": 32.0,
+      "MaxSOC_MWh": 320.0,
+      "SOCWithinBounds": true,
+      "SOCStateContinuous": true,
+      "RecoverableSOCLowerAt96_MWh": 32.0,
+      "MaxChargePower_MW": 90.0,
+      "MaxDischargePower_MW": 90.0,
+      "HasNaN": false,
+      "HasNegativeInvalidValue": false
+    },
+    {
+      "RecordType": "Storage",
+      "Region": "RegionC",
+      "SOCAt72_MWh": 300.0,
+      "SOCEndHour71_MWh": 300.0,
+      "MinSOC_MWh": 30.0,
+      "MaxSOC_MWh": 300.0,
+      "SOCWithinBounds": true,
+      "SOCStateContinuous": true,
+      "RecoverableSOCLowerAt96_MWh": 30.0,
+      "MaxChargePower_MW": 85.0,
+      "MaxDischargePower_MW": 85.0,
+      "HasNaN": false,
+      "HasNegativeInvalidValue": false
+    },
+    {
+      "RecordType": "Storage",
+      "Region": "RegionD",
+      "SOCAt72_MWh": 870.1164153118277,
+      "SOCEndHour71_MWh": 870.1164153118277,
+      "MinSOC_MWh": 90.0,
+      "MaxSOC_MWh": 900.0,
+      "SOCWithinBounds": true,
+      "SOCStateContinuous": true,
+      "RecoverableSOCLowerAt96_MWh": 90.0,
+      "MaxChargePower_MW": 260.0,
+      "MaxDischargePower_MW": 260.0,
+      "HasNaN": false,
+      "HasNegativeInvalidValue": false
+    },
+    {
+      "RecordType": "Storage",
+      "Region": "RegionE",
+      "SOCAt72_MWh": 768.90949910394,
+      "SOCEndHour71_MWh": 768.90949910394,
+      "MinSOC_MWh": 82.0,
+      "MaxSOC_MWh": 820.0,
+      "SOCWithinBounds": true,
+      "SOCStateContinuous": true,
+      "RecoverableSOCLowerAt96_MWh": 82.0,
+      "MaxChargePower_MW": 240.0,
+      "MaxDischargePower_MW": 240.0,
+      "HasNaN": false,
+      "HasNegativeInvalidValue": false
+    },
+    {
+      "RecordType": "Storage",
+      "Region": "RegionF",
+      "SOCAt72_MWh": 832.3321500824372,
+      "SOCEndHour71_MWh": 832.3321500824372,
+      "MinSOC_MWh": 85.0,
+      "MaxSOC_MWh": 850.0,
+      "SOCWithinBounds": true,
+      "SOCStateContinuous": true,
+      "RecoverableSOCLowerAt96_MWh": 85.0,
+      "MaxChargePower_MW": 250.0,
+      "MaxDischargePower_MW": 250.0,
+      "HasNaN": false,
+      "HasNegativeInvalidValue": false
+    }
+  ],
+  "Energy": {
+    "NecessarySupplyShortfallWithoutDischargeCount": 0,
+    "NecessarySupplyShortfallWithMaxDischargeCount": 0,
+    "HourlyDetailsLocation": "q4_window72_diagnosis.csv RecordType=EnergyHour"
+  },
+  "ConstraintGroups": [
+    {
+      "Group": "A",
+      "Name": "???????????",
+      "Status": "PASS",
+      "ViolationCount": 0,
+      "Detail": "????72???????????H?????"
+    },
+    {
+      "Group": "B",
+      "Name": "????????",
+      "Status": "PASS",
+      "ViolationCount": 0,
+      "Detail": "???????????????????"
+    },
+    {
+      "Group": "C",
+      "Name": "?????????",
+      "Status": "PASS",
+      "ViolationCount": 0,
+      "Detail": "latest_start<72??????"
+    },
+    {
+      "Group": "D",
+      "Name": "???????",
+      "Status": "PASS",
+      "ViolationCount": 0,
+      "Detail": "???TaskID????????????????"
+    },
+    {
+      "Group": "E",
+      "Name": "GPU??",
+      "Status": "PASS",
+      "ViolationCount": 0,
+      "Detail": "??????GPU??=0"
+    },
+    {
+      "Group": "F",
+      "Name": "IT??",
+      "Status": "FAIL",
+      "ViolationCount": 1,
+      "Detail": "RegionB??73??AI????IT???????=0.913333MW"
+    },
+    {
+      "Group": "G",
+      "Name": "????",
+      "Status": "FAIL",
+      "ViolationCount": 1,
+      "Detail": "RegionB??73??AI?????????????=1.23299955MW"
+    },
+    {
+      "Group": "H",
+      "Name": "????",
+      "Status": "PASS",
+      "ViolationCount": 0,
+      "Detail": "?????????????????????=0MW"
+    },
+    {
+      "Group": "I",
+      "Name": "SOC??????",
+      "Status": "PASS",
+      "ViolationCount": 0,
+      "Detail": "tau=72 SOC???71??SOC???????"
+    },
+    {
+      "Group": "J",
+      "Name": "?????",
+      "Status": "PASS",
+      "ViolationCount": 0,
+      "Detail": "??0--71???????????????72????????"
+    },
+    {
+      "Group": "K",
+      "Name": "?????????",
+      "Status": "PASS",
+      "ViolationCount": 0,
+      "Detail": "??????????????????????"
+    },
+    {
+      "Group": "L",
+      "Name": "????SOC?????",
+      "Status": "PASS",
+      "ViolationCount": 0,
+      "Detail": "??96???SOC???????"
+    },
+    {
+      "Group": "M",
+      "Name": "??SOC????",
+      "Status": "PASS",
+      "ViolationCount": 0,
+      "Detail": "tau=72???????SOC?????????2406??SOC???"
+    }
+  ],
+  "PrimaryConflicts": [
+    {
+      "ConstraintGroup": "F/G",
+      "ConstraintName": "AI_IT_FacilityCapacity[Hour=73,Region=RegionB]",
+      "MatrixRowZeroBased": 735,
+      "Hour": 73,
+      "Region": "RegionB",
+      "PhysicalLHS_MW": 42.82,
+      "PhysicalRHS_MW": 41.90666700000003,
+      "ModelNewTaskLHSMinimum_MW": 0.0,
+      "ModelResidualUpperBound_MW": -0.9133329999999731,
+      "Violation_MW": 0.9133329999999731,
+      "SourceWindow": 48,
+      "Source": "??48?H-only??????72??????????????48????"
+    }
+  ],
+  "ConflictContributors": [
+    {
+      "RecordType": "ConflictContributor",
+      "ConstraintName": "AI_IT_FacilityCapacity[Hour=73,Region=RegionB]",
+      "TaskID": "36854",
+      "SourceWindow": 48,
+      "Region": "RegionB",
+      "Hour": 73,
+      "StartHour": 69.0,
+      "FinishHour": 74.91666666666667,
+      "RemainingRunTime_h": 2.9166666666666714,
+      "AIContribution_MW": 0.48,
+      "GPUContribution": 6.0
+    },
+    {
+      "RecordType": "ConflictContributor",
+      "ConstraintName": "AI_IT_FacilityCapacity[Hour=73,Region=RegionB]",
+      "TaskID": "10944",
+      "SourceWindow": 48,
+      "Region": "RegionB",
+      "Hour": 73,
+      "StartHour": 69.0,
+      "FinishHour": 75.1,
+      "RemainingRunTime_h": 3.0999999999999943,
+      "AIContribution_MW": 0.24,
+      "GPUContribution": 3.0
+    },
+    {
+      "RecordType": "ConflictContributor",
+      "ConstraintName": "AI_IT_FacilityCapacity[Hour=73,Region=RegionB]",
+      "TaskID": "33311",
+      "SourceWindow": 48,
+      "Region": "RegionB",
+      "Hour": 73,
+      "StartHour": 71.0,
+      "FinishHour": 76.78333333333333,
+      "RemainingRunTime_h": 4.783333333333331,
+      "AIContribution_MW": 0.16,
+      "GPUContribution": 2.0
+    },
+    {
+      "RecordType": "ConflictContributor",
+      "ConstraintName": "AI_IT_FacilityCapacity[Hour=73,Region=RegionB]",
+      "TaskID": "19411",
+      "SourceWindow": 48,
+      "Region": "RegionB",
+      "Hour": 73,
+      "StartHour": 67.0,
+      "FinishHour": 73.25,
+      "RemainingRunTime_h": 1.25,
+      "AIContribution_MW": 4.44,
+      "GPUContribution": 27.75
+    },
+    {
+      "RecordType": "ConflictContributor",
+      "ConstraintName": "AI_IT_FacilityCapacity[Hour=73,Region=RegionB]",
+      "TaskID": "18891",
+      "SourceWindow": 48,
+      "Region": "RegionB",
+      "Hour": 73,
+      "StartHour": 69.0,
+      "FinishHour": 75.45,
+      "RemainingRunTime_h": 3.450000000000003,
+      "AIContribution_MW": 16.64,
+      "GPUContribution": 104.0
+    },
+    {
+      "RecordType": "ConflictContributor",
+      "ConstraintName": "AI_IT_FacilityCapacity[Hour=73,Region=RegionB]",
+      "TaskID": "33888",
+      "SourceWindow": 48,
+      "Region": "RegionB",
+      "Hour": 73,
+      "StartHour": 70.0,
+      "FinishHour": 74.31666666666666,
+      "RemainingRunTime_h": 2.316666666666663,
+      "AIContribution_MW": 1.5,
+      "GPUContribution": 15.0
+    },
+    {
+      "RecordType": "ConflictContributor",
+      "ConstraintName": "AI_IT_FacilityCapacity[Hour=73,Region=RegionB]",
+      "TaskID": "48439",
+      "SourceWindow": 48,
+      "Region": "RegionB",
+      "Hour": 73,
+      "StartHour": 70.0,
+      "FinishHour": 74.31666666666666,
+      "RemainingRunTime_h": 2.316666666666663,
+      "AIContribution_MW": 19.36,
+      "GPUContribution": 121.0
+    }
+  ],
+  "RootCause": "??48?H-only?????48--71????48--71????????72?????????????????48?????RegionB??73???AI?????IT/?????",
+  "RecommendedRollbackTau": 48,
+  "CanResumeDirectlyFrom72": false
+}

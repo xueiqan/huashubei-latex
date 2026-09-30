@@ -1,0 +1,62 @@
+{
+  "baseline_status": "REUSED_BASELINE",
+  "passed": true,
+  "errors": [],
+  "baseline_dir": "E:\\python project\\huashubei\\question\\question_04\\outputs\\tables",
+  "hashes": {
+    "q4_task_assignments.csv": "f8eeb31c7f28e0821d3567e45187f292c28a80920c13cf53e14fb2239f88af05",
+    "q4_region_hour_dispatch.csv": "cc97562263a61c48cb8b86c060207a12d51da9bee20070b0085dec0c0704ac65",
+    "q4_objective_summary.csv": "7e16fa2080a67a5a8a1ed90267c359b997d0b60b4f79ac83c98f50fe0257777d",
+    "q4_window_solver.csv": "14585cad60e1b1cf4a3c7175adae2bada8feb1260130b837b1cab7d34d6e19b2",
+    "q4_scaling.csv": "37bc8edaf6ba5dcb9a48918b46f50b19b031a9d7c9e6437432b5d84ae04018aa",
+    "q4_model_configuration.csv": "cb74fb0724b2464a3ea49d44efcd05c00a1eb4bd7c42812002b630817b632268",
+    "q4_simple_validation.csv": "77f4ddf99dbad6bb2628e0fd7335561aa8e6a83fcd565fd6587e657e6f3e27b0",
+    "q4_calibration_records.csv": "785deb727b672739fa0434c9e2c545eb493ee8878400697e4dded025d17955bb",
+    "q4_forecast_profile.csv": "a8b173506d8fcc7f63fe38b5a8f3672aec1d1d62035cb53670599e8a91040e3a"
+  },
+  "row_counts": {
+    "q4_task_assignments.csv": 50000,
+    "q4_region_hour_dispatch.csv": 14436,
+    "q4_objective_summary.csv": 6,
+    "q4_window_solver.csv": 101,
+    "q4_scaling.csv": 6,
+    "q4_model_configuration.csv": 15,
+    "q4_simple_validation.csv": 22,
+    "q4_calibration_records.csv": 36,
+    "q4_forecast_profile.csv": 17208
+  },
+  "audit": {
+    "passed": true,
+    "failed_checks": [],
+    "max_violation": 1.00656317170006e-11,
+    "violation_details": {},
+    "independent_metrics": {
+      "Cost": -458781844.2761476,
+      "Carbon": -1.9108871485841723e-12,
+      "Latency": 0.13731025000000002,
+      "RenewableUnusedRate": 0.30321573192268775,
+      "Peak": 2.8421709430403997e-13,
+      "Delay": 0.01993099110692945,
+      "RenewableUtilization": 0.6967842680773122
+    },
+    "solver_metrics": {
+      "Cost": -458781844.276148,
+      "Carbon": -1.91088714858417e-12,
+      "Latency": 0.137310250000038,
+      "Delay": 0.0109271822516482,
+      "RenewableUnusedRate": 0.303215731922688,
+      "Peak": 2.8421709430403997e-13
+    },
+    "metric_differences": {
+      "Cost": 4.172325134277344e-07,
+      "Carbon": -2.4233807008389483e-27,
+      "Latency": -3.7969627442180354e-14,
+      "Delay": 0.00900380885528125,
+      "RenewableUnusedRate": -2.7755575615628914e-16,
+      "Peak": 0.0
+    },
+    "tolerance_used": 1e-06,
+    "baseline_status": "REUSED_BASELINE",
+    "scenario_status": "BASELINE"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "passed": true,
+  "failed_checks": [],
+  "max_violation": 2.384185791015625e-07,
+  "violation_details": {},
+  "independent_metrics": {
+    "Cost": -453887338.8664122,
+    "Carbon": 71.20054696770457,
+    "Latency": 9.96178,
+    "LatencySLA": 0.20958611666666668,
+    "RenewableUnusedRate": 0.29835689704180435,
+    "Peak": 97.18279375999037,
+    "Delay": 0.07928104028170245,
+    "RenewableUtilization": 0.7016431029581957
+  },
+  "solver_metrics": {
+    "Cost": -453887338.866412,
+    "Carbon": 71.2005469677046,
+    "Latency": 9.96178,
+    "RenewableUnusedRate": 0.298356897041804,
+    "Peak": 97.1827937599904,
+    "Delay": 0.0792810402817025
+  },
+  "metric_differences": {
+    "Cost": -2.384185791015625e-07,
+    "Carbon": -2.842170943040401e-14,
+    "Latency": 0.0,
+    "Delay": -5.551115123125783e-17,
+    "RenewableUnusedRate": 3.3306690738754696e-16,
+    "Peak": -2.842170943040401e-14
+  },
+  "tolerance_used": 1e-06,
+  "baseline_status": "EXISTING_JOINT_TASK_SCHEDULE_TO_V4_ENERGY_REFERENCE",
+  "scenario_status": "JOINT_TASK_SCHEDULE_ENERGY_REEVALUATION_ONLY",
+  "model_version": "Q4_MATHEURISTIC_V4_PHYSICAL_TIEBREAK_DOCUMENT_COMPLIANT",
+  "scope": "joint_task_schedule_energy_reference_only",
+  "reported_metrics": {
+    "Cost": -453887338.866412,
+    "Carbon": 71.2005469677046,
+    "Latency": 9.96178,
+    "RenewableUnusedRate": 0.298356897041804,
+    "Peak": 97.1827937599904,
+    "Delay": 0.0792810402817025
+  },
+  "audit_checks": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\matheuristic_v4_doccompliant\\validation\\q4_validation_v4_joint_energy_reference_audit.csv",
+  "metric_checks": "D:\\PyCharm\\PyCharm2026.2\\Project\\huashubei\\question\\question_04\\outputs\\matheuristic_v4_doccompliant\\validation\\q4_validation_v4_joint_energy_reference_metrics.csv"
+}
