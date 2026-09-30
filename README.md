@@ -134,4 +134,3 @@ LaTeX主文件指定XeLaTeX，并使用Windows中文字体配置以及Times New 
 当前仓库尚未提供统一LICENSE。程序、团队论文、赛题数据、赛方文件及引用资料应分别核对权利归属和适用授权；本说明不替这些材料设定新的许可。
 
 欢迎通过[Issues](https://github.com/xueiqan/huashubei-latex/issues)反馈复现问题、结果口径差异和文档错误，或提交改进程序与说明的Pull Request。反馈时请附代码提交版本、问题编号、运行命令、Python及依赖版本、相关日志和预期行为，便于复核。
-
