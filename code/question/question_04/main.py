@@ -1,4 +1,4 @@
-"""单题入口：本题预处理、建模、验证和绘图均限定在本题目录内。"""
+"""Run preprocessing, modeling, validation, and plotting within this question directory."""
 
 from __future__ import annotations
 
@@ -40,14 +40,14 @@ def main() -> int:
     if not run_stage("preprocess"):
         return 1
     if not has_model_input():
-        logging.info("本题没有可建模的预处理结果，后续阶段跳过。")
+        logging.info("No processed model input is available; skipping subsequent stages.")
         return 0
     if not run_stage("model"):
         return 1
     if not run_stage("validation"):
-        logging.warning("验证阶段未通过，请检查本题 validation.py。")
+        logging.warning("Validation failed; inspect this question's validation.py.")
     if not run_stage("plot"):
-        logging.warning("绘图阶段未通过，请检查本题 plot.py。")
+        logging.warning("Plotting failed; inspect this question's plot.py.")
     return 0
 
 

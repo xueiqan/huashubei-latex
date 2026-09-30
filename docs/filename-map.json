@@ -1,0 +1,1445 @@
+{
+  "description": "Original-to-English repository filenames. Original path values are historical metadata. Contents and archive-internal names are preserved.",
+  "files": [
+    {
+      "original": "archive/submission-copies/CCM2601033\u6539.pdf",
+      "english": "archive/submission-copies/CCM2601033-revised.pdf",
+      "sha256": "399772d497aa4f47a81b36c0e5c2aec370a37e36adc184c181c77c651f5c7d10"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/00_\u5f52\u6863\u8bf4\u660e/manifest_sha256.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/00-archive-guide/manifest_sha256.csv",
+      "sha256": "84211372b18f4e88ea0ef27d0bc0662a69c3d9e7e92cb743ef4978338cdb2df8"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/00_\u5f52\u6863\u8bf4\u660e/README_\u5f52\u6863\u8bf4\u660e.md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/00-archive-guide/README-archive.md",
+      "sha256": "92fd9f692cd17005728872faa313bafc46cfa8bea4bb855565401a193b59f29e"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u534e\u6570\u676f\u8d5b\u524d\u4e0e\u8d5b\u4e2d\u6267\u884c\u6e05\u5355.md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-checklist.md",
+      "sha256": "a750d0adc93245d2b8e4c4037fe409e9ea5c205b0ab238e335db69d783e6bce5"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/02_\u8bba\u6587\u4e0e\u6b63\u5f0f\u63d0\u4ea4\u4ef6/00_\u8d5b\u65b9\u9644\u5f55\u8981\u6c42\u6838\u5bf9.md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/02-paper-and-submissions/00-organizer-appendix-requirements.md",
+      "sha256": "43eb891ac69a6ab51b0efc12a069a7ea1cfad6e71f891a6c683e0dcdec9bdb8c"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/02_\u8bba\u6587\u4e0e\u6b63\u5f0f\u63d0\u4ea4\u4ef6/CCM2601033_\u7ade\u8d5b\u63d0\u4ea4\u539f\u7248_20260810.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/02-paper-and-submissions/CCM2601033-competition-submission-20260810.pdf",
+      "sha256": "49d4d861b010b5ac1e3d1ceb3091b7a51585af158e03da00c539288a565c0da5"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/02_\u8bba\u6587\u4e0e\u6b63\u5f0f\u63d0\u4ea4\u4ef6/CCM2601033_\u8d5b\u540e\u4fee\u8ba2\u7248_20260817.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/02-paper-and-submissions/CCM2601033-post-competition-revision-20260817.pdf",
+      "sha256": "399772d497aa4f47a81b36c0e5c2aec370a37e36adc184c181c77c651f5c7d10"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/02_\u8bba\u6587\u4e0e\u6b63\u5f0f\u63d0\u4ea4\u4ef6/CCM2601033\u9644\u4ef6_\u7ade\u8d5b\u63d0\u4ea4\u7248.zip",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/02-paper-and-submissions/CCM2601033-support-competition-submission.zip",
+      "sha256": "58884145ba7ac1e996d26bf92ba9988835cf8c726792e0339a8dd0a9b3dfcd27"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/02_\u8bba\u6587\u4e0e\u6b63\u5f0f\u63d0\u4ea4\u4ef6/\u63d0\u4ea4\u524d\u68c0\u67e5\u6e05\u5355.md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/02-paper-and-submissions/pre-submission-checklist.md",
+      "sha256": "b2b60dcce9859c4dc6a51671fc5b8f38eda4a7062f0b7387349687f70aebc912"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/02_\u8bba\u6587\u4e0e\u6b63\u5f0f\u63d0\u4ea4\u4ef6/\u8bba\u6587\u9644\u5f55_\u7ade\u8d5b\u6574\u7406\u7248.rar",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/02-paper-and-submissions/paper-appendix-competition-edition.rar",
+      "sha256": "967273f3ac02b78bfa56da3dc9f8198b4fb155f7d0c8fd6dfdf002a0482e0fba"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/main.tex",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/main.tex",
+      "sha256": "e12be29233fd9c2caffa514c77a3f6f186b52715221eb9468eb4620d26694ef7"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/references.tex",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/references.tex",
+      "sha256": "4d4ae9c961a7ba3b22361b3562e8eb43624f17a4b2caa3455b0052715a7d6430"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/AI\u5de5\u5177\u4f7f\u7528\u62a5\u544a_DeepSeek_V4_Flash_0731.md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/ai-use-report-deepseek-v4-flash-0731.md",
+      "sha256": "7d8d5803ed5e1ae087911a7838258c4d74159221b31fbe045a03bf7ddf3e810b"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/C\u9898\u5ba1\u9898\u5206\u6790_\u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76.md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/problem-c-analysis-computing-power-scheduling.md",
+      "sha256": "8d4c27d76429ccea2269eb49faa8cd99656efe56aec46dc08fd3890dbc66c584"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/C\u9898\u6700\u7ec8\u53c2\u8003\u6587\u732e\u6536\u5c3e\u6e05\u5355.md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/problem-c-final-reference-checklist.md",
+      "sha256": "42865258c20fb10e2a7985afad054c14b38ce0c7113c73e13d887882b4d43126"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/C\u9898\u95ee\u98981\u6570\u636e\u9884\u5904\u7406\u8bf4\u660e.md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/problem-c-q1-preprocessing-notes.md",
+      "sha256": "427c90eee11fb637ecfe17f72f8541ff4a0c15bd842d9582fd361c937d1ae563"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/q1\u53ef\u89c6\u5316.txt",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/q1-visualization.txt",
+      "sha256": "9601f30f61ed5079c25559426f30e8e938aab61d9bd686401797aef4ce35839e"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/q1\u68c0\u9a8c.txt",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/q1-validation.txt",
+      "sha256": "d916af291eb0a35fdb3f492a61c98315ca576efb4bf46d7e65f3ebfd6fddefc9"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/q1\u6a21\u578b(1)(1).docx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/q1-model-revision-1-1.docx",
+      "sha256": "fc98c597c783babee750f8dd7a1468e5a912ef4b513fbfe25ab24e37c2effdde"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/q2\u6a21\u578b(9)(1).docx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/q2-model-revision-9-1.docx",
+      "sha256": "7cc3dc702455cf0bd57311bd4da5809c9c982db27efaa33944858b5755ff9ef4"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/q3\u68c0\u9a8c.txt",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/q3-validation.txt",
+      "sha256": "8676ca3581177572b1614aef6c99811f38feaac3f648770112b1ef0b67fa20fe"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/q3\u6a21\u578b(5)(1).docx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/q3-model-revision-5-1.docx",
+      "sha256": "679d641c532802090ff31364bba97b1f8152442354210ea0c110ee0c1298c0ba"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/q4.txt",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/q4.txt",
+      "sha256": "ebf7fdbbf3f735c5385ede751deb6c82255289cdb3a0ef056c0f5d41ed473013"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/q4\u4ee3\u7801.txt",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/q4-code-notes.txt",
+      "sha256": "bbfc24a35a00ffc76b787cec9ef7a63d1fb54612e916edd56e72164c3f275a06"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/q4\u68c0\u9a8c.txt",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/q4-validation.txt",
+      "sha256": "159a4c8145f2f980876d37abf3a4e1927efbdf22fd51e01eb51227500ad91e1b"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/q4\u6a21\u578b(1)(1).md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/q4-model-revision-1-1.md",
+      "sha256": "185227059a33cb425999155c0fcace0326c8fe610836075f8c4bb281c90fa7c5"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/06_\u6bd4\u8d5b\u8fc7\u7a0b\u6587\u6863/\u8bba\u6587\u6587\u5185\u53c2\u8003\u6587\u732e\u5f15\u7528\u8bf4\u660e_\u53d1\u8bba\u6587\u624b.md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/06-competition-notes/in-text-citation-guide-for-paper-writer.md",
+      "sha256": "f94a3a27d84881af5ee820d47fdc6774e0c752c813e435e3604fcacbf8553a47"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/2026\u5e74\u7b2c\u4e03\u5c4a\u201c\u534e\u6570\u676f\u201d\u5927\u5b66\u751f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u627f\u8bfa\u4e66.docx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/huashu-2026-commitment-form.docx",
+      "sha256": "9540d4cfb10bd9e44d65223e80bb91475268b0fad354b8ef1c44cec8d0d5ce3f"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8bba\u6587\u683c\u5f0f\u89c4\u8303\u4e0e\u63d0\u4ea4\u8bf4\u660e.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/huashu-2026-paper-format-and-submission.pdf",
+      "sha256": "7aa7cc14ad61819a2b30444a6283dc6dba170dcd69c1232bc1b3be19f1ab4e22"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/2026\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u7ade\u8d5b\u8bba\u6587\u6a21\u677f.docx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/huashu-2026-paper-template.docx",
+      "sha256": "4edf51dbcdb27f842209a54e9becad5e1c7308cbec3a6d7f0edf0dbe860fc07c"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/\u201c\u534e\u6570\u676f\u201d\u5927\u5b66\u751f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u4eba\u5de5\u667a\u80fd\u5de5\u5177\u4f7f\u7528\u7ae0\u7a0b.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/huashu-ai-use-policy.pdf",
+      "sha256": "b3f4a1bcc86a80724b313b9690a59e9fb9ab157780591d3321b0c4d953bd31dc"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/\u8d5b\u65b9\u6587\u4ef6/2026\u5e74\u7b2c\u4e03\u5c4a\u201c\u534e\u6570\u676f\u201d\u5168\u56fd\u5927\u5b66\u2026\u624b\u5199\u6216\u8005\u7535\u5b50\u7b7e\u540d\u540e\u4e0a\u4f20\uff09.docx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-rules/huashu-2026-signed-commitment-form.docx",
+      "sha256": "aac40dc857a31c0e097387277a81f8420c3b8ac380b6902588cd4fb7fd3c23ed"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/\u8d5b\u65b9\u6587\u4ef6/2026\u5e74\u7b2c\u4e03\u5c4a\u201c\u534e\u6570\u676f\u201d\u5168\u56fd\u5927\u5b66\u751f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u53c2\u8d5b\u624b\u518c.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-rules/huashu-2026-competition-handbook.pdf",
+      "sha256": "97e7c6ba67bdaa528834c5464a0bb96489c26d47fe412018c58a593bdb3e8ee4"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/\u8d5b\u65b9\u6587\u4ef6/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8bba\u6587\u683c\u5f0f\u89c4\u8303\u4e0e\u63d0\u4ea4\u8bf4\u660e.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-rules/huashu-2026-paper-format-and-submission.pdf",
+      "sha256": "7aa7cc14ad61819a2b30444a6283dc6dba170dcd69c1232bc1b3be19f1ab4e22"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/\u8d5b\u65b9\u6587\u4ef6/2026\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u7ade\u8d5b\u8bba\u6587\u6a21\u677f.docx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-rules/huashu-2026-paper-template.docx",
+      "sha256": "4edf51dbcdb27f842209a54e9becad5e1c7308cbec3a6d7f0edf0dbe860fc07c"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/\u8d5b\u65b9\u6587\u4ef6/\u201c\u534e\u6570\u676f\u201d\u5927\u5b66\u751f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u4eba\u5de5\u667a\u80fd\u5de5\u5177\u4f7f\u7528\u7ae0\u7a0b.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-rules/huashu-ai-use-policy.pdf",
+      "sha256": "2623a11bff720a1393ac578f71407d79387f504f7cfea2e473c14ac5a45b90c6"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/A\u9898 \u5fae\u6784\u4f53\u4e2d\u586b\u5145\u5bfc\u7535\u4ecb\u8d28\u7684\u4eff\u771f\u4f18\u5316/A\u9898 \u5fae\u6784\u4f53\u4e2d\u586b\u5145\u5bfc\u7535\u4ecb\u8d28\u7684\u4eff\u771f\u4f18\u5316.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-a-conductive-microstructures/problem-a-conductive-microstructures.pdf",
+      "sha256": "6d31c44022b08840b5e791dd11b431cbcdc187e0f2ff33f613d45728646d0c0a"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/A\u9898 \u5fae\u6784\u4f53\u4e2d\u586b\u5145\u5bfc\u7535\u4ecb\u8d28\u7684\u4eff\u771f\u4f18\u5316/\u9644\u4ef6.xlsx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-a-conductive-microstructures/attachment.xlsx",
+      "sha256": "6dc68dd49356aeab483906a524ff79855b454fcaccd168f81ff3a3ad989c4c51"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-b-vlsi-floorplanning/problem-b-vlsi-floorplanning.pdf",
+      "sha256": "f5e74a5d3997efc2252bc2ef204e5a20ba66bba442ae05ad2e4f473261b32566"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/Modern Floorplanning Based on B \u2217 -Tree and Fast Simulated.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-b-vlsi-floorplanning/Modern Floorplanning Based on B \u2217 -Tree and Fast Simulated.pdf",
+      "sha256": "f6f8b53e7b9324c1e0318b4549e15b2fa4f2dcf4299ed5840b9fbc570e003c2e"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-c-computing-power-scheduling/problem-c-computing-power-scheduling.pdf",
+      "sha256": "0adc971ab421a7de5e3dd1c19c8540479b16977893edf4af13486e88410622c9"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef61.docx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-c-computing-power-scheduling/attachment-1.docx",
+      "sha256": "e3e15318a42bd51cce1976f6ab5c46fddf796bf99f97b5a592cccf104bb7b10a"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n100.blocks",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-b-vlsi-floorplanning/attachments/n100.blocks",
+      "sha256": "c66f917c48f3c7ee9624bec8e0dc053eb349d10121d3278d25b09b67a2e94e2b"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n100.nets",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-b-vlsi-floorplanning/attachments/n100.nets",
+      "sha256": "cd86e1b49547f9c76144aa2acef6d643c8fd9222c3a4b8c91a40bb6f7ca42193"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n100.pl",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-b-vlsi-floorplanning/attachments/n100.pl",
+      "sha256": "cb8b03aff82241643ca899aa9759d8aa42bcf085ead64d5011f52c83f836355f"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n200.blocks",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-b-vlsi-floorplanning/attachments/n200.blocks",
+      "sha256": "bed652bf55c2034b04a1c1bbe97ad617e027c11736bf069727a63baf575720ef"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n200.nets",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-b-vlsi-floorplanning/attachments/n200.nets",
+      "sha256": "8867f3f167845d88623a5cadba68f7a19fe343278779538e7804c5ac0c5940a2"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n200.pl",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-b-vlsi-floorplanning/attachments/n200.pl",
+      "sha256": "0400507fcb07124e01f6cdb86c5e71cdce1bbbb871030651f5583a2f66ec3589"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n300.blocks",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-b-vlsi-floorplanning/attachments/n300.blocks",
+      "sha256": "88ca80814070d9578c7ccd31182ff31ab026a1a1ea9da5fd0e0342d26327bc82"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n300.nets",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-b-vlsi-floorplanning/attachments/n300.nets",
+      "sha256": "39d9cc7b7d347dd0ecefb8d17e0adfbcbf2af1c071079fbf64caec34bcc0d94c"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n300.pl",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-b-vlsi-floorplanning/attachments/n300.pl",
+      "sha256": "7b095ff15624666c3fdf95c71fda72e45ffff70acdf27d10302830ba3031f035"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef6\u6570\u636e/GPU_information.xlsx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-c-computing-power-scheduling/attachment-data/GPU_information.xlsx",
+      "sha256": "68f978ff242da0bab54259283f647c7552693acf6db5e2212ff4e10f6a5d5d2f"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef6\u6570\u636e/network_latency.xlsx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-c-computing-power-scheduling/attachment-data/network_latency.xlsx",
+      "sha256": "f7e16fc33d8c188b0889e358497e0d96451e04c77ce765a667a50488f02ac157"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef6\u6570\u636e/power_mapping.xlsx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-c-computing-power-scheduling/attachment-data/power_mapping.xlsx",
+      "sha256": "a5bea2b708cc4e5586e59bfd832b8dde7b629d212fcd8c3a0f132c03163ae39e"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef6\u6570\u636e/region_time_data.xlsx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-c-computing-power-scheduling/attachment-data/region_time_data.xlsx",
+      "sha256": "0386a1f6ae825fc4e9797528545090863817b73154050f3ba7a1068e456d55ba"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef6\u6570\u636e/storage_information.xlsx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-c-computing-power-scheduling/attachment-data/storage_information.xlsx",
+      "sha256": "ff5384eb6e955079766b22432e630dfdec9f347f11cd334d950716b21692b3e4"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/01_\u8d5b\u65b9\u4e0e\u539f\u59cb\u8d44\u6599/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8d5b\u9898/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef6\u6570\u636e/workload_trace.xlsx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/01-original-materials/competition-problems-2026/problem-c-computing-power-scheduling/attachment-data/workload_trace.xlsx",
+      "sha256": "006c0802f4a5a94a94eb7c54f8333091ac860c7d35c9c2c9ad04c68d4f0165ba"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q1_group1_demand_structure.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q1_group1_demand_structure.pdf",
+      "sha256": "60d0e0503221768abe076bbe80c020b3345c2a2ff32c3f09fc93813eb2044161"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q1_group2_core_results.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q1_group2_core_results.pdf",
+      "sha256": "6f4d4a8d8dc7eeeaded9eca654655c3f83855d332f7efed187088b54c6757ed3"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q1_group3_validation_robustness.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q1_group3_validation_robustness.pdf",
+      "sha256": "2d570eb698f9a3816bb70047fa681fdf9f0ad5a70a88238d44cf4315381dd36a"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q2_group1_core_results.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q2_group1_core_results.pdf",
+      "sha256": "4b518617378fd73e3a7148a65a251e7e1e625b02018f15985cce1060b38b4a83"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q2_group2_dispatch_mechanism.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q2_group2_dispatch_mechanism.pdf",
+      "sha256": "5f236f31eba419dd3dc26a6007a312c0318e975a87339d4416c7f5943b5ec315"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q2_group3_model_validation.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q2_group3_model_validation.pdf",
+      "sha256": "ca85ee22e0237b8a7af7695d2d34480b321316595088776153f9d661bec25196"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q3_group1_storage_mechanism.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q3_group1_storage_mechanism.pdf",
+      "sha256": "8bc1b4748101ed1cf4285de5cb2e4f71ed950e90dfc4e747f4c7e004da1ea29d"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q3_group2_optimization_effect.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q3_group2_optimization_effect.pdf",
+      "sha256": "592ebd3e66365369d0c2f9892e4d788ba6da5cb26f508d704d8b81b685617de4"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q3_group3_validation_credibility.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q3_group3_validation_credibility.pdf",
+      "sha256": "849b00727c7b4088adebbfa4a75b41ff8fca5bfb722a3c67d31eb83a9be83f02"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q4_group1_joint_optimization_results.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q4_group1_joint_optimization_results.pdf",
+      "sha256": "9f2930b4badcad55cb0fbf9f24af019f2da7d7ba3fd975a4c4aef4f86bb9b4a4"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q4_group1_joint_optimization_results.png",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q4_group1_joint_optimization_results.png",
+      "sha256": "a71c1ac21b3f41f89695e93dc6da8844a5b533db8244250169ae2ea5fce2447d"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q4_group2_scenario_response.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q4_group2_scenario_response.pdf",
+      "sha256": "c7d134e7bac2f6db54daf00dc66194f6a45be6036b24adda9ad9960942ea60ff"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q4_group3_model_validation.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q4_group3_model_validation.pdf",
+      "sha256": "a1e48f7516fb5908661dbf826cd287a9623c3a9f7da0662138765b2737abd31c"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/q4_group3_model_validation.png",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/q4_group3_model_validation.png",
+      "sha256": "ba8570b1524617f47e86590916594bf758836f408731fb00f150a884b159beec"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/figures/\u534e\u6570\u676f\u6d41\u7a0b\u56fe.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/figures/workflow.pdf",
+      "sha256": "653d79e942869964f131aa168f13844c6f778afec4914ec6030941ffad92b15e"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/sections/1_restatement.tex",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/sections/1_restatement.tex",
+      "sha256": "b9c4d8b52e36f782537abdd6fec4f6a7924d3ec321cec3d8065391ee7a74f56a"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/sections/2_analysis.tex",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/sections/2_analysis.tex",
+      "sha256": "7725a8e0d09a41a60d35c139fdd4faa1198c7c7c57b0f847bcd175bad9f7cb1f"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/sections/3_assumptions.tex",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/sections/3_assumptions.tex",
+      "sha256": "d51bae3adf30ede0d4d6fc576b2a9f9f104d4a05dc7a0f571a0f1ceec974a989"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/sections/4_symbols.tex",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/sections/4_symbols.tex",
+      "sha256": "42d7669db101acf654bcee288c4648c20387301478e591c73a6d0bd2aebd8f8a"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/sections/5_problem1.tex",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/sections/5_problem1.tex",
+      "sha256": "07fd0dec219d1bf94e3b96653b586e673a0f15f26241c55293039d228f8849e3"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/sections/6_problem2.tex",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/sections/6_problem2.tex",
+      "sha256": "50eb7733194e623b5844618aeec71c2823d431b3c102d62a98f7c3a7e698d158"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/sections/7_problem3.tex",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/sections/7_problem3.tex",
+      "sha256": "d27a4b529ad0a623c407995fbe17173a497ec39b92b7f54f15935302840a802a"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/sections/8_evaluation.tex",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/sections/8_evaluation.tex",
+      "sha256": "f1098809f8c36f30e321959e12b973e55673ca1563fa3c8a2492d9c47e852471"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/03_LaTeX\u6e90\u6587\u4ef6/sections/A_code.tex",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/03-latex-source/sections/A_code.tex",
+      "sha256": "3cfe3b98cfaf462d61a17c848ab652c6e3a8d20d11132f34f5ae3f48066b22a1"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/Q1_\u5efa\u6a21\u624b\u4ea4\u63a5\u6e05\u5355.md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/q1-modeler-handoff.md",
+      "sha256": "ae0ed47fb9a10fc741f7c971b165180f4439e953183af7de74f1a2d648911e23"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/\u95ee\u98981\u5efa\u6a21.docx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/q1-modeling.docx",
+      "sha256": "e53ae30e000afcd7909feff72af153d31542a4d544fcd57c9cf43e960fd81ec8"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/Q2_\u5efa\u6a21\u624b\u4ea4\u63a5\u6e05\u5355.md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/q2-modeler-handoff.md",
+      "sha256": "47747f5de0921994931348fedf8cf64bd6561c7200acd2da39b65adec1254e32"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/q2\u6a21\u578b(9)(1).docx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/q2-model-revision-9-1.docx",
+      "sha256": "7cc3dc702455cf0bd57311bd4da5809c9c982db27efaa33944858b5755ff9ef4"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/Q3_\u5efa\u6a21\u624b\u4ea4\u63a5\u6e05\u5355.md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/q3-modeler-handoff.md",
+      "sha256": "454fcfa3d1c462e5ad1c3f1add8c0452ae2ff8ca46eb9a043a982211ae98d837"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/\u95ee\u98983\u5efa\u6a21.docx",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/q3-modeling.docx",
+      "sha256": "0cacc171d9bfff0df0652ad7d8569febed8d51ad2341715f7925e1263b4f1471"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/Q4_\u5efa\u6a21\u624b\u4ea4\u63a5\u6e05\u5355.md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/q4-modeler-handoff.md",
+      "sha256": "03046365e99e8146eb4ece9b27b36f83591e19004097304786874912409a5186"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/q4\u6a21\u578b(1)(1).md",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/q4-model-revision-1-1.md",
+      "sha256": "185227059a33cb425999155c0fcace0326c8fe610836075f8c4bb281c90fa7c5"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/figures/q1_group1_demand_structure.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/figures/q1_group1_demand_structure.pdf",
+      "sha256": "60d0e0503221768abe076bbe80c020b3345c2a2ff32c3f09fc93813eb2044161"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/figures/q1_group2_core_results.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/figures/q1_group2_core_results.pdf",
+      "sha256": "6f4d4a8d8dc7eeeaded9eca654655c3f83855d332f7efed187088b54c6757ed3"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/figures/q1_group3_validation_robustness.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/figures/q1_group3_validation_robustness.pdf",
+      "sha256": "2d570eb698f9a3816bb70047fa681fdf9f0ad5a70a88238d44cf4315381dd36a"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/dispatch_assignments.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/dispatch_assignments.csv",
+      "sha256": "585fbbd24bd6c611e854cfdc4de1161fa2c274e6c7e83b54de73f734ee6cd9cc"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/dispatch_resource_profile.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/dispatch_resource_profile.csv",
+      "sha256": "3fee2d1db814018b2f581053c0fb378f0781b476b46c9192bbfc8c088ae544c5"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/dispatch_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/dispatch_summary.csv",
+      "sha256": "2bb8a0a9dac3d1f40dd0e66a4496a0c23e809b37f1556d4c989f87949924d613"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/forecast_aggregation_sensitivity.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/forecast_aggregation_sensitivity.csv",
+      "sha256": "ab6499f842f5e9c277fe55027e576f4275c848ff34a19f7592114b03a9862b1f"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/forecast_hierarchy_metrics.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/forecast_hierarchy_metrics.csv",
+      "sha256": "9dba7f6569d7a5754304cf63f5783ed93d41a34b60334975a2ed109ec82a4f71"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/forecast_hierarchy_predictions.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/forecast_hierarchy_predictions.csv",
+      "sha256": "0958929c358c3f1376bd100f1d22e14c053833f63d81e299348b0f82884d2348"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/forecast_metrics.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/forecast_metrics.csv",
+      "sha256": "9992e6ac65fe1a2c63935d2128baa47aabe8b2ba18f760c865e503584272aa73"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/forecast_parameters.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/forecast_parameters.csv",
+      "sha256": "5bf1282cacc0518f9a1c4ecae4a5142be248838160e7171151824cf9d75acdfa"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/forecast_predictions.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/forecast_predictions.csv",
+      "sha256": "27fd2da34c76c5985d288736b0febdc2a02f3ad7d75cd4805ede8ba86e86edfc"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/forecast_rolling_backtest.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/forecast_rolling_backtest.csv",
+      "sha256": "fd419c1c02d110be61821d4eb9b79326476cf79659bbbe886d21981c98f4a7e7"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/forecast_rolling_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/forecast_rolling_summary.csv",
+      "sha256": "d6e6596c93b3f2609139a50380cb11572e165ac2fcf07175c308056dafe5ac19"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/forecast_window_selection.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/forecast_window_selection.csv",
+      "sha256": "28bea7639b791e66ef4b9b3614fd94e264000fc87a408c479ca6ed500e9a138a"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_critical_pressure.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_critical_pressure.csv",
+      "sha256": "c603bae58f2bae4c85c4c49fcc06399b0288accdfe74be4718e8fdc63d9e7ded"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_dispatch_certificate.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_dispatch_certificate.csv",
+      "sha256": "00438e7e9d25d4c71259a524edf262f8841430338232f5bacf59c74ab7d15188"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_dispatch_resource_recompute.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_dispatch_resource_recompute.csv",
+      "sha256": "d89c36046c40d8e7811da5176a935ea39437627596e398f534a94decf342f0b7"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_granularity_pressure_interaction.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_granularity_pressure_interaction.csv",
+      "sha256": "18d453cec7b808f2ef8500eb2b77315619b3a7a58240f9b4785bb3686ca4e782"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_hierarchy_consistency.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_hierarchy_consistency.csv",
+      "sha256": "bd1f647e9796678d318edaa7f8ffc34292f74e6752a4117d50d4c84c2666e543"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_hierarchy_vs_direct.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_hierarchy_vs_direct.csv",
+      "sha256": "e89499e8805ab1b4b69a30c1c832b1e2bf1487380968f43e70c6f9fecac86094"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_paired_differences.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_paired_differences.csv",
+      "sha256": "9bcff57d7760212ea984918cd20127c36b8c58dc7c3e700228f449a5485183e8"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_pressure_objectives.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_pressure_objectives.csv",
+      "sha256": "0fa12552e07a92ecc90ffd102d20324b982b532d9cf6e46ce777c4d7971be2c1"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_pressure_trace.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_pressure_trace.csv",
+      "sha256": "ddc4a1ef8f6d75c8eecd0e0d76503f19c319f0429b9acf56d8cf3fa837f9ef44"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_rolling_hierarchy.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_rolling_hierarchy.csv",
+      "sha256": "b458a4ce1e2ed26d80c5c47ce28fef76f9924dc5c2016402ea3196851a59f7aa"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_rolling_metrics.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_rolling_metrics.csv",
+      "sha256": "b839ed1dacdc694937c29e9f0b3fe21babdd80b80714de4b3e25cb0d191e1ef2"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_rolling_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_rolling_summary.csv",
+      "sha256": "47b77c7bb54964e618796c46d9d8686ce0ae5894e1707efcae838460436e2565"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_structure_js.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_structure_js.csv",
+      "sha256": "2c9e3d259b54adb538621dd221bdb56dbe6de364c9aa5cc51aa629db471fc951"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_summary.csv",
+      "sha256": "0e50eb6441c511d979e958f965e9c3b2edb2bb8a6e198d93b0955cd55dc39555"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_test1_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_test1_summary.csv",
+      "sha256": "21de98e4def4910968b4d218f056cf5545aa84fd79cf06c5463c8b36bd4663f2"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q1/tables/validation_window_selection_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q1/tables/validation_window_selection_audit.csv",
+      "sha256": "4472aea330cff9f9a4ffaee29b1fe4e5e1c025a27cf8780909642b5e370d5f0c"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/figures/q2_group1_core_results.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/figures/q2_group1_core_results.pdf",
+      "sha256": "4b518617378fd73e3a7148a65a251e7e1e625b02018f15985cce1060b38b4a83"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/figures/q2_group1_core_results.png",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/figures/q2_group1_core_results.png",
+      "sha256": "70adadb4ee53925f9d718c364916c28b47f86c043914869fee34d10b1584baa7"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/figures/q2_group2_dispatch_mechanism.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/figures/q2_group2_dispatch_mechanism.pdf",
+      "sha256": "5f236f31eba419dd3dc26a6007a312c0318e975a87339d4416c7f5943b5ec315"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/figures/q2_group2_dispatch_mechanism.png",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/figures/q2_group2_dispatch_mechanism.png",
+      "sha256": "9c24f55a598d0f876a9b6225f4351a2bbf9841f43c77650eb8108712befc5259"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/figures/q2_group3_model_validation.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/figures/q2_group3_model_validation.pdf",
+      "sha256": "ca85ee22e0237b8a7af7695d2d34480b321316595088776153f9d661bec25196"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/figures/q2_group3_model_validation.png",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/figures/q2_group3_model_validation.png",
+      "sha256": "e663dd85b46c52a35ce8c7990be1a67661582e2778bd06b97d219068d24846e7"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_aggregation_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_aggregation_audit.csv",
+      "sha256": "6997d32cee4766cc50ac77dd19203d17cf2a802a119ac9be4ed6ef9b383c5eba"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_assignments.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_assignments.csv",
+      "sha256": "1cae0be4a55ee27e4c2c29a91c9ba340437f125cc844f07f963da3fc022d05af"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_balanced_assignments.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_balanced_assignments.csv",
+      "sha256": "1cae0be4a55ee27e4c2c29a91c9ba340437f125cc844f07f963da3fc022d05af"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_balanced_rolling_windows.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_balanced_rolling_windows.csv",
+      "sha256": "c11e15f495d7dcdaeac73084851e2cd9e771e2e346866ffc46f8efe2c4cf9d62"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_baseline_assignments.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_baseline_assignments.csv",
+      "sha256": "0c48ddf99e00684b28c2775787959386fa52cb9a24eb5435200da3f17580e05a"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_baseline_comparison.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_baseline_comparison.csv",
+      "sha256": "7385f10527b8f2279e507d7ae0805c3e176a6e0771060b440f308c2d3964d735"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_baseline_energy_profile.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_baseline_energy_profile.csv",
+      "sha256": "03d3585edb7834b72e241fbab83efaee8fff1f7618eb4d7f89bfd85712bfd19c"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_baseline_resource_profile.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_baseline_resource_profile.csv",
+      "sha256": "138a56534eacaa934b7fb046122a9de56f25fe19390b7cedfc08f51dc1f03020"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_baseline_rolling_windows.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_baseline_rolling_windows.csv",
+      "sha256": "2432b7ebb608fc779509eb8c0786cf784c49bbfcb0773cd5c3374ea6f8be83e3"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_energy_profile.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_energy_profile.csv",
+      "sha256": "76256901e2ca718920e7979ba5aadd45c84560a6a4401320c376b4347b2b68cd"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_global_calibration.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_global_calibration.csv",
+      "sha256": "5e2e91d09df7773ce13cc9c9e7e8ae921e7a472268234e7f2b7097ef71fb3055"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_global_ideal_points.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_global_ideal_points.csv",
+      "sha256": "cc9188e8818934a58b0c227a1f67074263e6d483cc7bdf5c68fd20479ca3fddf"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_model_config.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_model_config.csv",
+      "sha256": "2d5553195b1f27598779f5249ec7c81a03d138079acbe460d535d3697539c2bb"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_objective_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_objective_summary.csv",
+      "sha256": "86f0df778c0010254c6da16c996acd1a717e56890bbdb2568e383ac424934a6b"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_resource_profile.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_resource_profile.csv",
+      "sha256": "2ded32c68d04bd5bb12102f9b9a630624d292e6ad1fa63fc3c3936d3aa677af1"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_solver_log.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_solver_log.csv",
+      "sha256": "1ded14823cfc98ef25879a133786a9bd6900fde190b020f848bf29c1fccaa5cf"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_validation_baseline_consistency.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_validation_baseline_consistency.csv",
+      "sha256": "225827f13c08d1ea5e2e3eb7a30e6dfe55c5f86bd04dfce36f4c2eab9ec0a746"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_validation_constraint_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_validation_constraint_audit.csv",
+      "sha256": "ff723e850213c07248a933b7f27c3f50d5ae95153f4f1825b35efd76e3de83c4"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_validation_exact_vs_heuristic.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_validation_exact_vs_heuristic.csv",
+      "sha256": "a2a01d7c306c4d70967e586ed9360cb33037314caa9ac950e32d9e68dfd37a9e"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_validation_lns_ablation.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_validation_lns_ablation.csv",
+      "sha256": "d41aa785e128bb9f6fb6c4ba1084c6231b005e65ba4591e1b66aaac7f70d4200"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_validation_lookahead.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_validation_lookahead.csv",
+      "sha256": "22e2b2bc3399648edd1c72af7ef60be749854e85cbc2c1cef2c4742f5ea57322"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_validation_overview.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_validation_overview.csv",
+      "sha256": "d0559c741d3e96902336c5f7b6a829f3d8dd51db92f49614092863de0cf3a015"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q2/tables/q2_validation_recomputed_profiles.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q2/tables/q2_validation_recomputed_profiles.csv",
+      "sha256": "91a1dbdb6893390d72f5d339bd5e39994ef35921c8129c34bd9148d0d8548f2d"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/figures/q3_group1_storage_mechanism.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/figures/q3_group1_storage_mechanism.pdf",
+      "sha256": "8bc1b4748101ed1cf4285de5cb2e4f71ed950e90dfc4e747f4c7e004da1ea29d"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/figures/q3_group2_optimization_effect.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/figures/q3_group2_optimization_effect.pdf",
+      "sha256": "0bfb0b94357a9b214779cb922f62e35221069a53a65e5baf887608a422786203"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/figures/q3_group3_validation_credibility.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/figures/q3_group3_validation_credibility.pdf",
+      "sha256": "849b00727c7b4088adebbfa4a75b41ff8fca5bfb722a3c67d31eb83a9be83f02"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_anchor_metrics.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_anchor_metrics.csv",
+      "sha256": "0bbeb6f985ce048ce4329bb60ab44927580331eefff8d2b2a2ea803cf36cbd96"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_balanced_region_hour.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_balanced_region_hour.csv",
+      "sha256": "76a01dbb69b7cf79a6a0e4642f6d562e1539ca73730e08cc99587d975968f2f0"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_baseline_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_baseline_audit.csv",
+      "sha256": "854e6f9e94d68d6523293d59cbc07aa06f7c81ffaffe9e4fe75ba9d1fec6d052"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_baseline_comparison.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_baseline_comparison.csv",
+      "sha256": "3967bde0b60777a01f32fe5397eae3ba5f8c628f8b296f24f63715db287511d6"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_baseline_region_hour.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_baseline_region_hour.csv",
+      "sha256": "958cb950717d5e4415a0c27bc731de7175ee0d96bf2a93e0c7eb79990fcd3128"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_constraint_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_constraint_audit.csv",
+      "sha256": "98912c3290063be945a2ade3dbf38440cb1938b9f44f899a9bd85352a119951b"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_model_configuration.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_model_configuration.csv",
+      "sha256": "e31930bacdd8d9df69797ddaee562eecd7c8731a62672c2f39068d86ed0041b7"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_no_storage_region_hour.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_no_storage_region_hour.csv",
+      "sha256": "24984ebe8566adf77a620ec4b2e08257e0e78fb4ec52d071f54acf8e83e5d69b"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_objective_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_objective_summary.csv",
+      "sha256": "7e117ba36252697ac796a104ee5332269c8dbf2e01b4403a2c0ddf10544c8094"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_regional_metrics.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_regional_metrics.csv",
+      "sha256": "7b044f32f12bc3d91ed8e13e3876c2a56aea82246ebd55710bb8fd5f9472b58b"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_solver_log.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_solver_log.csv",
+      "sha256": "3c9083760285a332d147c43fa52f29c5f1c9af81a68f9fed9b541e0c99e16bae"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_validation_baseline_reconciliation.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_validation_baseline_reconciliation.csv",
+      "sha256": "fe2d91102e69bf06d005f9f65a793f1710e122754331bd9a83cc9a353d33713a"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_validation_metric_recompute.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_validation_metric_recompute.csv",
+      "sha256": "fcb08cafd5b3c204cc28c2ea844570d595e235cf68eeb5e40b87e28e0f80e2ac"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_validation_multiobjective.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_validation_multiobjective.csv",
+      "sha256": "84f67a5c126ed0ac38e016f8b0c0c063bcca7d26e49e917a2162f450bad8dff9"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_validation_profile_checks.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_validation_profile_checks.csv",
+      "sha256": "b1fd664b6ec7047abcb730a261eee6802fc84dc84c47fe4cb5b3c93ac7eb1df9"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_validation_report.txt",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_validation_report.txt",
+      "sha256": "f64f697763608d2fd81842d289a3bbf98a2a94f93fee4362c90b3ca43b41a010"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_validation_solver_checks.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_validation_solver_checks.csv",
+      "sha256": "5447323f3b35cfeaad80788ceb49e98b3053cf96bf61911f2c3ccaaba5acb936"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q3/tables/q3_validation_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q3/tables/q3_validation_summary.csv",
+      "sha256": "0ed00b68ea949c6f5066021933e1993ecb9a0159f3e26074777e2955fd0a4b51"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/figures/q4_group1_joint_optimization_results.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/figures/q4_group1_joint_optimization_results.pdf",
+      "sha256": "82fd49ad26e7ac21dc184e9813c5f03af681a43a52c315bd531336f6f562b05b"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/figures/q4_group1_joint_optimization_results.png",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/figures/q4_group1_joint_optimization_results.png",
+      "sha256": "2513caff84d64fc3cc3258b4f009271210e29cf8b3d0c10713aca343633f926d"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/figures/q4_group2_scenario_response.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/figures/q4_group2_scenario_response.pdf",
+      "sha256": "c7d134e7bac2f6db54daf00dc66194f6a45be6036b24adda9ad9960942ea60ff"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/figures/q4_group2_scenario_response.png",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/figures/q4_group2_scenario_response.png",
+      "sha256": "fc70959b9691fe0c814f98ba135b13ab68cdbfe17343c7aff008c5ff9f75dc4d"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/figures/q4_group3_model_validation.pdf",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/figures/q4_group3_model_validation.pdf",
+      "sha256": "4a9dd78dde58bdc5a0c040518df385c014133a5c0d84d566fd8d92123b7a1742"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/figures/q4_group3_model_validation.png",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/figures/q4_group3_model_validation.png",
+      "sha256": "46ce16e9fdd76fd2fe39ff2023bde83c7968d97f15f6e63def03e5d6a27d1406"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/.q4_matheuristic_v3_complete.json",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/.q4_matheuristic_v3_complete.json",
+      "sha256": "7e54694fcbc4b85592b34c10e24edfabdf3f3936d7521a856479f27a464cba77"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/.q4_sequential_baseline_complete.json",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/.q4_sequential_baseline_complete.json",
+      "sha256": "86d2a93930ebfdd9f6c629cafeb6655a0c9fab5700cd6a2bed8df46c9e8aa6c6"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_automated_tests.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_automated_tests.csv",
+      "sha256": "e0490756c119368ed75d258a1bec4bec73b3788b9d9aec87b8f2f6a2959171de"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_calibration_records.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_calibration_records.csv",
+      "sha256": "b0f49e06d037b6ec14bbb65b66c510cb7f1510c68c2fda35cdd8c087105957ae"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_forecast_profile.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_forecast_profile.csv",
+      "sha256": "74cbce273aee1b18bb10185b38c029c42968341faf83ce79c05c501f832fd2ad"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_lns_diagnostics.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_lns_diagnostics.csv",
+      "sha256": "82f18e174fb22d9c29c782ff8d0cef7c0ba8723497509c4e65b380ee23676ab6"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_matheuristic_v3_scenario_comparison.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_matheuristic_v3_scenario_comparison.csv",
+      "sha256": "92cadfd46bf5b45d2e2ea7119074ffc53f75a6a15f1ef45ad8e0ac73986dec21"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_model_configuration.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_model_configuration.csv",
+      "sha256": "d3479fd142ee7d3a9f86fe0386f8cf9f879ab720978c1c4b0ed0e7bb172fc605"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_objective_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_objective_summary.csv",
+      "sha256": "c62d4bbaabb3cee0c5e7ae27c068a0a312a2a9762fcb11c34b39eb061269f941"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_reference_window_comparison.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_reference_window_comparison.csv",
+      "sha256": "038420eab47927dda9078bf1e58333586d50cbd7749c59b894e554ee0063ed07"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_reference_window_selection.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_reference_window_selection.csv",
+      "sha256": "afdd5c1fbdeeac3997e64e5a7384d767efe22bdd7b078bd8feb00906e3982b09"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_region_hour_dispatch.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_region_hour_dispatch.csv",
+      "sha256": "5434af568b796fc9a18f46851e9adf7c222ee84103e0c12990392d7331e114a8"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_scaling.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_scaling.csv",
+      "sha256": "b3ce5564f9483e88742d401795d8bd227db82050c1d212362bc2abca1323333d"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_scenario_interface_smoke.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_scenario_interface_smoke.csv",
+      "sha256": "167073fa7ec82a248c14bed9dccf98dc9ca9bebecf13ef9276c6a4bed6866d4c"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_sequential_baseline_assignments.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_sequential_baseline_assignments.csv",
+      "sha256": "b1c2802c7c861ec93cd6edf8702dc7baab5c1549762283aa15c76d2e1574a41b"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_sequential_baseline_dispatch.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_sequential_baseline_dispatch.csv",
+      "sha256": "d88046025ddc9a2cfa0f199d08742b962ede38e8c59d74177d7ee4f545bdd912"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_sequential_baseline_metrics.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_sequential_baseline_metrics.csv",
+      "sha256": "a88ffbf17f9877654f2c4121780b6b803bc0dda61788da7423e5c0d413e0ad48"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_sequential_baseline_windows.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_sequential_baseline_windows.csv",
+      "sha256": "c375c41170954c66c359756f972fcfb913423441c38e880478d27f9ad6c50637"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_simple_validation.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_simple_validation.csv",
+      "sha256": "4ee8c8573337e309ec6067a40c6126e39e205477020f631b18ae39c5300e24ca"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_task_assignments.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_task_assignments.csv",
+      "sha256": "421c5a4a40dda1f343ca5d2e9b8d34eead9b424a2dea195559ee151aaeb65b3b"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_metric_comparison.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_metric_comparison.csv",
+      "sha256": "8e34292fa95630071e2491fab4dc0f29850ae13ee9501bc35ec0def7c12da31b"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_report.json",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_report.json",
+      "sha256": "2c2472bb33054dd427f24a2046ec0b7da6c9dd5796180cb2e1e87540b3afe602"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_scenario_carbon_lambda_0_25_doccompliant_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_scenario_carbon_lambda_0_25_doccompliant_audit.csv",
+      "sha256": "1cc9bd3eaf8b70494e04c947d4ac22476d44e4747071db56d3ac3887c2b5d7d5"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_scenario_carbon_lambda_0_50_doccompliant_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_scenario_carbon_lambda_0_50_doccompliant_audit.csv",
+      "sha256": "8088d16f239711d2da28a620206417326422a76ca8cec6f7dbe6a4b912611c51"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_scenario_carbon_lambda_1_00_doccompliant_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_scenario_carbon_lambda_1_00_doccompliant_audit.csv",
+      "sha256": "4bcbc083a60274567676769ee4e5968dd35406f3d70f11e27a2889fe9207f6ac"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_scenario_flat_price_doccompliant_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_scenario_flat_price_doccompliant_audit.csv",
+      "sha256": "e18b288bd742f13e799bd8bb6f8891c9d8b0648607991b3781dfe7f6a4d91c8e"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_scenario_low_carbon_reference_doccompliant_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_scenario_low_carbon_reference_doccompliant_audit.csv",
+      "sha256": "f53a9963ff7f626ed2706b1e6c4e74040b057f27d62dd55004ca666a3031b357"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_scenario_low_variability_renewable_gamma_0_25_doccompliant_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_scenario_low_variability_renewable_gamma_0_25_doccompliant_audit.csv",
+      "sha256": "a955da4a7140ccec15ffe8b9dcb92c0f8552045a1a7f29b4404faedde20a8f18"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_scenario_low_variability_renewable_gamma_0_50_doccompliant_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_scenario_low_variability_renewable_gamma_0_50_doccompliant_audit.csv",
+      "sha256": "5ec577870b0f40e904da8fb2fd87b19183e466ecbddbb3344599837d21d6e7d1"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_scenario_low_variability_renewable_gamma_1_00_doccompliant_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_scenario_low_variability_renewable_gamma_1_00_doccompliant_audit.csv",
+      "sha256": "c54daefa0536f83796a4f33ee0b1e3d678067c880f6bd15f74f051caeb9eabe1"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_scenario_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_scenario_summary.csv",
+      "sha256": "0d0d445439888ed530e65d4f72e7503e85796e078c761e0ea01eb2596026a030"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_sequential_hard_constraint_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_sequential_hard_constraint_audit.csv",
+      "sha256": "6a312a33005661f7eeb259d8b313fb7760db5d1838f227e24c0ce4633f9af892"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_sequential_independent_audit.json",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_sequential_independent_audit.json",
+      "sha256": "2e9509a4f3b06b89a38e4f356f782a1e83d9e6f9a633eec7ba96d91965acb551"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_summary.csv",
+      "sha256": "164580343b4b9c513c277a8de0588f39277cee0b0abcfa852defd0511153714c"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_v3_hard_constraint_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_v3_hard_constraint_audit.csv",
+      "sha256": "ec60a170a0f07c18cf2accbc19f9e66902db968382f8707d96957c404103991a"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_validation_v3_independent_audit.json",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_validation_v3_independent_audit.json",
+      "sha256": "e4979177a2ba5a0105d129bb317de43506b8d1303e108e9136f204791e497d65"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/q4/tables/q4_window_solver.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/q4/tables/q4_window_solver.csv",
+      "sha256": "8ff0ef4a16a77f9ee90916bd6560d5de1f110d7c1ca018381855d81d8d98b53c"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q1/dispatch_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q1/dispatch_summary.csv",
+      "sha256": "2bb8a0a9dac3d1f40dd0e66a4496a0c23e809b37f1556d4c989f87949924d613"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q1/forecast_hierarchy_metrics.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q1/forecast_hierarchy_metrics.csv",
+      "sha256": "9dba7f6569d7a5754304cf63f5783ed93d41a34b60334975a2ed109ec82a4f71"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q1/forecast_metrics.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q1/forecast_metrics.csv",
+      "sha256": "9992e6ac65fe1a2c63935d2128baa47aabe8b2ba18f760c865e503584272aa73"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q1/forecast_window_selection.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q1/forecast_window_selection.csv",
+      "sha256": "28bea7639b791e66ef4b9b3614fd94e264000fc87a408c479ca6ed500e9a138a"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q1/validation_critical_pressure.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q1/validation_critical_pressure.csv",
+      "sha256": "c603bae58f2bae4c85c4c49fcc06399b0288accdfe74be4718e8fdc63d9e7ded"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q1/validation_dispatch_certificate.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q1/validation_dispatch_certificate.csv",
+      "sha256": "00438e7e9d25d4c71259a524edf262f8841430338232f5bacf59c74ab7d15188"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q1/validation_hierarchy_vs_direct.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q1/validation_hierarchy_vs_direct.csv",
+      "sha256": "e89499e8805ab1b4b69a30c1c832b1e2bf1487380968f43e70c6f9fecac86094"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q1/validation_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q1/validation_summary.csv",
+      "sha256": "0e50eb6441c511d979e958f965e9c3b2edb2bb8a6e198d93b0955cd55dc39555"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q1/validation_test1_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q1/validation_test1_summary.csv",
+      "sha256": "21de98e4def4910968b4d218f056cf5545aa84fd79cf06c5463c8b36bd4663f2"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q2/q2_baseline_comparison.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q2/q2_baseline_comparison.csv",
+      "sha256": "7385f10527b8f2279e507d7ae0805c3e176a6e0771060b440f308c2d3964d735"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q2/q2_objective_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q2/q2_objective_summary.csv",
+      "sha256": "86f0df778c0010254c6da16c996acd1a717e56890bbdb2568e383ac424934a6b"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q2/q2_validation_constraint_audit.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q2/q2_validation_constraint_audit.csv",
+      "sha256": "ff723e850213c07248a933b7f27c3f50d5ae95153f4f1825b35efd76e3de83c4"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q2/q2_validation_exact_vs_heuristic.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q2/q2_validation_exact_vs_heuristic.csv",
+      "sha256": "a2a01d7c306c4d70967e586ed9360cb33037314caa9ac950e32d9e68dfd37a9e"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q2/q2_validation_lns_ablation.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q2/q2_validation_lns_ablation.csv",
+      "sha256": "d41aa785e128bb9f6fb6c4ba1084c6231b005e65ba4591e1b66aaac7f70d4200"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q2/q2_validation_lookahead.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q2/q2_validation_lookahead.csv",
+      "sha256": "22e2b2bc3399648edd1c72af7ef60be749854e85cbc2c1cef2c4742f5ea57322"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q2/q2_validation_overview.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q2/q2_validation_overview.csv",
+      "sha256": "d0559c741d3e96902336c5f7b6a829f3d8dd51db92f49614092863de0cf3a015"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q3/q3_baseline_comparison.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q3/q3_baseline_comparison.csv",
+      "sha256": "3967bde0b60777a01f32fe5397eae3ba5f8c628f8b296f24f63715db287511d6"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q3/q3_objective_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q3/q3_objective_summary.csv",
+      "sha256": "7e117ba36252697ac796a104ee5332269c8dbf2e01b4403a2c0ddf10544c8094"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q3/q3_regional_metrics.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q3/q3_regional_metrics.csv",
+      "sha256": "7b044f32f12bc3d91ed8e13e3876c2a56aea82246ebd55710bb8fd5f9472b58b"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q3/q3_validation_baseline_reconciliation.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q3/q3_validation_baseline_reconciliation.csv",
+      "sha256": "fe2d91102e69bf06d005f9f65a793f1710e122754331bd9a83cc9a353d33713a"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q3/q3_validation_metric_recompute.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q3/q3_validation_metric_recompute.csv",
+      "sha256": "fcb08cafd5b3c204cc28c2ea844570d595e235cf68eeb5e40b87e28e0f80e2ac"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q3/q3_validation_multiobjective.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q3/q3_validation_multiobjective.csv",
+      "sha256": "84f67a5c126ed0ac38e016f8b0c0c063bcca7d26e49e917a2162f450bad8dff9"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q3/q3_validation_profile_checks.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q3/q3_validation_profile_checks.csv",
+      "sha256": "b1fd664b6ec7047abcb730a261eee6802fc84dc84c47fe4cb5b3c93ac7eb1df9"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q3/q3_validation_solver_checks.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q3/q3_validation_solver_checks.csv",
+      "sha256": "5447323f3b35cfeaad80788ceb49e98b3053cf96bf61911f2c3ccaaba5acb936"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q3/q3_validation_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q3/q3_validation_summary.csv",
+      "sha256": "0ed00b68ea949c6f5066021933e1993ecb9a0159f3e26074777e2955fd0a4b51"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q4/q4_calibration_records.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q4/q4_calibration_records.csv",
+      "sha256": "785deb727b672739fa0434c9e2c545eb493ee8878400697e4dded025d17955bb"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q4/q4_hard_constraint_validation.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q4/q4_hard_constraint_validation.csv",
+      "sha256": "77f4ddf99dbad6bb2628e0fd7335561aa8e6a83fcd565fd6587e657e6f3e27b0"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q4/q4_model_configuration.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q4/q4_model_configuration.csv",
+      "sha256": "cb74fb0724b2464a3ea49d44efcd05c00a1eb4bd7c42812002b630817b632268"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q4/q4_simple_validation.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q4/q4_simple_validation.csv",
+      "sha256": "77f4ddf99dbad6bb2628e0fd7335561aa8e6a83fcd565fd6587e657e6f3e27b0"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q4/q4_task_execution_boundary_summary.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q4/q4_task_execution_boundary_summary.csv",
+      "sha256": "258687e3ddfde3c80920b51719b6eb190d0427d519c30102db00e97735466334"
+    },
+    {
+      "original": "archive/2026\u534e\u6570\u676f_C\u9898_CCM2601033_20260818/05_Q1-Q4\u7ed3\u679c\u4e0e\u8bc1\u636e/\u7ed3\u679c\u8868/Q4/q4_window_solver.csv",
+      "english": "archive/huashu-2026-problem-c-CCM2601033-20260818/05-results-and-evidence/result-tables/Q4/q4_window_solver.csv",
+      "sha256": "14585cad60e1b1cf4a3c7175adae2bada8feb1260130b837b1cab7d34d6e19b2"
+    },
+    {
+      "original": "archive/source-backups/question_04/model_\u4fee\u6539\u524d_20260809_2337.py",
+      "english": "archive/source-backups/question_04/model-before-edit-20260809-2337.py",
+      "sha256": "4e03b5457c0c857d4e2b85506a23cb71abe775975bcc0b22d659c81427d36f76"
+    },
+    {
+      "original": "archive/source-backups/question_04/model_\u4fee\u6539\u524d_Q2\u6b63\u5f0f\u7ed3\u679c\u63a5\u53e3_20260810.py",
+      "english": "archive/source-backups/question_04/model-before-q2-formal-result-interface-20260810.py",
+      "sha256": "be4322d7d63398e4f954f14eaad5f85619dcb365f8199fe789bca9090db5cf0e"
+    },
+    {
+      "original": "archive/source-backups/question_04/model_\u4fee\u6539\u524d_q4\u6a21\u578b2\u589e\u91cf_20260810.py",
+      "english": "archive/source-backups/question_04/model-before-q4-model-2-increment-20260810.py",
+      "sha256": "9b5393fd3b6a52b72fba6bbf25f52d4adb9fa23b6eccbb6e9f906476c0bc913c"
+    },
+    {
+      "original": "archive/source-backups/question_04/model_\u4fee\u6539\u524d_QoS\u4efb\u52a1ID\u7c7b\u578b\u4fee\u590d_20260810.py",
+      "english": "archive/source-backups/question_04/model-before-qos-task-id-type-fix-20260810.py",
+      "sha256": "d6d93a6b922ea59c4cf379ad85fb92482289c98a63cc263b16c865f85fcb25cb"
+    },
+    {
+      "original": "archive/source-backups/question_04/model_\u4fee\u6539\u524d_QoS\u6c47\u603b\u517c\u5bb9\u4fee\u590d_20260810.py",
+      "english": "archive/source-backups/question_04/model-before-qos-summary-compatibility-fix-20260810.py",
+      "sha256": "3e1e58c5e1c6aed487422ae2116b8155060a5cde92aff37748ac27045083524c"
+    },
+    {
+      "original": "archive/source-backups/question_04/model_\u4fee\u6539\u524d_V2\u60c5\u666f\u5165\u53e3_20260810_0045.py",
+      "english": "archive/source-backups/question_04/model-before-v2-scenario-entry-20260810-0045.py",
+      "sha256": "96884f3024c02e090bf30ff05211bc6b78735218e2011d8cfac634ad9e694a25"
+    },
+    {
+      "original": "archive/source-backups/question_04/model_\u4fee\u6539\u524d_\u4f4e\u78b3\u53c2\u8003\u57fa\u51c6\u79cd\u5b50\u4e0e\u7d2f\u8ba1\u78b3\u4fdd\u62a4_20260810_052138.py",
+      "english": "archive/source-backups/question_04/model-before-low-carbon-reference-seed-and-cumulative-carbon-guard-20260810-052138.py",
+      "sha256": "5c8e943b18e8fb3680e48667329da82b1620a0b82784b15fdcbfb02916b3774e"
+    },
+    {
+      "original": "archive/source-backups/question_04/model_\u4fee\u6539\u524d_\u6309q4\u6587\u4ef6\u91cd\u6784_20260810.py",
+      "english": "archive/source-backups/question_04/model-before-q4-document-refactor-20260810.py",
+      "sha256": "4d4cb39903920db7fe26f0149e88ef2a5e1a0ec78718cc5e07beeef3f2ce27a9"
+    },
+    {
+      "original": "archive/source-backups/question_04/model_\u4fee\u6539\u524d_\u6587\u6863\u7ea7\u5168\u91cf\u6838\u67e5\u4fee\u590d_20260810_061037.py",
+      "english": "archive/source-backups/question_04/model-before-document-compliance-audit-fix-20260810-061037.py",
+      "sha256": "14436b57137878c032e644e2964c8bb70907bc6b68b88e7bd70588f6807d833f"
+    },
+    {
+      "original": "archive/source-backups/question_04/model_\u4fee\u6539\u524d_\u78b3\u7ea6\u675f\u4f4e\u78b3\u79cd\u5b50\u4fdd\u62a4_20260810_053042.py",
+      "english": "archive/source-backups/question_04/model-before-carbon-constraint-seed-guard-20260810-053042.py",
+      "sha256": "ff542348f2108a124796c02b2cc343f613bf77fbd7f31f45a7b045ffee2664c3"
+    },
+    {
+      "original": "archive/source-backups/question_04/pycharm_run_configs_before_v3_doccompliant_20260810_061037/Q4_\u60c5\u666f\u8fd0\u884c\u8bf4\u660e.md",
+      "english": "archive/source-backups/question_04/pycharm_run_configs_before_v3_doccompliant_20260810_061037/q4-scenario-run-guide.md",
+      "sha256": "836048cfec3256138d291502a1aef37533dc30c1bda7d47865a48c1d092ebc39"
+    },
+    {
+      "original": "archive/submission-copies/\u9644\u5f55\u6574\u7406_20260810/CCM2601033\u9644\u4ef6.zip",
+      "english": "archive/submission-copies/appendix-20260810/CCM2601033-support.zip",
+      "sha256": "58884145ba7ac1e996d26bf92ba9988835cf8c726792e0339a8dd0a9b3dfcd27"
+    },
+    {
+      "original": "archive/submission-copies/\u9644\u5f55\u6574\u7406_20260810/\u8bba\u6587\u9644\u5f55.rar",
+      "english": "archive/submission-copies/appendix-20260810/paper-appendix.rar",
+      "sha256": "967273f3ac02b78bfa56da3dc9f8198b4fb155f7d0c8fd6dfdf002a0482e0fba"
+    },
+    {
+      "original": "materials/problems/2026\u5e74\u7b2c\u4e03\u5c4a\u201c\u534e\u6570\u676f\u201d\u5927\u5b66\u751f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u627f\u8bfa\u4e66.docx",
+      "english": "materials/problems/huashu-2026-commitment-form.docx",
+      "sha256": "9540d4cfb10bd9e44d65223e80bb91475268b0fad354b8ef1c44cec8d0d5ce3f"
+    },
+    {
+      "original": "materials/problems/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8bba\u6587\u683c\u5f0f\u89c4\u8303\u4e0e\u63d0\u4ea4\u8bf4\u660e.pdf",
+      "english": "materials/problems/huashu-2026-paper-format-and-submission.pdf",
+      "sha256": "7aa7cc14ad61819a2b30444a6283dc6dba170dcd69c1232bc1b3be19f1ab4e22"
+    },
+    {
+      "original": "materials/problems/2026\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u7ade\u8d5b\u8bba\u6587\u6a21\u677f.docx",
+      "english": "materials/problems/huashu-2026-paper-template.docx",
+      "sha256": "4edf51dbcdb27f842209a54e9becad5e1c7308cbec3a6d7f0edf0dbe860fc07c"
+    },
+    {
+      "original": "materials/problems/\u201c\u534e\u6570\u676f\u201d\u5927\u5b66\u751f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u4eba\u5de5\u667a\u80fd\u5de5\u5177\u4f7f\u7528\u7ae0\u7a0b.pdf",
+      "english": "materials/problems/huashu-ai-use-policy.pdf",
+      "sha256": "b3f4a1bcc86a80724b313b9690a59e9fb9ab157780591d3321b0c4d953bd31dc"
+    },
+    {
+      "original": "materials/rules/2026\u5e74\u7b2c\u4e03\u5c4a\u201c\u534e\u6570\u676f\u201d\u5168\u56fd\u5927\u5b66\u2026\u624b\u5199\u6216\u8005\u7535\u5b50\u7b7e\u540d\u540e\u4e0a\u4f20\uff09.docx",
+      "english": "materials/rules/huashu-2026-signed-commitment-form.docx",
+      "sha256": "aac40dc857a31c0e097387277a81f8420c3b8ac380b6902588cd4fb7fd3c23ed"
+    },
+    {
+      "original": "materials/rules/2026\u5e74\u7b2c\u4e03\u5c4a\u201c\u534e\u6570\u676f\u201d\u5168\u56fd\u5927\u5b66\u751f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u53c2\u8d5b\u624b\u518c.pdf",
+      "english": "materials/rules/huashu-2026-competition-handbook.pdf",
+      "sha256": "97e7c6ba67bdaa528834c5464a0bb96489c26d47fe412018c58a593bdb3e8ee4"
+    },
+    {
+      "original": "materials/rules/2026\u5e74\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u8bba\u6587\u683c\u5f0f\u89c4\u8303\u4e0e\u63d0\u4ea4\u8bf4\u660e.pdf",
+      "english": "materials/rules/huashu-2026-paper-format-and-submission.pdf",
+      "sha256": "7aa7cc14ad61819a2b30444a6283dc6dba170dcd69c1232bc1b3be19f1ab4e22"
+    },
+    {
+      "original": "materials/rules/2026\u7b2c\u4e03\u5c4a\u534e\u6570\u676f\u7ade\u8d5b\u8bba\u6587\u6a21\u677f.docx",
+      "english": "materials/rules/huashu-2026-paper-template.docx",
+      "sha256": "4edf51dbcdb27f842209a54e9becad5e1c7308cbec3a6d7f0edf0dbe860fc07c"
+    },
+    {
+      "original": "materials/rules/\u201c\u534e\u6570\u676f\u201d\u5927\u5b66\u751f\u6570\u5b66\u5efa\u6a21\u7ade\u8d5b\u4eba\u5de5\u667a\u80fd\u5de5\u5177\u4f7f\u7528\u7ae0\u7a0b.pdf",
+      "english": "materials/rules/huashu-ai-use-policy.pdf",
+      "sha256": "2623a11bff720a1393ac578f71407d79387f504f7cfea2e473c14ac5a45b90c6"
+    },
+    {
+      "original": "materials/problems/A\u9898 \u5fae\u6784\u4f53\u4e2d\u586b\u5145\u5bfc\u7535\u4ecb\u8d28\u7684\u4eff\u771f\u4f18\u5316/A\u9898 \u5fae\u6784\u4f53\u4e2d\u586b\u5145\u5bfc\u7535\u4ecb\u8d28\u7684\u4eff\u771f\u4f18\u5316.pdf",
+      "english": "materials/problems/problem-a-conductive-microstructures/problem-a-conductive-microstructures.pdf",
+      "sha256": "6d31c44022b08840b5e791dd11b431cbcdc187e0f2ff33f613d45728646d0c0a"
+    },
+    {
+      "original": "materials/problems/A\u9898 \u5fae\u6784\u4f53\u4e2d\u586b\u5145\u5bfc\u7535\u4ecb\u8d28\u7684\u4eff\u771f\u4f18\u5316/\u9644\u4ef6.xlsx",
+      "english": "materials/problems/problem-a-conductive-microstructures/attachment.xlsx",
+      "sha256": "6dc68dd49356aeab483906a524ff79855b454fcaccd168f81ff3a3ad989c4c51"
+    },
+    {
+      "original": "materials/problems/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1.pdf",
+      "english": "materials/problems/problem-b-vlsi-floorplanning/problem-b-vlsi-floorplanning.pdf",
+      "sha256": "f5e74a5d3997efc2252bc2ef204e5a20ba66bba442ae05ad2e4f473261b32566"
+    },
+    {
+      "original": "materials/problems/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/Modern Floorplanning Based on B \u2217 -Tree and Fast Simulated.pdf",
+      "english": "materials/problems/problem-b-vlsi-floorplanning/Modern Floorplanning Based on B \u2217 -Tree and Fast Simulated.pdf",
+      "sha256": "f6f8b53e7b9324c1e0318b4549e15b2fa4f2dcf4299ed5840b9fbc570e003c2e"
+    },
+    {
+      "original": "materials/problems/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76.pdf",
+      "english": "materials/problems/problem-c-computing-power-scheduling/problem-c-computing-power-scheduling.pdf",
+      "sha256": "0adc971ab421a7de5e3dd1c19c8540479b16977893edf4af13486e88410622c9"
+    },
+    {
+      "original": "materials/problems/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef61.docx",
+      "english": "materials/problems/problem-c-computing-power-scheduling/attachment-1.docx",
+      "sha256": "e3e15318a42bd51cce1976f6ab5c46fddf796bf99f97b5a592cccf104bb7b10a"
+    },
+    {
+      "original": "materials/problems/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n100.blocks",
+      "english": "materials/problems/problem-b-vlsi-floorplanning/attachments/n100.blocks",
+      "sha256": "c66f917c48f3c7ee9624bec8e0dc053eb349d10121d3278d25b09b67a2e94e2b"
+    },
+    {
+      "original": "materials/problems/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n100.nets",
+      "english": "materials/problems/problem-b-vlsi-floorplanning/attachments/n100.nets",
+      "sha256": "cd86e1b49547f9c76144aa2acef6d643c8fd9222c3a4b8c91a40bb6f7ca42193"
+    },
+    {
+      "original": "materials/problems/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n100.pl",
+      "english": "materials/problems/problem-b-vlsi-floorplanning/attachments/n100.pl",
+      "sha256": "cb8b03aff82241643ca899aa9759d8aa42bcf085ead64d5011f52c83f836355f"
+    },
+    {
+      "original": "materials/problems/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n200.blocks",
+      "english": "materials/problems/problem-b-vlsi-floorplanning/attachments/n200.blocks",
+      "sha256": "bed652bf55c2034b04a1c1bbe97ad617e027c11736bf069727a63baf575720ef"
+    },
+    {
+      "original": "materials/problems/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n200.nets",
+      "english": "materials/problems/problem-b-vlsi-floorplanning/attachments/n200.nets",
+      "sha256": "8867f3f167845d88623a5cadba68f7a19fe343278779538e7804c5ac0c5940a2"
+    },
+    {
+      "original": "materials/problems/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n200.pl",
+      "english": "materials/problems/problem-b-vlsi-floorplanning/attachments/n200.pl",
+      "sha256": "0400507fcb07124e01f6cdb86c5e71cdce1bbbb871030651f5583a2f66ec3589"
+    },
+    {
+      "original": "materials/problems/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n300.blocks",
+      "english": "materials/problems/problem-b-vlsi-floorplanning/attachments/n300.blocks",
+      "sha256": "88ca80814070d9578c7ccd31182ff31ab026a1a1ea9da5fd0e0342d26327bc82"
+    },
+    {
+      "original": "materials/problems/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n300.nets",
+      "english": "materials/problems/problem-b-vlsi-floorplanning/attachments/n300.nets",
+      "sha256": "39d9cc7b7d347dd0ecefb8d17e0adfbcbf2af1c071079fbf64caec34bcc0d94c"
+    },
+    {
+      "original": "materials/problems/B\u9898 VLSI\u5e03\u56fe\u89c4\u5212\u8bbe\u8ba1/\u9644\u4ef6/n300.pl",
+      "english": "materials/problems/problem-b-vlsi-floorplanning/attachments/n300.pl",
+      "sha256": "7b095ff15624666c3fdf95c71fda72e45ffff70acdf27d10302830ba3031f035"
+    },
+    {
+      "original": "materials/problems/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef6\u6570\u636e/GPU_information.xlsx",
+      "english": "materials/problems/problem-c-computing-power-scheduling/attachment-data/GPU_information.xlsx",
+      "sha256": "68f978ff242da0bab54259283f647c7552693acf6db5e2212ff4e10f6a5d5d2f"
+    },
+    {
+      "original": "materials/problems/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef6\u6570\u636e/network_latency.xlsx",
+      "english": "materials/problems/problem-c-computing-power-scheduling/attachment-data/network_latency.xlsx",
+      "sha256": "f7e16fc33d8c188b0889e358497e0d96451e04c77ce765a667a50488f02ac157"
+    },
+    {
+      "original": "materials/problems/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef6\u6570\u636e/power_mapping.xlsx",
+      "english": "materials/problems/problem-c-computing-power-scheduling/attachment-data/power_mapping.xlsx",
+      "sha256": "a5bea2b708cc4e5586e59bfd832b8dde7b629d212fcd8c3a0f132c03163ae39e"
+    },
+    {
+      "original": "materials/problems/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef6\u6570\u636e/region_time_data.xlsx",
+      "english": "materials/problems/problem-c-computing-power-scheduling/attachment-data/region_time_data.xlsx",
+      "sha256": "0386a1f6ae825fc4e9797528545090863817b73154050f3ba7a1068e456d55ba"
+    },
+    {
+      "original": "materials/problems/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef6\u6570\u636e/storage_information.xlsx",
+      "english": "materials/problems/problem-c-computing-power-scheduling/attachment-data/storage_information.xlsx",
+      "sha256": "ff5384eb6e955079766b22432e630dfdec9f347f11cd334d950716b21692b3e4"
+    },
+    {
+      "original": "materials/problems/C\u9898 \u9762\u5411\u7b97\u7535\u534f\u540c\u7684\u591a\u76ee\u6807\u8c03\u5ea6\u4f18\u5316\u7814\u7a76/\u9644\u4ef6\u6570\u636e/workload_trace.xlsx",
+      "english": "materials/problems/problem-c-computing-power-scheduling/attachment-data/workload_trace.xlsx",
+      "sha256": "006c0802f4a5a94a94eb7c54f8333091ac860c7d35c9c2c9ad04c68d4f0165ba"
+    },
+    {
+      "original": "code/question/question_04/outputs/matheuristic_v3_doccompliant/validation/Q4_\u6587\u6863_\u5b9e\u65f6\u6027_\u4e8b\u5b9e\u6027\u590d\u6838\u62a5\u544a.md",
+      "english": "code/question/question_04/outputs/matheuristic_v3_doccompliant/validation/q4-document-timeliness-and-factuality-report.md",
+      "sha256": "03dee2dc63b88abc3ee03fc2ece08e65b8ce1ae486e34a2ddfda4526b20307f9"
+    }
+  ]
+}
